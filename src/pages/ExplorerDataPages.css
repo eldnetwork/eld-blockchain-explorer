@@ -1,0 +1,199 @@
+.explorer-page {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px 24px;
+  color: var(--lh-text, #f3f3f0);
+}
+
+.explorer-page__state {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px;
+  color: var(--lh-text, #f3f3f0);
+}
+
+.explorer-page__state--error {
+  color: #ff8c8c;
+}
+
+.explorer-page__crumbs {
+  margin-bottom: 20px;
+}
+
+.explorer-page__crumb-link,
+.explorer-page__crumb-sep {
+  color: var(--lh-faint, rgba(243, 243, 240, 0.4)) !important;
+  text-transform: uppercase;
+  font-size: 0.64rem;
+  letter-spacing: 0.2em;
+  text-decoration: none !important;
+}
+
+.explorer-page__crumb-current {
+  color: var(--lh-accent, #ff7a18) !important;
+  text-transform: uppercase;
+  font-size: 0.64rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.explorer-page__title {
+  margin: 0 0 24px !important;
+  color: var(--lh-text, #f3f3f0) !important;
+  font-size: clamp(2rem, 4.5vw, 3rem) !important;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.explorer-page__section,
+.explorer-page__card {
+  margin-bottom: 12px;
+  border: 1px solid var(--lh-border, rgba(255, 255, 255, 0.08));
+  background: var(
+    --lh-list-bg,
+    linear-gradient(180deg, rgba(12, 12, 12, 0.95), rgba(9, 9, 9, 0.95))
+  ) !important;
+}
+
+.explorer-page__section h2,
+.explorer-page__section-title {
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--lh-faint, rgba(243, 243, 240, 0.4)) !important;
+  font-size: 0.66rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-weight: 600 !important;
+}
+
+.explorer-page__section h2 span,
+.explorer-page__section-title-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--lh-accent, #ff7a18);
+  vertical-align: middle;
+}
+
+.explorer-page__kv-grid > div {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.25fr) 1fr;
+  gap: 20px;
+  align-items: start;
+  min-height: 56px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.explorer-page__kv-grid > div:last-child {
+  border-bottom: 0;
+}
+
+.explorer-page__kv-grid span {
+  color: var(--lh-faint, rgba(243, 243, 240, 0.4));
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.explorer-page__kv-grid strong {
+  color: var(--lh-text, #f3f3f0);
+  font-size: 0.94rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.explorer-page__mono {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.78rem !important;
+}
+
+/* Match Block page secondary copy (--lh-muted) for row meta; --lh-faint is for uppercase labels */
+.explorer-page__muted {
+  color: var(--lh-muted, rgba(243, 243, 240, 0.68)) !important;
+}
+
+.explorer-page__summary-line,
+.explorer-page__body-text {
+  color: var(--lh-text, #f3f3f0) !important;
+}
+
+.explorer-page__index-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--lh-text, #f3f3f0) !important;
+}
+
+.explorer-home-shell--light .explorer-page__index-badge {
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Chakra RouterLink defaults can paint children white in light mode; inherit shell tokens */
+.explorer-page__list-row-link {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+.explorer-page__list-item {
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.015) !important;
+}
+
+.explorer-page__action {
+  border: 1px solid var(--lh-border, rgba(255, 255, 255, 0.08)) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--lh-text, #f3f3f0) !important;
+}
+
+.explorer-page__input {
+  border: 1px solid var(--lh-border, rgba(255, 255, 255, 0.16)) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--lh-text, #f3f3f0) !important;
+}
+
+.explorer-page__input::placeholder {
+  color: var(--lh-faint, rgba(243, 243, 240, 0.4)) !important;
+}
+
+.explorer-page__clickable {
+  color: var(--lh-accent, #ff7a18) !important;
+}
+
+.explorer-page .chakra-tabs__tablist,
+.explorer-page [role="tablist"] {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.explorer-home-shell--light .explorer-page .chakra-tabs__tablist,
+.explorer-home-shell--light .explorer-page [role="tablist"] {
+  border-bottom-color: rgba(15, 23, 42, 0.12);
+}
+
+.explorer-page .chakra-tabs__tab,
+.explorer-page [role="tab"] {
+  color: var(--lh-muted, rgba(243, 243, 240, 0.68));
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+}
+
+.explorer-page .chakra-tabs__tab[aria-selected="true"],
+.explorer-page [role="tab"][aria-selected="true"] {
+  color: var(--lh-accent, #ff7a18);
+  border-bottom-color: var(--lh-accent, #ff7a18) !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 900px) {
+  .explorer-page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .explorer-page__kv-grid > div {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

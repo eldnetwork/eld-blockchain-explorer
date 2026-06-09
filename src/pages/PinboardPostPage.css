@@ -1,0 +1,28 @@
+/* Pinboard-only helpers; shared detail layout is explorer-record__* in BlockPage.css. */
+
+.explorer-pinboard-post__content-note {
+  margin-bottom: 10px;
+  color: var(--lh-faint, rgba(243, 243, 240, 0.4)) !important;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.explorer-pinboard-post__pre {
+  margin: 0;
+  display: block;
+  padding: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.explorer-pinboard-post__image-wrap {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.explorer-pinboard-post__image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
