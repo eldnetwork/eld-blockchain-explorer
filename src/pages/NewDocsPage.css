@@ -1,0 +1,328 @@
+.new-docs {
+  --nd-bg: #080808;
+  --nd-border: rgba(255, 255, 255, 0.08);
+  --nd-text: #f3f3f0;
+  --nd-muted: rgba(243, 243, 240, 0.7);
+  --nd-faint: rgba(243, 243, 240, 0.42);
+  --nd-accent: #ff7a18;
+  position: relative;
+  min-height: 100vh;
+  color: var(--nd-text);
+  background:
+    radial-gradient(circle at top center, rgba(255, 122, 24, 0.06), transparent 28%),
+    linear-gradient(180deg, #0a0a0a 0%, #070707 100%);
+  overflow: hidden;
+}
+
+.new-docs,
+.new-docs * {
+  box-sizing: border-box;
+}
+
+.new-docs input,
+.new-docs button,
+.new-docs a,
+.new-docs div,
+.new-docs section,
+.new-docs aside,
+.new-docs pre {
+  border-radius: 0;
+}
+
+.new-docs__brand-mark,
+.new-docs__nav-link,
+.new-docs__follow,
+.new-docs__sidebar,
+.new-docs__sidebar-item,
+.new-docs__article,
+.new-docs__callout {
+  border-radius: 0 !important;
+}
+
+.new-docs__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.new-docs__header,
+.new-docs__content {
+  position: relative;
+  z-index: 1;
+}
+
+.new-docs__header {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 64px;
+  padding: 0 24px;
+  background: rgba(9, 9, 9, 0.94);
+  border-bottom: 1px solid var(--nd-border);
+}
+
+.new-docs__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-docs__brand-mark {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--nd-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.new-docs__brand-text {
+  display: inline-flex;
+  gap: 10px;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.new-docs__brand-text span:nth-child(n + 2) {
+  color: var(--nd-muted);
+}
+
+.new-docs__nav {
+  display: flex;
+  justify-content: center;
+}
+
+.new-docs__nav-link,
+.new-docs__follow {
+  position: relative;
+  padding: 22px 18px;
+  color: var(--nd-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.7rem;
+  border-left: 1px solid var(--nd-border);
+}
+
+.new-docs__nav-link:hover,
+.new-docs__follow:hover {
+  color: var(--nd-text);
+}
+
+.new-docs__nav-link--active {
+  color: var(--nd-accent);
+  background: rgba(255, 122, 24, 0.04);
+}
+
+.new-docs__nav-link--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--nd-accent);
+}
+
+.new-docs__follow {
+  border-left: 1px solid transparent;
+  padding-right: 0;
+}
+
+.new-docs__content {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 28px;
+}
+
+.new-docs__sidebar {
+  align-self: start;
+  position: sticky;
+  top: 92px;
+  padding: 16px 14px;
+  border: 1px solid var(--nd-border);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.new-docs__sidebar-group + .new-docs__sidebar-group {
+  margin-top: 20px;
+}
+
+.new-docs__sidebar-group h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: var(--nd-faint);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.new-docs__sidebar-icon {
+  color: var(--nd-accent);
+  font-size: 0.72rem;
+}
+
+.new-docs__sidebar-list {
+  display: grid;
+  gap: 4px;
+}
+
+.new-docs__sidebar-item {
+  display: block;
+  padding: 9px 10px;
+  color: var(--nd-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.new-docs__sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.new-docs__sidebar-item--active {
+  color: var(--nd-accent);
+  background: rgba(255, 122, 24, 0.12);
+  border-color: rgba(255, 122, 24, 0.12);
+}
+
+.new-docs__article {
+  min-width: 0;
+  padding: 8px 12px 24px;
+}
+
+.new-docs__breadcrumbs {
+  display: flex;
+  gap: 10px;
+  color: var(--nd-faint);
+  font-size: 0.76rem;
+  margin-bottom: 18px;
+}
+
+.new-docs__breadcrumbs span:not(:last-child)::after {
+  content: ">";
+  margin-left: 10px;
+}
+
+.new-docs__breadcrumbs span:last-child {
+  color: var(--nd-accent);
+}
+
+.new-docs__section {
+  max-width: 920px;
+  margin-bottom: 34px;
+}
+
+.new-docs__section h1,
+.new-docs__section h2 {
+  margin: 0 0 18px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.new-docs__section h1 {
+  font-size: clamp(2.8rem, 5vw, 3.6rem);
+}
+
+.new-docs__section h2 {
+  font-size: clamp(2rem, 4vw, 2.55rem);
+}
+
+.new-docs__section p,
+.new-docs__bullet-list li,
+.new-docs__number-list li {
+  color: var(--nd-muted);
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+
+.new-docs__bullet-list,
+.new-docs__number-list {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.new-docs__callout {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--nd-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.new-docs__callout-label {
+  margin-bottom: 10px;
+  color: var(--nd-accent);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.new-docs__callout pre {
+  margin: 0;
+  color: var(--nd-text);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 980px) {
+  .new-docs__content {
+    grid-template-columns: 1fr;
+  }
+
+  .new-docs__sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .new-docs__header {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .new-docs__nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .new-docs__nav-link,
+  .new-docs__follow {
+    padding: 10px 0;
+    border: none;
+    margin-right: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .new-docs__header,
+  .new-docs__content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .new-docs__article {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

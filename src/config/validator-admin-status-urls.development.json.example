@@ -1,0 +1,6 @@
+{
+  "0x75f9bda5dca416610aa163c7e04bdb35c1916308": "http://localhost:9001/admin/v1/status",
+  "0xc62a8303b2ccc33e9be90f93621855cae1166d70": "http://localhost:9002/admin/v1/status",
+  "0xeb08921d4c401af0e953e0643fb71613690e288c": "http://localhost:9003/admin/v1/status",
+  "0xa10ff3d39d233f32c0efa4b9084b61fd8d7cded8": "http://localhost:9004/admin/v1/status"
+}
