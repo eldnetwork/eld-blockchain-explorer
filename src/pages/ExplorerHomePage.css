@@ -8,6 +8,7 @@
   --lh-accent: #ff7a18;
   --lh-success: #62d58b;
   --lh-header-bg: rgba(9, 9, 9, 0.94);
+  --lh-banner-bg: #1a1208;
   --lh-shell-gradient:
     radial-gradient(circle at top center, rgba(255, 122, 24, 0.08), transparent 32%),
     linear-gradient(180deg, #0a0a0a 0%, #070707 100%);
@@ -31,6 +32,7 @@
   --lh-accent: #ff7a18;
   --lh-success: #1f9d5a;
   --lh-header-bg: rgba(248, 250, 252, 0.94);
+  --lh-banner-bg: #fff4eb;
   --lh-shell-gradient:
     radial-gradient(circle at top center, rgba(255, 122, 24, 0.16), transparent 42%),
     linear-gradient(180deg, #fafbfc 0%, #eff3f8 100%);
@@ -47,10 +49,13 @@
   box-sizing: border-box;
 }
 
-.explorer-home-shell__header {
+.explorer-home-shell__header-group {
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+.explorer-home-shell__header {
   display: flex !important;
   justify-content: space-between;
   gap: 20px;
@@ -59,6 +64,20 @@
   background: var(--lh-header-bg) !important;
   border-bottom: 1px solid var(--lh-border);
   backdrop-filter: blur(10px);
+}
+
+.explorer-home-shell__whitelist-banner {
+  padding: 6px 16px;
+  text-align: center;
+  background: var(--lh-banner-bg) !important;
+  border-bottom: 1px solid var(--lh-border);
+}
+
+.explorer-home-shell__whitelist-banner-text {
+  color: var(--lh-muted) !important;
+  font-size: 0.68rem !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.02em;
 }
 
 .explorer-home-shell__brand {

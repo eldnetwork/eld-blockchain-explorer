@@ -212,49 +212,56 @@ function ExplorerAppShell() {
       display="flex"
       flexDirection="column"
     >
-      <Flex
-        className="explorer-home-shell__header"
-        as="nav"
-        p={4}
-        bg="black"
-        color={LIGHT_TEXT_COLOR}
-        justify="space-between"
-        align="center"
-        sx={{ borderRadius: '0 !important' }}
-      >
-        <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }} className="explorer-home-shell__brand">
-          <Box className="explorer-home-shell__brand-mark">E</Box>
-          <HStack className="explorer-home-shell__brand-text" spacing={2} align="center">
-            <Text>ELD</Text>
-            <Text>{'//'}</Text>
-            <Text>BLOCKCHAIN EXPLORER</Text>
-          </HStack>
-        </Link>
-
-        <HStack className="explorer-home-shell__meta" spacing={6} align="center">
-          <HStack spacing={2} align="center">
-            <Text className="explorer-home-shell__chain-label">network:</Text>
-            <Text className="explorer-home-shell__chain-id">{chainId || 'unknown'}</Text>
-            <Button
-              className="explorer-home-shell__theme-toggle"
-              onClick={handleThemeToggle}
-              variant="ghost"
-              aria-label={isLightTheme ? 'Switch to dark mode' : 'Switch to light mode'}
-              title={isLightTheme ? 'Switch to dark mode' : 'Switch to light mode'}
-              minW="34px"
-              h="34px"
-              p={0}
-              _hover={{ bg: 'transparent' }}
-              _active={{ bg: 'transparent' }}
-            >
-              {isLightTheme ? <MoonIcon /> : <SunIcon />}
-            </Button>
-          </HStack>
-          <Link href="https://eld.network" className="explorer-home-shell__intro-link" isExternal>
-            ELD INTRO -&gt;
+      <Box className="explorer-home-shell__header-group">
+        <Flex
+          className="explorer-home-shell__header"
+          as="nav"
+          p={4}
+          bg="black"
+          color={LIGHT_TEXT_COLOR}
+          justify="space-between"
+          align="center"
+          sx={{ borderRadius: '0 !important' }}
+        >
+          <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }} className="explorer-home-shell__brand">
+            <Box className="explorer-home-shell__brand-mark">E</Box>
+            <HStack className="explorer-home-shell__brand-text" spacing={2} align="center">
+              <Text>ELD</Text>
+              <Text>{'//'}</Text>
+              <Text>BLOCKCHAIN EXPLORER</Text>
+            </HStack>
           </Link>
-        </HStack>
-      </Flex>
+
+          <HStack className="explorer-home-shell__meta" spacing={6} align="center">
+            <HStack spacing={2} align="center">
+              <Text className="explorer-home-shell__chain-label">network:</Text>
+              <Text className="explorer-home-shell__chain-id">{chainId || 'unknown'}</Text>
+              <Button
+                className="explorer-home-shell__theme-toggle"
+                onClick={handleThemeToggle}
+                variant="ghost"
+                aria-label={isLightTheme ? 'Switch to dark mode' : 'Switch to light mode'}
+                title={isLightTheme ? 'Switch to dark mode' : 'Switch to light mode'}
+                minW="34px"
+                h="34px"
+                p={0}
+                _hover={{ bg: 'transparent' }}
+                _active={{ bg: 'transparent' }}
+              >
+                {isLightTheme ? <MoonIcon /> : <SunIcon />}
+              </Button>
+            </HStack>
+            <Link href="https://eld.network" className="explorer-home-shell__intro-link" isExternal>
+              ELD INTRO -&gt;
+            </Link>
+          </HStack>
+        </Flex>
+        <Box className="explorer-home-shell__whitelist-banner" role="status">
+          <Text className="explorer-home-shell__whitelist-banner-text">
+            Eld testnet is invitation-only / whitelist. If you&apos;re interested in helping out, send a DM on X — link in the footer.
+          </Text>
+        </Box>
+      </Box>
       <Box as="main" flex="1 0 auto">
         <Routes>
           <Route path="/tx/:hash" element={<TransactionPage />} />
