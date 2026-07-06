@@ -45,6 +45,10 @@
   text-transform: uppercase;
 }
 
+.explorer-tx__title span {
+  color: var(--lh-accent, #ff7a18);
+}
+
 .explorer-tx__section {
   margin-bottom: 12px;
   border: 1px solid var(--lh-border, rgba(255, 255, 255, 0.08));

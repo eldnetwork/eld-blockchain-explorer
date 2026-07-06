@@ -80,6 +80,12 @@
   letter-spacing: 0.02em;
 }
 
+.explorer-home-shell__whitelist-banner-link {
+  color: inherit !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .explorer-home-shell__brand {
   display: inline-flex !important;
   align-items: center;

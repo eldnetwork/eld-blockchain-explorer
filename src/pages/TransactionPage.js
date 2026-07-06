@@ -4,7 +4,7 @@ import useTransaction from '../hooks/useTransaction';
 import useBlockTransaction from '../hooks/useBlockTransaction';
 import useEvents from '../hooks/useEvents';
 import useContract from '../hooks/useContract';
-import { Box, Heading, Text, VStack, HStack, Link, List, ListItem } from '@chakra-ui/react';
+import { Box, Heading, Text, VStack, Link, List, ListItem } from '@chakra-ui/react';
 import AsciiBox from '../components/AsciiBox';
 import { formatELDAmount } from '../utils/formatAmount';
 import { normalizeAccountAddress } from '../utils/accountAddress';
@@ -136,13 +136,9 @@ function TransactionPage() {
 
   return (
     <Box className="explorer-tx">
-      <HStack className="explorer-tx__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-tx__crumb-link">← Explorer</Link>
-        <Text className="explorer-tx__crumb-sep">TX</Text>
-        <Text className="explorer-tx__crumb-current">{txIdShort}</Text>
-      </HStack>
-
-      <Heading className="explorer-tx__title" as="h1">TRANSACTION</Heading>
+      <Heading className="explorer-tx__title" as="h1">
+        TRANSACTION <Text as="span">{txIdShort}</Text>
+      </Heading>
 
       <Box mb={6}>
         <Link as={RouterLink} to="/" className="explorer-tx__crumb-link">

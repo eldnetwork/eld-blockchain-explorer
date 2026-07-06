@@ -66,12 +66,6 @@ function BlockPage() {
 
   return (
     <Box className="explorer-record">
-      <HStack className="explorer-record__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-record__crumb-link">← Explorer</Link>
-        <Text className="explorer-record__crumb-sep">Block</Text>
-        <Text className="explorer-record__crumb-current">{header.height}</Text>
-      </HStack>
-
       <Heading className="explorer-record__title" as="h1">
         BLOCK <Text as="span">#{header.height}</Text>
       </Heading>

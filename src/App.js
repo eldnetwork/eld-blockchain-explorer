@@ -258,7 +258,15 @@ function ExplorerAppShell() {
         </Flex>
         <Box className="explorer-home-shell__whitelist-banner" role="status">
           <Text className="explorer-home-shell__whitelist-banner-text">
-            Eld testnet is invitation-only / whitelist. If you&apos;re interested in helping out, send a DM on X — link in the footer.
+            Eld testnet is invitation-only / whitelist. If you&apos;re interested in helping out, send a DM on{' '}
+            <Link
+              href="https://x.com/eld_network"
+              className="explorer-home-shell__whitelist-banner-link"
+              isExternal
+            >
+              X / Twitter
+            </Link>
+            .
           </Text>
         </Box>
       </Box>
