@@ -27,8 +27,12 @@ async function abciQuery(path) {
   }
 
   const data = await response.json();
-  if (data.result?.response?.info) {
-    return JSON.parse(data.result.response.info);
+  const queryResponse = data.result?.response;
+  if (queryResponse?.code && queryResponse.code !== 0) {
+    throw new Error(queryResponse.log || 'ABCI query returned error');
+  }
+  if (queryResponse?.info) {
+    return JSON.parse(queryResponse.info);
   }
   throw new Error('Invalid response format');
 }
@@ -65,7 +69,14 @@ function useValidators() {
         },
       });
 
-      if (!result.ok || cancelled) return;
+      if (!result.ok || cancelled) {
+        if (!isRefresh && !cancelled) {
+          setLoading(false);
+          setIsInitialLoad(false);
+          setError('Failed to load validators');
+        }
+        return;
+      }
 
       const data = result.value;
       setValidators(data.validators || []);

@@ -27,14 +27,18 @@ async function abciQuery(path) {
   }
 
   const data = await response.json();
-  if (data.result?.response?.info) {
-    return JSON.parse(data.result.response.info);
+  const queryResponse = data.result?.response;
+  if (queryResponse?.code && queryResponse.code !== 0) {
+    throw new Error(queryResponse.log || 'ABCI query returned error');
+  }
+  if (queryResponse?.info) {
+    return JSON.parse(queryResponse.info);
   }
   throw new Error('Invalid response format');
 }
 
 async function fetchProvidersOnce() {
-  return abciQuery('active_storage_providers');
+  return abciQuery('capacity_validators');
 }
 
 function useCapacityProviders() {
@@ -69,15 +73,29 @@ function useCapacityProviders() {
         },
       });
 
-      if (!result.ok || cancelled) return;
+      if (!result.ok || cancelled) {
+        if (!isRefresh && !cancelled) {
+          setLoading(false);
+          setIsInitialLoad(false);
+          setError('Failed to load capacity providers');
+        }
+        return;
+      }
 
       const data = result.value;
-      setActiveProviders(data.active_providers || []);
-      setAllProviders(data.all_providers || []);
-      setActiveTotalStake(data.active_total_stake || 0);
-      setActiveTotalCapacity(data.active_total_capacity || 0);
-      setAllTotalStake(data.all_total_stake || 0);
-      setAllTotalCapacity(data.all_total_capacity || 0);
+      const providers = data.capacity_validators || data.all_providers || data.active_providers || [];
+      const totalStake = data.total_stake || data.all_total_stake || data.active_total_stake || 0;
+      const totalCapacity =
+        data.total_capacity || data.all_total_capacity || data.active_total_capacity || 0;
+
+      // `capacity_validators` is now the canonical list; mirror to active/all
+      // so existing UI surfaces continue to work.
+      setActiveProviders(providers);
+      setAllProviders(providers);
+      setActiveTotalStake(totalStake);
+      setActiveTotalCapacity(totalCapacity);
+      setAllTotalStake(totalStake);
+      setAllTotalCapacity(totalCapacity);
       setCurrentEpoch(data.current_epoch || 0);
       setError(null);
       if (!isRefresh) {
