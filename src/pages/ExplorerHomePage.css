@@ -292,6 +292,11 @@
   opacity: 0.8;
 }
 
+.explorer-home__stat-card .chakra-stat {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .explorer-home__stat-card .explorer-home__stat-label {
   display: block;
   margin-bottom: 14px;
@@ -328,13 +333,11 @@
 .explorer-home__stat-value {
   color: var(--lh-text) !important;
   font-size: clamp(1.6rem, 2.8vw, 2.2rem) !important;
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: normal !important;
   line-height: 1.2;
-  letter-spacing: -0.04em;
 }
 
 .explorer-home__list-title {

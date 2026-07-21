@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@chakra-ui/react';
+import { Skeleton, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import useEpochInfo from '../hooks/useEpochInfo';
 
 const STAT_DEFINITIONS = [
@@ -20,12 +20,14 @@ function EpochDashboard() {
       <section className="explorer-home__stats-grid" aria-label="Epoch stats">
         {STAT_DEFINITIONS.map((stat) => (
           <div key={stat.label} className="explorer-home__stat-card">
-            <span className="explorer-home__stat-label">
-              <Skeleton height="10px" width="120px" />
-            </span>
-            <strong className="explorer-home__stat-value">
-              <Skeleton height="30px" width="80px" display="block" mt={2} />
-            </strong>
+            <Stat>
+              <StatLabel className="explorer-home__stat-label">
+                <Skeleton height="10px" width="120px" />
+              </StatLabel>
+              <StatNumber className="explorer-home__stat-value" fontFamily="mono" transition="all 0.2s">
+                <Skeleton height="30px" width="80px" display="block" mt={2} />
+              </StatNumber>
+            </Stat>
           </div>
         ))}
       </section>
@@ -40,8 +42,12 @@ function EpochDashboard() {
           className={`explorer-home__stat-card${stat.clickable ? ' explorer-home__stat-card--clickable' : ''}`}
           onClick={stat.clickable ? () => navigate('/epoch/current') : undefined}
         >
-          <span className="explorer-home__stat-label">{stat.label}</span>
-          <strong className="explorer-home__stat-value">{epochInfo[stat.key]}</strong>
+          <Stat>
+            <StatLabel className="explorer-home__stat-label">{stat.label}</StatLabel>
+            <StatNumber className="explorer-home__stat-value" fontFamily="mono" transition="all 0.2s">
+              {epochInfo[stat.key]}
+            </StatNumber>
+          </Stat>
         </div>
       ))}
     </section>
