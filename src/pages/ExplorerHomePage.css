@@ -275,6 +275,10 @@
   border-left: 1px solid var(--lh-border);
 }
 
+.explorer-home__stats-grid--validators {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .explorer-home__stat-card {
   min-height: 116px;
   padding: 26px 22px 32px;
@@ -463,10 +467,18 @@
   .explorer-home__stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .explorer-home__stats-grid--validators {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
   .explorer-home__stat-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+
+  .explorer-home__stats-grid--validators .explorer-home__stat-card:last-child {
     grid-column: span 2;
   }
 }
