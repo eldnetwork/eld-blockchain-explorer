@@ -10,6 +10,7 @@ import { formatELDAmount } from '../utils/formatAmount';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 import { resolveTransactionExecutionStatus, deliverTxFailureMessage } from '../utils/transactionStatus';
 import { formatEventForDisplay } from '../utils/eventDisplay';
+import { formatJsonForDisplay } from '../utils/formatJsonForDisplay';
 import './TransactionPage.css';
 
 function TransactionPage() {
@@ -219,7 +220,7 @@ function TransactionPage() {
 
             const shouldFormatAmount = key === 'amount';
             const isAddressField = /(address|owner|signer|sender|recipient|account)/i.test(String(key));
-            const valueAsString = typeof value === 'object' && value !== null ? JSON.stringify(value, null, 2) : shouldFormatAmount ? formatELDAmount(value) : String(value);
+            const valueAsString = typeof value === 'object' && value !== null ? formatJsonForDisplay(value) : shouldFormatAmount ? formatELDAmount(value) : String(value);
             return (
               <div key={key}>
                 <span>{String(key).replace(/_/g, ' ').toUpperCase()}</span>
