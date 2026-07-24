@@ -101,39 +101,50 @@ function HomePage() {
     >
       
       <VStack className="explorer-home__stack" spacing={4} align="stretch" w="100%" maxW="100%">
-        <Box className="explorer-home__hero">
-          <Heading className="explorer-home__title" as="h1">
-            Eld Blockchain Explorer
-          </Heading>
-          <Text className="explorer-home__subtitle">
-            Explore blocks, transactions, and network activity on Eld testnet
-          </Text>
-        </Box>
+        <Flex className="explorer-home__intro" align="center" justify="center" gap={{ base: 3, md: 5 }}>
+          <Box
+            as="img"
+            className="explorer-home__logo"
+            src="/images/cube_fire_400x400.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <VStack className="explorer-home__intro-copy" spacing={4} align="stretch" minW={0}>
+            <Box className="explorer-home__hero">
+              <Heading className="explorer-home__title" as="h1">
+                Eld Blockchain Explorer
+              </Heading>
+              <Text className="explorer-home__subtitle">
+                Explore blocks, transactions, and network activity on Eld testnet
+              </Text>
+            </Box>
 
-        <HStack className="explorer-home__search-row" spacing={2} align="flex-start" w="100%" maxW="100%">
-          <AsciiBox className="explorer-home__search-shell" p={0} bg={BOX_BG_COLOR} borderRadius={BORDER_RADIUS} display="inline-block" w={{ base: 'calc(100% - 48px)', md: 'auto' }} maxW="100%">
-            <Input
-              className="explorer-home__search-input"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Search by block hash, transaction, or address..."
-              size="md"
-              width={{ base: '100%', md: '760px' }}
-              maxW="100%"
-              bg="transparent"
-              border="none"
-              px={2}
-              py={2}
-              _hover={{ bg: "transparent" }}
-              _focus={{ bg: "transparent" }}
-              _focusVisible={{
-                outline: "none",
-              }}
-            />
-          </AsciiBox>
-          <Button className="explorer-home__search-button" onClick={handleSearch} colorScheme="gray" flexShrink={0} sx={{ borderRadius: `${BORDER_RADIUS} !important` }}><FontAwesomeIcon icon={faMagnifyingGlass} /></Button>
-        </HStack>
+            <HStack className="explorer-home__search-row" spacing={2} align="flex-start" w="100%" maxW="100%">
+              <AsciiBox className="explorer-home__search-shell" p={0} bg={BOX_BG_COLOR} borderRadius={BORDER_RADIUS} display="inline-block" w={{ base: 'calc(100% - 48px)', md: 'auto' }} maxW="100%">
+                <Input
+                  className="explorer-home__search-input"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Search by block hash, transaction, or address..."
+                  size="md"
+                  width={{ base: '100%', md: '760px' }}
+                  maxW="100%"
+                  bg="transparent"
+                  border="none"
+                  px={2}
+                  py={2}
+                  _hover={{ bg: "transparent" }}
+                  _focus={{ bg: "transparent" }}
+                  _focusVisible={{
+                    outline: "none",
+                  }}
+                />
+              </AsciiBox>
+              <Button className="explorer-home__search-button" onClick={handleSearch} colorScheme="gray" flexShrink={0} sx={{ borderRadius: `${BORDER_RADIUS} !important` }}><FontAwesomeIcon icon={faMagnifyingGlass} /></Button>
+            </HStack>
+          </VStack>
+        </Flex>
         <EpochDashboard />
         <ValidatorStats />
         <Flex
