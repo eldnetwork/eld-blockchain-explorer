@@ -86,13 +86,14 @@
 
 .explorer-home-shell__whitelist-banner-link {
   color: inherit !important;
-  text-decoration: underline;
+  text-decoration: underline !important;
   text-underline-offset: 2px;
   transition: opacity 160ms ease;
 }
 
 .explorer-home-shell__whitelist-banner-link:hover {
   opacity: 0.82;
+  text-decoration: underline !important;
 }
 
 .explorer-home-shell__brand {

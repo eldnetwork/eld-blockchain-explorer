@@ -269,12 +269,16 @@ function ExplorerAppShell() {
         </Flex>
         <Box className="explorer-home-shell__whitelist-banner" role="status">
           <Text className="explorer-home-shell__whitelist-banner-text">
+            FOLLOW ELD ON{' '}
             <Link
               href="https://x.com/eld_network"
               className="explorer-home-shell__whitelist-banner-link"
               isExternal
+              textDecoration="underline"
+              textUnderlineOffset="2px"
+              _hover={{ textDecoration: 'underline', opacity: 0.82 }}
             >
-              FOLLOW ELD ON X / TWITTER
+              X / TWITTER
             </Link>
           </Text>
         </Box>
