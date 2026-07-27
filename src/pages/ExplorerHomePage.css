@@ -193,6 +193,23 @@
   text-transform: uppercase;
 }
 
+.explorer-home-shell__network-stack {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.explorer-home-shell__network-metric {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: flex-end;
+  text-align: right;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .explorer-home-shell__meta {
   margin-left: auto;
 }

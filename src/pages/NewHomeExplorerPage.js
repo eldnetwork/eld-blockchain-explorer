@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './NewHomeExplorerPage.css';
 
 const topStats = [
@@ -22,6 +22,40 @@ const transactions = [
 
 function NewHomeExplorerPage() {
   const [searchValue, setSearchValue] = useState('');
+  const [nodeVersion, setNodeVersion] = useState('--');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadNodeVersion = async () => {
+      try {
+        const response = await fetch('https://node-rpc.eld.network/abci_info');
+        if (!response.ok) {
+          throw new Error(`Failed to load node version: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const responseData = payload?.result?.response?.data;
+        const parsedData = responseData ? JSON.parse(responseData) : null;
+        const resolvedVersion =
+          parsedData?.eld_app_version || payload?.result?.response?.version || '--';
+
+        if (isMounted) {
+          setNodeVersion(resolvedVersion);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setNodeVersion('--');
+        }
+      }
+    };
+
+    loadNodeVersion();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="new-home-explorer">
@@ -33,7 +67,11 @@ function NewHomeExplorerPage() {
           <div className="new-home-explorer__brand-text">
             <span className="new-home-explorer__brand-name">ELD</span>
             <span className="new-home-explorer__brand-divider">{'//'}</span>
-            <span className="new-home-explorer__brand-subtitle">NETWORK</span>
+            <div className="new-home-explorer__brand-network">
+              <span className="new-home-explorer__brand-subtitle">NETWORK</span>
+              <span className="new-home-explorer__brand-version-label">ELD NODE VERSION</span>
+              <span className="new-home-explorer__brand-version-value">{nodeVersion}</span>
+            </div>
           </div>
         </div>
 

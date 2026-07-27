@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Heading, Input, Button, VStack, HStack, Link, Text } from '@chakra-ui/react';
 import TransactionPage from './pages/TransactionPage';
@@ -200,6 +200,7 @@ function HomePage() {
 
 function ExplorerAppShell() {
   const { chainId } = useChainId();
+  const [nodeVersion, setNodeVersion] = useState('--');
   const [isLightTheme, setIsLightTheme] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -214,6 +215,39 @@ function ExplorerAppShell() {
       return nextIsLight;
     });
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadNodeVersion = async () => {
+      try {
+        const response = await fetch('https://node-rpc.eld.network/abci_info');
+        if (!response.ok) {
+          throw new Error(`Failed to load node version: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const responseData = payload?.result?.response?.data;
+        const parsedData = responseData ? JSON.parse(responseData) : null;
+        const resolvedVersion =
+          parsedData?.eld_app_version || payload?.result?.response?.version || '--';
+
+        if (isMounted) {
+          setNodeVersion(resolvedVersion);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setNodeVersion('--');
+        }
+      }
+    };
+
+    loadNodeVersion();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <Box
@@ -245,8 +279,16 @@ function ExplorerAppShell() {
 
           <HStack className="explorer-home-shell__meta" spacing={6} align="center">
             <HStack spacing={2} align="center">
-              <Text className="explorer-home-shell__chain-label">network:</Text>
-              <Text className="explorer-home-shell__chain-id">{chainId || 'unknown'}</Text>
+              <Box className="explorer-home-shell__network-stack">
+                <HStack className="explorer-home-shell__network-metric" spacing={2}>
+                  <Text className="explorer-home-shell__chain-label">network:</Text>
+                  <Text className="explorer-home-shell__chain-id">{chainId || 'unknown'}</Text>
+                </HStack>
+                <HStack className="explorer-home-shell__network-metric" spacing={2}>
+                  <Text className="explorer-home-shell__chain-label">eld node version:</Text>
+                  <Text className="explorer-home-shell__chain-id">{nodeVersion}</Text>
+                </HStack>
+              </Box>
               <Button
                 className="explorer-home-shell__theme-toggle"
                 onClick={handleThemeToggle}

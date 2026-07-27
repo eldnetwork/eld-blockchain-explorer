@@ -95,9 +95,30 @@
   font-weight: 700;
 }
 
+.new-home-explorer__brand-network {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
 .new-home-explorer__brand-divider,
 .new-home-explorer__brand-subtitle {
   color: var(--nhe-muted);
+}
+
+.new-home-explorer__brand-version-label {
+  color: var(--nhe-muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+}
+
+.new-home-explorer__brand-version-value {
+  color: var(--nhe-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .new-home-explorer__nav {
