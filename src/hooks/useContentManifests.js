@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { RPC_URL } from '../config';
 
-// Hex-encoded data for "/@eld/content_manifest/"
-const CONTENT_MANIFEST_PATH_HEX = '2f406261686e2f636f6e74656e745f6d616e69666573742f';
+// Path prefix for content manifest CADOs
+const CONTENT_MANIFEST_PATH = '/@eld/content_manifest/';
 
 // Helper function to decode base64 to Uint8Array
 function base64ToUint8Array(base64) {
@@ -52,22 +52,9 @@ function useContentManifests() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(RPC_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: -1,
-            method: 'abci_query',
-            params: {
-              path: 'cado_list',
-              data: CONTENT_MANIFEST_PATH_HEX,
-              prove: false
-            }
-          })
-        });
+        const response = await fetch(
+          `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify('cado_list'))}&data=${encodeURIComponent(JSON.stringify(CONTENT_MANIFEST_PATH))}&prove=false`
+        );
 
         const data = await response.json();
         

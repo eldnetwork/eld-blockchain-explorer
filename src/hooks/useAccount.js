@@ -2,14 +2,10 @@ import { useState, useEffect } from 'react';
 import { RPC_URL } from '../config';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
-// Helper function to convert string to hex
-function stringToHex(str) {
-  let hex = '';
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    hex += charCode.toString(16).padStart(2, '0');
-  }
-  return hex;
+function abciQueryGet(path, data) {
+  return fetch(
+    `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify(path))}&data=${encodeURIComponent(JSON.stringify(data))}&prove=false`
+  ).then((response) => response.json());
 }
 
 function useAccount(address) {
@@ -19,50 +15,11 @@ function useAccount(address) {
 
   useEffect(() => {
     async function queryAccountByAddress(addressValue) {
-      const path = `/@eld/account/${addressValue}`;
-      const hexData = stringToHex(path);
-
-      const response = await fetch(RPC_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'abci_query',
-          params: {
-            path: 'cado',
-            data: hexData,
-            prove: false
-          }
-        })
-      });
-
-      return response.json();
+      return abciQueryGet('cado', `/@eld/account/${addressValue}`);
     }
 
     async function queryAccountView(addressValue) {
-      const hexData = stringToHex(addressValue);
-
-      const response = await fetch(RPC_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'abci_query',
-          params: {
-            path: 'account_view',
-            data: hexData,
-            prove: false,
-          },
-        }),
-      });
-
-      return response.json();
+      return abciQueryGet('account_view', addressValue);
     }
 
     async function fetchAccount() {
