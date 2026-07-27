@@ -4,23 +4,10 @@ import { fetchWithRetry } from '../utils/retryFetch';
 
 const REFRESH_INTERVAL_MS = 10000;
 
-async function abciQuery(path) {
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'abci_query',
-      params: {
-        path: path,
-        data: '',
-        prove: false,
-      },
-    }),
-  });
+async function fetchValidatorsOnce() {
+  const response = await fetch(
+    `${RPC_URL}/abci_query?path="active_validators"&data=""&prove=false`
+  );
 
   if (!response.ok) {
     throw new Error(`ABCI query failed (${response.status})`);
@@ -35,10 +22,6 @@ async function abciQuery(path) {
     return JSON.parse(queryResponse.info);
   }
   throw new Error('Invalid response format');
-}
-
-async function fetchValidatorsOnce() {
-  return abciQuery('active_validators');
 }
 
 function useValidators() {

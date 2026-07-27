@@ -5,22 +5,12 @@ import { fetchWithRetry } from '../utils/retryFetch';
 const REFRESH_INTERVAL_MS = 10000;
 
 async function abciQuery(path) {
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'abci_query',
-      params: {
-        path: path,
-        data: '',
-        prove: false,
-      },
-    }),
-  });
+  // Tendermint-style GET:
+  //   /abci_query?path="..."&data=""&prove=false
+  // where `path` and `data` are JSON-string parameters.
+  const response = await fetch(
+    `${RPC_URL}/abci_query?path="${path}"&data=""&prove=false`
+  );
 
   if (!response.ok) {
     throw new Error(`ABCI query failed (${response.status})`);
