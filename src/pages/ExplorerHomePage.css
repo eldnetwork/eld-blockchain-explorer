@@ -592,22 +592,34 @@
   .explorer-home-shell__meta {
     margin-left: 0;
     width: 100%;
-    justify-content: space-between;
-    padding-right: 4px;
+    justify-content: flex-start;
+    padding-right: 44px;
   }
 
   .explorer-home-shell__network-stack {
     align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .explorer-home-shell__network-metric {
     justify-content: flex-start;
     text-align: left;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .explorer-home-shell__network-metric .explorer-home-shell__chain-label,
+  .explorer-home-shell__network-metric .explorer-home-shell__chain-id {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.08em;
   }
 
   .explorer-home-shell__intro-link {
-    margin-left: auto;
-    margin-right: 0;
+    display: none !important;
   }
 
   .explorer-home-shell__theme-toggle {
