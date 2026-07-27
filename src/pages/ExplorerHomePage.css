@@ -576,7 +576,7 @@
   }
 
   .explorer-home__stat-value {
-    font-size: clamp(1rem, 4.5vw, 1.35rem) !important;
+    font-size: clamp(1.6rem, 2.8vw, 2.2rem) !important;
   }
 }
 
