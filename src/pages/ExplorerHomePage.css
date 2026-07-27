@@ -582,6 +582,7 @@
 
 @media (max-width: 900px) {
   .explorer-home-shell__header {
+    position: relative;
     flex-direction: column;
     align-items: flex-start !important;
     padding-top: 14px !important;
@@ -592,5 +593,14 @@
     margin-left: 0;
     width: 100%;
     justify-content: space-between;
+    padding-right: 44px;
+  }
+
+  .explorer-home-shell__theme-toggle {
+    position: absolute !important;
+    top: 10px !important;
+    right: 16px !important;
+    margin-left: 0 !important;
+    z-index: 2;
   }
 }
