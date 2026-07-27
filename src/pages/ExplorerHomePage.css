@@ -376,7 +376,7 @@
 }
 
 .explorer-home__stat-label {
-  color: var(--lh-faint) !important;
+  color: var(--lh-accent) !important;
   font-size: 0.66rem !important;
   text-transform: uppercase;
   letter-spacing: 0.2em;
