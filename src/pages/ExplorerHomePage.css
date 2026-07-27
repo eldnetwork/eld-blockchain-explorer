@@ -8,7 +8,8 @@
   --lh-accent: #ff7a18;
   --lh-success: #62d58b;
   --lh-header-bg: rgba(9, 9, 9, 0.94);
-  --lh-banner-bg: #1a1208;
+  --lh-banner-bg: #ff7a18;
+  --lh-banner-text: #0a0a0a;
   --lh-shell-gradient:
     radial-gradient(circle at top center, rgba(255, 122, 24, 0.08), transparent 32%),
     linear-gradient(180deg, #0a0a0a 0%, #070707 100%);
@@ -32,7 +33,8 @@
   --lh-accent: #ff7a18;
   --lh-success: #1f9d5a;
   --lh-header-bg: rgba(248, 250, 252, 0.94);
-  --lh-banner-bg: #fff4eb;
+  --lh-banner-bg: #ff7a18;
+  --lh-banner-text: #0a0a0a;
   --lh-shell-gradient:
     radial-gradient(circle at top center, rgba(255, 122, 24, 0.16), transparent 42%),
     linear-gradient(180deg, #fafbfc 0%, #eff3f8 100%);
@@ -70,20 +72,27 @@
   padding: 6px 16px;
   text-align: center;
   background: var(--lh-banner-bg) !important;
-  border-bottom: 1px solid var(--lh-border);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0 !important;
 }
 
 .explorer-home-shell__whitelist-banner-text {
-  color: var(--lh-muted) !important;
+  color: var(--lh-banner-text) !important;
   font-size: 0.68rem !important;
   line-height: 1.35 !important;
   letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .explorer-home-shell__whitelist-banner-link {
   color: inherit !important;
   text-decoration: underline;
   text-underline-offset: 2px;
+  transition: opacity 160ms ease;
+}
+
+.explorer-home-shell__whitelist-banner-link:hover {
+  opacity: 0.82;
 }
 
 .explorer-home-shell__brand {
