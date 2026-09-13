@@ -1,7 +1,11 @@
 {
-  "name": "eld-chain-explorer",
+  "name": "eld-blockchain-explorer",
   "version": "0.1.0",
   "private": true,
+  "description": "Block explorer UI for the Eld decentralized ephemeral storage protocol",
+  "homepage": "https://explorer.eld.network",
+  "author": "Eld",
+  "license": "MIT",
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.0",
@@ -12,7 +16,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.15.0",
@@ -31,8 +35,13 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "preview": "npx --yes serve -s build",
     "test": "react-scripts test",
+    "ci": "CI=true npm test -- --watchAll=false && npm run build",
     "eject": "react-scripts eject"
+  },
+  "engines": {
+    "node": ">=20.0"
   },
   "eslintConfig": {
     "extends": [
