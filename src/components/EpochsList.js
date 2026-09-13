@@ -14,7 +14,7 @@ import useEpochs from '../hooks/useEpochs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLayerGroup, faCube } from '@fortawesome/free-solid-svg-icons';
 import AsciiBox from './AsciiBox';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../utils/constants';
 
 function EpochsList() {
   const epochsPerPage = 20;

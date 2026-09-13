@@ -4,7 +4,7 @@ import useNamespaces from '../hooks/useNamespaces';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAt, faCube } from '@fortawesome/free-solid-svg-icons';
 import AsciiBox from './AsciiBox';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../utils/constants';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
 function shortenAddress(address) {

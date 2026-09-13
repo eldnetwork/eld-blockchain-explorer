@@ -16,7 +16,7 @@ import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { faMessage } from '@fortawesome/free-solid-svg-icons';
 import AsciiBox from './AsciiBox';
 import usePinboardPosts, { findLastPinboardPostsPageIndex } from '../hooks/usePinboardPosts';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../utils/constants';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
 const POSTS_PER_PAGE = 20;

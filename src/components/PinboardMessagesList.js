@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, HStack, List, ListItem, Text } from '@chakra-ui/react';
 import AsciiBox from './AsciiBox';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../utils/constants';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
 function getFirstDefined(obj, keys) {

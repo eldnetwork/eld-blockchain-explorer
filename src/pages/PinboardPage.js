@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import PinIcon from '../components/PinIcon';
-import { DARK_TEXT_COLOR } from '../constants';
+import { DARK_TEXT_COLOR } from '../utils/constants';
 import AsciiBox from '../components/AsciiBox';
 import PinboardMessagesList from '../components/PinboardMessagesList';
 import usePinboardMessagesByWallet from '../hooks/usePinboardMessagesByWallet';

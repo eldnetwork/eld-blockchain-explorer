@@ -1,5 +1,5 @@
 import { Box } from '@chakra-ui/react';
-import { BACKGROUND_COLOR, BOX_BG_COLOR, BORDER_COLOR, BORDER_RADIUS } from '../constants';
+import { BACKGROUND_COLOR, BOX_BG_COLOR, BORDER_COLOR, BORDER_RADIUS } from '../utils/constants';
 
 function AsciiBox({
   children,

@@ -16,7 +16,7 @@ import useBlocks from '../hooks/useBlocks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCube } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { BORDER_RADIUS } from '../constants';
+import { BORDER_RADIUS } from '../utils/constants';
 
 function BlocksPage() {
   const [page, setPage] = useState(1);

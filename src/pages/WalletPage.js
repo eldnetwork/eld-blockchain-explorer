@@ -15,10 +15,8 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import nacl from 'tweetnacl';
 import CryptoJS from 'crypto-js';
-import axios from 'axios';
 import { Buffer } from 'buffer';
-import { sha256 } from 'js-sha256';
-import { encodeTxToHex, TransferTx, Tx, Payload } from '../tx';
+import { encodeTxToHex, TransferTx, Tx, Payload } from '../utils/tx';
 import { createKeyPair } from '../utils';
 import { formatELDAmount } from '../utils/formatAmount';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,10 +36,8 @@ function WalletPage() {
   const [error, setError] = useState(null);
 
   function getWalletAddress(publicKey) {
-    const publicKeyBytes = Buffer.from(publicKey, 'hex');
-    const digest = sha256.array(publicKeyBytes); // SHA-256 digest (32 bytes)
-    const addressBytes = digest.slice(0, 20); // First 20 bytes
-    return '0x' + Buffer.from(addressBytes).toString('hex'); // Hex encode (40 chars)
+    const digestHex = CryptoJS.SHA256(CryptoJS.enc.Hex.parse(publicKey)).toString(CryptoJS.enc.Hex);
+    return '0x' + digestHex.slice(0, 40);
   }
 
   // Add useEffect for periodic balance fetching
@@ -110,8 +106,11 @@ function WalletPage() {
 
   const fetchBalance = async (address) => {
     try {
-      const response = await axios.get(`${RPC_URL}/abci_query?path="account"&data=${address}`);
-      const data = response.data;
+      const response = await fetch(`${RPC_URL}/abci_query?path="account"&data=${address}`);
+      if (!response.ok) {
+        throw new Error(`Balance request failed: ${response.status}`);
+      }
+      const data = await response.json();
       if (data.result && data.result.response && data.result.response.info) {
         let info = data.result.response.info;
         const accountData = JSON.parse(info);
@@ -150,13 +149,17 @@ function WalletPage() {
       const hex = encodeTxToHex(tx);
 
       const url = `${RPC_URL}/broadcast_tx_commit?tx="${hex}"`;
-      const response = await axios.get(url);
-      if (response.data.result && response.data.result.check_tx.code === 0) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Broadcast failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.result && data.result.check_tx.code === 0) {
         setError(null);
         alert('Transfer sent successfully');
         fetchBalance(wallet.address);
       } else {
-        setError('Transfer failed: ' + (response.data.result.check_tx.log || 'Unknown error'));
+        setError('Transfer failed: ' + (data.result.check_tx.log || 'Unknown error'));
       }
     } catch (err) {
       setError('Failed to send transfer: ' + err.message);
@@ -171,13 +174,21 @@ function WalletPage() {
     try {
       const address = getWalletAddress(wallet.publicKey);
 
-      const response = await axios.post(`${FAUCET_URL}/faucet/request`, { address });
-      if (response.data.success) {
+      const response = await fetch(`${FAUCET_URL}/faucet/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+      if (!response.ok) {
+        throw new Error(`Faucet request failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
         setError(null);
         alert('Tokens requested successfully');
         fetchBalance(wallet.address); // Refresh balance
       } else {
-        setError('Faucet request failed: ' + (response.data.message || 'Unknown error'));
+        setError('Faucet request failed: ' + (data.message || 'Unknown error'));
       }
     } catch (err) {
       setError('Failed to request tokens: ' + err.message);

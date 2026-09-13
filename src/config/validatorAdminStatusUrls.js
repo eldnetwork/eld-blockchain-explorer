@@ -1,4 +1,4 @@
-import { ENABLE_VALIDATOR_ADMIN_STATUS } from '../config';
+import { ENABLE_VALIDATOR_ADMIN_STATUS } from './index';
 import devUrls from './validator-admin-status-urls.development.json';
 import prodUrls from './validator-admin-status-urls.production.json';
 import { normalizeAccountAddress } from '../utils/accountAddress';
