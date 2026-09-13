@@ -44,4 +44,3 @@ function useContent(contentId) {
 }
 
 export default useContent;
-

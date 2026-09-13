@@ -9,4 +9,3 @@ export const BORDER_COLOR = 'gray.800';
 export const BORDER_RADIUS = '6px';
 export const GHOST_GREY_PRIMARY = '#1f242b';
 export const GHOST_GREY_SECONDARY = '#13171c';
-

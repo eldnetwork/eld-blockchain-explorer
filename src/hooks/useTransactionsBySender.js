@@ -77,7 +77,9 @@ function useTransactionsBySender(senderAddress) {
 
         setTransactions(aggregated);
       } catch (err) {
-        setError('Failed to fetch transactions: ' + (err instanceof Error ? err.message : String(err)));
+        setError(
+          'Failed to fetch transactions: ' + (err instanceof Error ? err.message : String(err)),
+        );
       } finally {
         setLoading(false);
       }

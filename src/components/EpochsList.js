@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -125,13 +124,29 @@ function EpochsList() {
     </>
   );
 
-  if (error) return <Box p={4} color="red.500">Error: {error}</Box>;
+  if (error)
+    return (
+      <Box p={4} color="red.500">
+        Error: {error}
+      </Box>
+    );
   if (!epochs.length && !loading) return <Box p={4}>No epoch records found</Box>;
 
   return (
     <Box className="explorer-home__list explorer-home__list--epochs" mt={4}>
-      <HStack className="explorer-home__list-header" mb={4} justify="space-between" align="baseline">
-        <Heading className="explorer-home__list-title" as="h2" size="lg" color="gray.700" lineHeight="1.2">
+      <HStack
+        className="explorer-home__list-header"
+        mb={4}
+        justify="space-between"
+        align="baseline"
+      >
+        <Heading
+          className="explorer-home__list-title"
+          as="h2"
+          size="lg"
+          color="gray.700"
+          lineHeight="1.2"
+        >
           Epochs{' '}
           <Text className="explorer-home__list-meta" as="span" fontSize="sm" display="inline">
             ({metaLabel})
@@ -141,13 +156,24 @@ function EpochsList() {
           {pagerButtons}
         </HStack>
       </HStack>
-      <List className="explorer-home__list-body" spacing={3} mt={0} pt={0} style={{ marginTop: '-5px' }}>
+      <List
+        className="explorer-home__list-body"
+        spacing={3}
+        mt={0}
+        pt={0}
+        style={{ marginTop: '-5px' }}
+      >
         {isInitialLoad
           ? Array(epochsPerPage)
               .fill(0)
               .map((_, index) => (
                 <ListItem key={index} transition="all 0.2s" _hover={{ opacity: 0.8 }}>
-                  <AsciiBox className="explorer-home__list-item" p={2} borderRadius={BORDER_RADIUS} boxShadow="sm">
+                  <AsciiBox
+                    className="explorer-home__list-item"
+                    p={2}
+                    borderRadius={BORDER_RADIUS}
+                    boxShadow="sm"
+                  >
                     <VStack spacing={2} align="stretch" display={{ base: 'flex', md: 'none' }}>
                       <HStack spacing={4} w="full" minW="0">
                         <Skeleton height="20px" width="20px" flexShrink={0} />
@@ -156,7 +182,13 @@ function EpochsList() {
                       </HStack>
                       <Skeleton height="20px" width="140px" />
                     </VStack>
-                    <HStack spacing={4} w="full" justify="space-between" minW="0" display={{ base: 'none', md: 'flex' }}>
+                    <HStack
+                      spacing={4}
+                      w="full"
+                      justify="space-between"
+                      minW="0"
+                      display={{ base: 'none', md: 'flex' }}
+                    >
                       <HStack spacing={4} flex="1" minW="0">
                         <Skeleton height="20px" width="20px" flexShrink={0} />
                         <Skeleton height="20px" width="100px" />
@@ -182,11 +214,21 @@ function EpochsList() {
                   _hover={{ opacity: 0.8 }}
                   transition="all 0.2s"
                 >
-                  <AsciiBox className="explorer-home__list-item" p={2} borderRadius={BORDER_RADIUS} boxShadow="sm">
+                  <AsciiBox
+                    className="explorer-home__list-item"
+                    p={2}
+                    borderRadius={BORDER_RADIUS}
+                    boxShadow="sm"
+                  >
                     <VStack spacing={2} align="stretch" display={{ base: 'flex', md: 'none' }}>
                       <HStack spacing={4} w="full" minW="0">
                         <FontAwesomeIcon icon={faLayerGroup} flexShrink={0} />
-                        <Text className="explorer-home__epoch-number" fontWeight="semibold" flex="1" minW="0">
+                        <Text
+                          className="explorer-home__epoch-number"
+                          fontWeight="semibold"
+                          flex="1"
+                          minW="0"
+                        >
                           Epoch {epochNum}
                         </Text>
                         <HStack
@@ -206,10 +248,21 @@ function EpochsList() {
                         {summary}
                       </Text>
                     </VStack>
-                    <HStack spacing={4} w="full" justify="space-between" minW="0" display={{ base: 'none', md: 'flex' }}>
+                    <HStack
+                      spacing={4}
+                      w="full"
+                      justify="space-between"
+                      minW="0"
+                      display={{ base: 'none', md: 'flex' }}
+                    >
                       <HStack spacing={4} flex="1" minW="0">
                         <FontAwesomeIcon icon={faLayerGroup} flexShrink={0} />
-                        <Text className="explorer-home__epoch-number" fontWeight="semibold" flex="0 0 auto" minW="90px">
+                        <Text
+                          className="explorer-home__epoch-number"
+                          fontWeight="semibold"
+                          flex="0 0 auto"
+                          minW="90px"
+                        >
                           Epoch {epochNum}
                         </Text>
                         <HStack
@@ -225,7 +278,13 @@ function EpochsList() {
                           </Text>
                         </HStack>
                       </HStack>
-                      <Text fontSize="sm" color="gray.500" flexShrink={0} noOfLines={1} title={summary}>
+                      <Text
+                        fontSize="sm"
+                        color="gray.500"
+                        flexShrink={0}
+                        noOfLines={1}
+                        title={summary}
+                      >
                         {summary}
                       </Text>
                     </HStack>
@@ -234,7 +293,11 @@ function EpochsList() {
               );
             })}
       </List>
-      <HStack className="explorer-home__pager explorer-home__pager--bottom" mt={4} justify="flex-end">
+      <HStack
+        className="explorer-home__pager explorer-home__pager--bottom"
+        mt={4}
+        justify="flex-end"
+      >
         {pagerButtons}
       </HStack>
     </Box>

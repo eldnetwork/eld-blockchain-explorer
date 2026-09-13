@@ -1,6 +1,21 @@
-import React from 'react';
 import { useNavigate, Link as RouterLink, useSearchParams } from 'react-router-dom';
-import { Box, Heading, Tabs, TabList, TabPanels, Tab, TabPanel, List, ListItem, HStack, Text, Skeleton, Badge, VStack, Link } from '@chakra-ui/react';
+import {
+  Box,
+  Heading,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  List,
+  ListItem,
+  HStack,
+  Text,
+  Skeleton,
+  Badge,
+  VStack,
+  Link,
+} from '@chakra-ui/react';
 import useValidators from '../hooks/useValidators';
 import useCapacityProviders from '../hooks/useCapacityProviders';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,15 +30,17 @@ function ValidatorList({ validators, loading }) {
   if (loading) {
     return (
       <List spacing={3}>
-        {Array(10).fill(0).map((_, index) => (
-          <ListItem key={index} p={4} className="explorer-page__list-item">
-            <HStack spacing={4} w="full">
-              <Skeleton height="20px" width="40px" />
-              <Skeleton height="20px" width="300px" />
-              <Skeleton height="20px" width="150px" />
-            </HStack>
-          </ListItem>
-        ))}
+        {Array(10)
+          .fill(0)
+          .map((_, index) => (
+            <ListItem key={index} p={4} className="explorer-page__list-item">
+              <HStack spacing={4} w="full">
+                <Skeleton height="20px" width="40px" />
+                <Skeleton height="20px" width="300px" />
+                <Skeleton height="20px" width="150px" />
+              </HStack>
+            </ListItem>
+          ))}
       </List>
     );
   }
@@ -44,43 +61,52 @@ function ValidatorList({ validators, loading }) {
         >
           <AsciiBox p={4} className="explorer-page__list-item">
             <VStack align="stretch" spacing={2}>
-            <HStack justify="space-between">
-              <HStack spacing={3}>
-                <Badge className="explorer-page__index-badge" fontSize="sm">#{index + 1}</Badge>
-                {validator.address ? (
-                  <Link
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigate(`/account/${normalizeAccountAddress(validator.address) || validator.address}`);
-                    }}
-                    className="explorer-page__clickable"
-                    fontWeight="semibold"
-                    fontSize="sm"
-                  >
-                    {`${validator.address.slice(0, 10)}...${validator.address.slice(-8)}`}
-                  </Link>
-                ) : (
-                  <Text fontWeight="semibold" fontSize="sm" className="explorer-page__body-text">
-                    {validator.address ? `${validator.address.slice(0, 10)}...${validator.address.slice(-8)}` : 'N/A'}
+              <HStack justify="space-between">
+                <HStack spacing={3}>
+                  <Badge className="explorer-page__index-badge" fontSize="sm">
+                    #{index + 1}
+                  </Badge>
+                  {validator.address ? (
+                    <Link
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(
+                          `/account/${normalizeAccountAddress(validator.address) || validator.address}`,
+                        );
+                      }}
+                      className="explorer-page__clickable"
+                      fontWeight="semibold"
+                      fontSize="sm"
+                    >
+                      {`${validator.address.slice(0, 10)}...${validator.address.slice(-8)}`}
+                    </Link>
+                  ) : (
+                    <Text fontWeight="semibold" fontSize="sm" className="explorer-page__body-text">
+                      {validator.address
+                        ? `${validator.address.slice(0, 10)}...${validator.address.slice(-8)}`
+                        : 'N/A'}
+                    </Text>
+                  )}
+                </HStack>
+                {validator.stake !== undefined && (
+                  <Text fontSize="sm" className="explorer-page__muted">
+                    Stake:{' '}
+                    {typeof validator.stake === 'number'
+                      ? validator.stake.toLocaleString()
+                      : validator.stake}
                   </Text>
                 )}
               </HStack>
-              {validator.stake !== undefined && (
-                <Text fontSize="sm" className="explorer-page__muted">
-                  Stake: {typeof validator.stake === 'number' ? validator.stake.toLocaleString() : validator.stake}
+              {validator.pub_key && (
+                <Text fontSize="xs" className="explorer-page__muted" isTruncated>
+                  Pub Key: {validator.pub_key}
                 </Text>
               )}
-            </HStack>
-            {validator.pub_key && (
-              <Text fontSize="xs" className="explorer-page__muted" isTruncated>
-                Pub Key: {validator.pub_key}
-              </Text>
-            )}
-            {validator.voting_power !== undefined && (
-              <Text fontSize="xs" className="explorer-page__muted">
-                Voting Power: {validator.voting_power}
-              </Text>
-            )}
+              {validator.voting_power !== undefined && (
+                <Text fontSize="xs" className="explorer-page__muted">
+                  Voting Power: {validator.voting_power}
+                </Text>
+              )}
             </VStack>
           </AsciiBox>
         </ListItem>
@@ -93,17 +119,19 @@ function CapacityProviderList({ providers, loading }) {
   if (loading) {
     return (
       <List spacing={3}>
-        {Array(10).fill(0).map((_, index) => (
-          <ListItem key={index}>
-            <AsciiBox p={4}>
-              <HStack spacing={4} w="full">
-                <Skeleton height="20px" width="40px" />
-                <Skeleton height="20px" width="300px" />
-                <Skeleton height="20px" width="150px" />
-              </HStack>
-            </AsciiBox>
-          </ListItem>
-        ))}
+        {Array(10)
+          .fill(0)
+          .map((_, index) => (
+            <ListItem key={index}>
+              <AsciiBox p={4}>
+                <HStack spacing={4} w="full">
+                  <Skeleton height="20px" width="40px" />
+                  <Skeleton height="20px" width="300px" />
+                  <Skeleton height="20px" width="150px" />
+                </HStack>
+              </AsciiBox>
+            </ListItem>
+          ))}
       </List>
     );
   }
@@ -133,18 +161,29 @@ function CapacityProviderList({ providers, loading }) {
                       #{index + 1}
                     </Badge>
                     {provider.address ? (
-                      <Text fontWeight="semibold" fontSize="sm" className="explorer-page__body-text">
+                      <Text
+                        fontWeight="semibold"
+                        fontSize="sm"
+                        className="explorer-page__body-text"
+                      >
                         {`${provider.address.slice(0, 10)}...${provider.address.slice(-8)}`}
                       </Text>
                     ) : (
-                      <Text fontWeight="semibold" fontSize="sm" className="explorer-page__body-text">
+                      <Text
+                        fontWeight="semibold"
+                        fontSize="sm"
+                        className="explorer-page__body-text"
+                      >
                         N/A
                       </Text>
                     )}
                   </HStack>
                   {provider.stake !== undefined && (
                     <Text fontSize="sm" className="explorer-page__muted">
-                      Stake: {typeof provider.stake === 'number' ? provider.stake.toLocaleString() : provider.stake}
+                      Stake:{' '}
+                      {typeof provider.stake === 'number'
+                        ? provider.stake.toLocaleString()
+                        : provider.stake}
                     </Text>
                   )}
                 </HStack>
@@ -159,7 +198,9 @@ function CapacityProviderList({ providers, loading }) {
                 {provider.chunk_count !== undefined && (
                   <Text fontSize="xs" className="explorer-page__muted">
                     Chunk Count:{' '}
-                    {typeof provider.chunk_count === 'number' ? provider.chunk_count.toLocaleString() : provider.chunk_count}
+                    {typeof provider.chunk_count === 'number'
+                      ? provider.chunk_count.toLocaleString()
+                      : provider.chunk_count}
                   </Text>
                 )}
                 {provider.merkle_root && (
@@ -189,7 +230,9 @@ function CapacityProviderList({ providers, loading }) {
                       : Number(provider.registered_at));
                   const duration = Number(provider.registration_duration);
                   const expirationBlock =
-                    !Number.isNaN(createdBlock) && !Number.isNaN(duration) ? createdBlock + duration : null;
+                    !Number.isNaN(createdBlock) && !Number.isNaN(duration)
+                      ? createdBlock + duration
+                      : null;
                   return expirationBlock != null ? (
                     <Text fontSize="xs" className="explorer-page__muted">
                       Expiration Block: {expirationBlock.toLocaleString()}
@@ -206,16 +249,21 @@ function CapacityProviderList({ providers, loading }) {
 }
 
 function ValidatorsPage() {
-  const { validators, totalStake: chainTotalStake, loading: validatorsLoading, error: validatorsError } = useValidators();
-  const { 
-    activeProviders, 
-    allProviders, 
-    activeTotalStake, 
-    activeTotalCapacity, 
-    allTotalStake, 
-    allTotalCapacity, 
-    loading: providersLoading, 
-    error: providersError 
+  const {
+    validators,
+    totalStake: chainTotalStake,
+    loading: validatorsLoading,
+    error: validatorsError,
+  } = useValidators();
+  const {
+    activeProviders,
+    allProviders,
+    activeTotalStake,
+    activeTotalCapacity,
+    allTotalStake,
+    allTotalCapacity,
+    loading: providersLoading,
+    error: providersError,
   } = useCapacityProviders();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabIndex = searchParams.get('tab') === 'capacity' ? 1 : 0;
@@ -230,7 +278,9 @@ function ValidatorsPage() {
   return (
     <Box className="explorer-page">
       <HStack className="explorer-page__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">← Explorer</Link>
+        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">
+          ← Explorer
+        </Link>
         <Text className="explorer-page__crumb-sep">My Node</Text>
         <Text className="explorer-page__crumb-current">Validators</Text>
       </HStack>
@@ -246,7 +296,9 @@ function ValidatorsPage() {
               <FontAwesomeIcon icon={faShield} />
               <Text>Chain Validators</Text>
               {!validatorsLoading && (
-                <Badge className="explorer-page__index-badge" borderRadius="0">{validators.length}</Badge>
+                <Badge className="explorer-page__index-badge" borderRadius="0">
+                  {validators.length}
+                </Badge>
               )}
             </HStack>
           </Tab>
@@ -255,7 +307,9 @@ function ValidatorsPage() {
               <FontAwesomeIcon icon={faHardDrive} />
               <Text>Capacity Providers</Text>
               {!providersLoading && (
-                <Badge className="explorer-page__index-badge" borderRadius="0">{allProviders.length}</Badge>
+                <Badge className="explorer-page__index-badge" borderRadius="0">
+                  {allProviders.length}
+                </Badge>
               )}
             </HStack>
           </Tab>
@@ -264,13 +318,18 @@ function ValidatorsPage() {
         <TabPanels>
           <TabPanel px={0}>
             {validatorsError ? (
-              <Box p={4} className="explorer-page__state--error">Error: {validatorsError}</Box>
+              <Box p={4} className="explorer-page__state--error">
+                Error: {validatorsError}
+              </Box>
             ) : (
               <>
                 {chainTotalStake > 0 && (
                   <AsciiBox mb={4} p={3} className="explorer-page__card">
                     <Text fontSize="sm" className="explorer-page__summary-line">
-                      Total Stake: {typeof chainTotalStake === 'number' ? chainTotalStake.toLocaleString() : chainTotalStake}
+                      Total Stake:{' '}
+                      {typeof chainTotalStake === 'number'
+                        ? chainTotalStake.toLocaleString()
+                        : chainTotalStake}
                     </Text>
                   </AsciiBox>
                 )}
@@ -280,24 +339,35 @@ function ValidatorsPage() {
           </TabPanel>
           <TabPanel px={0}>
             {providersError ? (
-              <Box p={4} className="explorer-page__state--error">Error: {providersError}</Box>
+              <Box p={4} className="explorer-page__state--error">
+                Error: {providersError}
+              </Box>
             ) : (
               <>
-                {(activeTotalStake > 0 || activeTotalCapacity > 0 || allTotalStake > 0 || allTotalCapacity > 0) && (
+                {(activeTotalStake > 0 ||
+                  activeTotalCapacity > 0 ||
+                  allTotalStake > 0 ||
+                  allTotalCapacity > 0) && (
                   <VStack align="stretch" spacing={2} mb={4}>
                     {activeProviders.length > 0 && (
                       <>
                         {activeTotalStake > 0 && (
                           <AsciiBox p={3} className="explorer-page__card">
                             <Text fontSize="sm" className="explorer-page__summary-line">
-                              Active Total Stake: {typeof activeTotalStake === 'number' ? activeTotalStake.toLocaleString() : activeTotalStake}
+                              Active Total Stake:{' '}
+                              {typeof activeTotalStake === 'number'
+                                ? activeTotalStake.toLocaleString()
+                                : activeTotalStake}
                             </Text>
                           </AsciiBox>
                         )}
                         {activeTotalCapacity > 0 && (
                           <AsciiBox p={3} className="explorer-page__card">
                             <Text fontSize="sm" className="explorer-page__summary-line">
-                              Active Total Capacity: {typeof activeTotalCapacity === 'number' ? activeTotalCapacity.toLocaleString() : activeTotalCapacity}
+                              Active Total Capacity:{' '}
+                              {typeof activeTotalCapacity === 'number'
+                                ? activeTotalCapacity.toLocaleString()
+                                : activeTotalCapacity}
                             </Text>
                           </AsciiBox>
                         )}
@@ -306,14 +376,20 @@ function ValidatorsPage() {
                     {allTotalStake > 0 && (
                       <AsciiBox p={3} className="explorer-page__card">
                         <Text fontSize="sm" className="explorer-page__summary-line">
-                          All Total Stake: {typeof allTotalStake === 'number' ? allTotalStake.toLocaleString() : allTotalStake}
+                          All Total Stake:{' '}
+                          {typeof allTotalStake === 'number'
+                            ? allTotalStake.toLocaleString()
+                            : allTotalStake}
                         </Text>
                       </AsciiBox>
                     )}
                     {allTotalCapacity > 0 && (
                       <AsciiBox p={3} className="explorer-page__card">
                         <Text fontSize="sm" className="explorer-page__summary-line">
-                          All Total Capacity: {typeof allTotalCapacity === 'number' ? allTotalCapacity.toLocaleString() : allTotalCapacity}
+                          All Total Capacity:{' '}
+                          {typeof allTotalCapacity === 'number'
+                            ? allTotalCapacity.toLocaleString()
+                            : allTotalCapacity}
                         </Text>
                       </AsciiBox>
                     )}
@@ -330,4 +406,3 @@ function ValidatorsPage() {
 }
 
 export default ValidatorsPage;
-

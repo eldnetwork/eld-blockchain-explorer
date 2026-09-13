@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import useBlock from '../hooks/useBlock';
 import { Box, Heading, Text, List, ListItem, HStack, Skeleton, Link } from '@chakra-ui/react';
@@ -56,7 +56,10 @@ function BlockPage() {
   };
 
   if (loading) return <Box className="explorer-record__state">Loading block...</Box>;
-  if (error) return <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>;
+  if (error)
+    return (
+      <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>
+    );
   if (!block) return <Box className="explorer-record__state">No block found</Box>;
 
   const header = block.header || {};
@@ -77,47 +80,116 @@ function BlockPage() {
       </Box>
 
       <section className="explorer-record__section">
-        <h2><span /> BASIC INFORMATION</h2>
+        <h2>
+          <span /> BASIC INFORMATION
+        </h2>
         <div className="explorer-record__kv-grid">
-          <div><span>HEIGHT</span><strong>{header.height || 'N/A'}</strong></div>
-          <div><span>CHAIN ID</span><strong>{header.chain_id || 'N/A'}</strong></div>
-          <div><span>TIME</span><strong>{formatDateTime(header.time) || 'N/A'}</strong></div>
-          <div><span>TX COUNT</span><strong>{txCount}</strong></div>
+          <div>
+            <span>HEIGHT</span>
+            <strong>{header.height || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>CHAIN ID</span>
+            <strong>{header.chain_id || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>TIME</span>
+            <strong>{formatDateTime(header.time) || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>TX COUNT</span>
+            <strong>{txCount}</strong>
+          </div>
         </div>
       </section>
 
       <section className="explorer-record__section">
-        <h2><span /> BLOCK ID</h2>
+        <h2>
+          <span /> BLOCK ID
+        </h2>
         <div className="explorer-record__kv-grid">
-          <div><span>HASH</span><strong className="explorer-record__mono">{blockId.hash || 'N/A'}</strong></div>
-          {blockId.parts && <div><span>PARTS TOTAL</span><strong>{blockId.parts.total}</strong></div>}
-          {blockId.parts && <div><span>PARTS HASH</span><strong className="explorer-record__mono">{blockId.parts.hash || 'N/A'}</strong></div>}
+          <div>
+            <span>HASH</span>
+            <strong className="explorer-record__mono">{blockId.hash || 'N/A'}</strong>
+          </div>
+          {blockId.parts && (
+            <div>
+              <span>PARTS TOTAL</span>
+              <strong>{blockId.parts.total}</strong>
+            </div>
+          )}
+          {blockId.parts && (
+            <div>
+              <span>PARTS HASH</span>
+              <strong className="explorer-record__mono">{blockId.parts.hash || 'N/A'}</strong>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="explorer-record__section">
-        <h2><span /> HEADER HASHES</h2>
+        <h2>
+          <span /> HEADER HASHES
+        </h2>
         <div className="explorer-record__kv-grid">
-          <div><span>LAST BLOCK ID</span><strong className="explorer-record__mono">{header.last_block_id?.hash || 'N/A'}</strong></div>
-          <div><span>LAST COMMIT HASH</span><strong className="explorer-record__mono">{header.last_commit_hash || 'N/A'}</strong></div>
-          <div><span>DATA HASH</span><strong className="explorer-record__mono">{header.data_hash || 'N/A'}</strong></div>
-          <div><span>VALIDATORS HASH</span><strong className="explorer-record__mono">{header.validators_hash || 'N/A'}</strong></div>
-          <div><span>NEXT VALIDATORS</span><strong className="explorer-record__mono">{header.next_validators_hash || 'N/A'}</strong></div>
-          <div><span>CONSENSUS HASH</span><strong className="explorer-record__mono">{header.consensus_hash || 'N/A'}</strong></div>
-          <div><span>APP HASH</span><strong className="explorer-record__mono">{header.app_hash || 'N/A'}</strong></div>
-          <div><span>LAST RESULTS HASH</span><strong className="explorer-record__mono">{header.last_results_hash || 'N/A'}</strong></div>
-          <div><span>EVIDENCE HASH</span><strong className="explorer-record__mono">{header.evidence_hash || 'N/A'}</strong></div>
+          <div>
+            <span>LAST BLOCK ID</span>
+            <strong className="explorer-record__mono">{header.last_block_id?.hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>LAST COMMIT HASH</span>
+            <strong className="explorer-record__mono">{header.last_commit_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>DATA HASH</span>
+            <strong className="explorer-record__mono">{header.data_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>VALIDATORS HASH</span>
+            <strong className="explorer-record__mono">{header.validators_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>NEXT VALIDATORS</span>
+            <strong className="explorer-record__mono">
+              {header.next_validators_hash || 'N/A'}
+            </strong>
+          </div>
+          <div>
+            <span>CONSENSUS HASH</span>
+            <strong className="explorer-record__mono">{header.consensus_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>APP HASH</span>
+            <strong className="explorer-record__mono">{header.app_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>LAST RESULTS HASH</span>
+            <strong className="explorer-record__mono">{header.last_results_hash || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>EVIDENCE HASH</span>
+            <strong className="explorer-record__mono">{header.evidence_hash || 'N/A'}</strong>
+          </div>
         </div>
       </section>
 
       {header.proposer_address && (
         <section className="explorer-record__section">
-          <h2><span /> PROPOSER</h2>
+          <h2>
+            <span /> PROPOSER
+          </h2>
           <div className="explorer-record__kv-grid">
             <div>
               <span>ADDRESS</span>
               <strong className="explorer-record__mono">
-                <Link onClick={() => navigate(`/account/${normalizeAccountAddress(header.proposer_address) || header.proposer_address}`)} className="explorer-record__tx-hash">
+                <Link
+                  onClick={() =>
+                    navigate(
+                      `/account/${normalizeAccountAddress(header.proposer_address) || header.proposer_address}`,
+                    )
+                  }
+                  className="explorer-record__tx-hash"
+                >
                   {header.proposer_address}
                 </Link>
               </strong>
@@ -128,19 +200,37 @@ function BlockPage() {
 
       {lastCommit.signatures && lastCommit.signatures.length > 0 && (
         <section className="explorer-record__section">
-          <h2><span /> LAST COMMIT</h2>
+          <h2>
+            <span /> LAST COMMIT
+          </h2>
           <div className="explorer-record__kv-grid">
-            <div><span>HEIGHT</span><strong>{lastCommit.height || 'N/A'}</strong></div>
-            <div><span>ROUND</span><strong>{lastCommit.round || 'N/A'}</strong></div>
-            <div><span>SIGNATURES</span><strong>{lastCommit.signatures.length}</strong></div>
-            <div><span>BLOCK ID HASH</span><strong className="explorer-record__mono">{lastCommit.block_id?.hash || 'N/A'}</strong></div>
+            <div>
+              <span>HEIGHT</span>
+              <strong>{lastCommit.height || 'N/A'}</strong>
+            </div>
+            <div>
+              <span>ROUND</span>
+              <strong>{lastCommit.round || 'N/A'}</strong>
+            </div>
+            <div>
+              <span>SIGNATURES</span>
+              <strong>{lastCommit.signatures.length}</strong>
+            </div>
+            <div>
+              <span>BLOCK ID HASH</span>
+              <strong className="explorer-record__mono">
+                {lastCommit.block_id?.hash || 'N/A'}
+              </strong>
+            </div>
           </div>
         </section>
       )}
 
       {block.data.txs && block.data.txs.length > 0 && (
         <section className="explorer-record__section">
-          <h2><span /> TRANSACTIONS ({txCount})</h2>
+          <h2>
+            <span /> TRANSACTIONS ({txCount})
+          </h2>
           {txLoading ? (
             <List spacing={3}>
               {block.data.txs.map((_, index) => (
@@ -173,19 +263,19 @@ function BlockPage() {
                       <HStack spacing={4} justify="space-between" minW="0">
                         <HStack spacing={3} minW="0" flex="1">
                           <FontAwesomeIcon icon={faReceipt} />
-                          <Text
-                            className="explorer-record__tx-hash"
-                            isTruncated
-                            title={hashTitle}
-                          >
+                          <Text className="explorer-record__tx-hash" isTruncated title={hashTitle}>
                             {hashLabel}
                           </Text>
                         </HStack>
                         <HStack spacing={3} flexShrink={0}>
-                          <span className={`explorer-record__tx-status ${statusBadgeClass(tx.executionStatus)}`}>
+                          <span
+                            className={`explorer-record__tx-status ${statusBadgeClass(tx.executionStatus)}`}
+                          >
                             {tx.executionStatus.label}
                           </span>
-                          <Text className="explorer-record__tx-type">{String(txType).replace(/_/g, ' ')}</Text>
+                          <Text className="explorer-record__tx-type">
+                            {String(txType).replace(/_/g, ' ')}
+                          </Text>
                         </HStack>
                       </HStack>
                     </AsciiBox>
@@ -194,11 +284,12 @@ function BlockPage() {
               })}
             </List>
           ) : (
-            <Box p={4} color="gray.500">Unable to load transaction details</Box>
+            <Box p={4} color="gray.500">
+              Unable to load transaction details
+            </Box>
           )}
         </section>
       )}
-
     </Box>
   );
 }

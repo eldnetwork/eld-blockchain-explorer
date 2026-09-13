@@ -65,7 +65,10 @@ function usePinboardMessage(wallet, messageId) {
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
-          const log = data?.result?.response?.log || data?.result?.response?.info || 'Pinboard post not found';
+          const log =
+            data?.result?.response?.log ||
+            data?.result?.response?.info ||
+            'Pinboard post not found';
           setError(log);
           setMessage(null);
           return;
@@ -116,4 +119,3 @@ function usePinboardMessage(wallet, messageId) {
 }
 
 export default usePinboardMessage;
-

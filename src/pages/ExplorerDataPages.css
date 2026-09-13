@@ -107,7 +107,8 @@
 }
 
 .explorer-page__mono {
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.78rem !important;
 }
 
@@ -162,25 +163,25 @@
 }
 
 .explorer-page .chakra-tabs__tablist,
-.explorer-page [role="tablist"] {
+.explorer-page [role='tablist'] {
   border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .explorer-home-shell--light .explorer-page .chakra-tabs__tablist,
-.explorer-home-shell--light .explorer-page [role="tablist"] {
+.explorer-home-shell--light .explorer-page [role='tablist'] {
   border-bottom-color: rgba(15, 23, 42, 0.12);
 }
 
 .explorer-page .chakra-tabs__tab,
-.explorer-page [role="tab"] {
+.explorer-page [role='tab'] {
   color: var(--lh-muted, rgba(243, 243, 240, 0.68));
   border-radius: 0 !important;
   border: 0 !important;
   border-bottom: 2px solid transparent !important;
 }
 
-.explorer-page .chakra-tabs__tab[aria-selected="true"],
-.explorer-page [role="tab"][aria-selected="true"] {
+.explorer-page .chakra-tabs__tab[aria-selected='true'],
+.explorer-page [role='tab'][aria-selected='true'] {
   color: var(--lh-accent, #ff7a18);
   border-bottom-color: var(--lh-accent, #ff7a18) !important;
   border-radius: 0 !important;

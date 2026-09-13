@@ -28,11 +28,11 @@ function useBlocks(page) {
       }
       const statusData = await statusResponse.json();
       const latestHeight = parseInt(statusData.result.sync_info.latest_block_height, 10);
-      const maxHeight = latestHeight - ((page - 1) * BLOCKS_PER_PAGE);
+      const maxHeight = latestHeight - (page - 1) * BLOCKS_PER_PAGE;
       const minHeight = Math.max(0, maxHeight - BLOCKS_PER_PAGE + 1);
 
       const response = await fetch(
-        `${RPC_URL}/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`
+        `${RPC_URL}/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`,
       );
       if (!response.ok) {
         throw new Error(`Blockchain request failed (${response.status})`);
@@ -43,7 +43,7 @@ function useBlocks(page) {
       }
 
       const sortedBlocks = [...data.result.block_metas].sort(
-        (a, b) => parseInt(b.header.height, 10) - parseInt(a.header.height, 10)
+        (a, b) => parseInt(b.header.height, 10) - parseInt(a.header.height, 10),
       );
       return { sortedBlocks, latestHeight };
     }
@@ -69,7 +69,7 @@ function useBlocks(page) {
             setIsInitialLoad(false);
           }
           return;
-        } catch (err) {
+        } catch (_err) {
           if (cancelled) return;
 
           if (attempt < MAX_RETRIES) {

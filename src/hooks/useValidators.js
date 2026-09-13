@@ -6,7 +6,7 @@ const REFRESH_INTERVAL_MS = 10000;
 
 async function fetchValidatorsOnce() {
   const response = await fetch(
-    `${RPC_URL}/abci_query?path="active_validators"&data=""&prove=false`
+    `${RPC_URL}/abci_query?path="active_validators"&data=""&prove=false`,
   );
 
   if (!response.ok) {

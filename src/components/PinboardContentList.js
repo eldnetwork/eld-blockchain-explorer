@@ -1,6 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Heading, HStack, List, ListItem, Skeleton, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  List,
+  ListItem,
+  Skeleton,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { faMessage } from '@fortawesome/free-solid-svg-icons';
@@ -82,16 +92,30 @@ function PinboardContentList() {
     const params = new URLSearchParams();
     if (cadoPath) params.set('path', cadoPath);
     const query = params.toString();
-    navigate(`/pinboard/post/${encodeURIComponent(wallet)}/${encodeURIComponent(messageId)}${query ? `?${query}` : ''}`);
+    navigate(
+      `/pinboard/post/${encodeURIComponent(wallet)}/${encodeURIComponent(messageId)}${query ? `?${query}` : ''}`,
+    );
   }
 
   return (
     <Box className="explorer-home__list explorer-home__list--content" mt={4}>
-      <HStack className="explorer-home__list-header" mb={4} justify="space-between" align="baseline">
-        <Heading className="explorer-home__list-title" as="h2" size="lg" color="gray.700" lineHeight="1.2">
+      <HStack
+        className="explorer-home__list-header"
+        mb={4}
+        justify="space-between"
+        align="baseline"
+      >
+        <Heading
+          className="explorer-home__list-title"
+          as="h2"
+          size="lg"
+          color="gray.700"
+          lineHeight="1.2"
+        >
           Latest Content
           <Text className="explorer-home__list-meta" as="span" fontSize="sm" display="inline">
-            {' '}({`Page ${page + 1}`})
+            {' '}
+            ({`Page ${page + 1}`})
           </Text>
         </Heading>
         <HStack className="explorer-home__pager" spacing={2}>
@@ -158,24 +182,41 @@ function PinboardContentList() {
         </HStack>
       </HStack>
 
-      {error && <Box p={4} color="red.500">Error: {error}</Box>}
+      {error && (
+        <Box p={4} color="red.500">
+          Error: {error}
+        </Box>
+      )}
 
-      <List className="explorer-home__list-body" spacing={3} mt={0} pt={0} style={{ marginTop: '-5px' }}>
+      <List
+        className="explorer-home__list-body"
+        spacing={3}
+        mt={0}
+        pt={0}
+        style={{ marginTop: '-5px' }}
+      >
         {loading || pageJumping ? (
-          Array(POSTS_PER_PAGE).fill(0).map((_, index) => (
-            <ListItem key={index}>
-              <AsciiBox className="explorer-home__list-item" p={3} borderRadius={BORDER_RADIUS} boxShadow="sm">
-                <VStack spacing={2} align="stretch">
-                  <HStack spacing={4} w="full" justify="space-between">
-                    <Skeleton height="20px" width="220px" />
-                    <Skeleton height="20px" width="80px" />
-                  </HStack>
-                  <Skeleton height="16px" width="100%" />
-                  <Skeleton height="16px" width="65%" />
-                </VStack>
-              </AsciiBox>
-            </ListItem>
-          ))
+          Array(POSTS_PER_PAGE)
+            .fill(0)
+            .map((_, index) => (
+              <ListItem key={index}>
+                <AsciiBox
+                  className="explorer-home__list-item"
+                  p={3}
+                  borderRadius={BORDER_RADIUS}
+                  boxShadow="sm"
+                >
+                  <VStack spacing={2} align="stretch">
+                    <HStack spacing={4} w="full" justify="space-between">
+                      <Skeleton height="20px" width="220px" />
+                      <Skeleton height="20px" width="80px" />
+                    </HStack>
+                    <Skeleton height="16px" width="100%" />
+                    <Skeleton height="16px" width="65%" />
+                  </VStack>
+                </AsciiBox>
+              </ListItem>
+            ))
         ) : items.length === 0 ? (
           <ListItem>
             <Box p={4}>No content posts found</Box>
@@ -197,7 +238,12 @@ function PinboardContentList() {
                 _hover={isClickable ? { opacity: 0.8 } : undefined}
                 transition="all 0.2s"
               >
-                <AsciiBox className="explorer-home__list-item" p={2} borderRadius={BORDER_RADIUS} boxShadow="sm">
+                <AsciiBox
+                  className="explorer-home__list-item"
+                  p={2}
+                  borderRadius={BORDER_RADIUS}
+                  boxShadow="sm"
+                >
                   <VStack spacing={2} align="stretch" w="full">
                     <HStack spacing={3} w="full" justify="space-between" align="center">
                       <HStack spacing={2} minW={0}>
@@ -206,7 +252,9 @@ function PinboardContentList() {
                           {truncateMiddle(messageId, 14, 10)}
                         </Text>
                       </HStack>
-                      <Text className={`explorer-home__content-status explorer-home__content-status--${blobState}`}>
+                      <Text
+                        className={`explorer-home__content-status explorer-home__content-status--${blobState}`}
+                      >
                         {blobState}
                       </Text>
                     </HStack>
@@ -240,7 +288,11 @@ function PinboardContentList() {
         )}
       </List>
 
-      <HStack className="explorer-home__pager explorer-home__pager--bottom" mt={4} justify="flex-end">
+      <HStack
+        className="explorer-home__pager explorer-home__pager--bottom"
+        mt={4}
+        justify="flex-end"
+      >
         <Button
           title="First page"
           className="explorer-home__pager-btn"

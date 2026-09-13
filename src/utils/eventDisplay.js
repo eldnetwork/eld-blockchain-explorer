@@ -3,7 +3,10 @@ import { Buffer } from 'buffer';
 const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
 function normalizeBase64String(value) {
-  return String(value).replace(/[\r\n\s]/g, '').replace(/-/g, '+').replace(/_/g, '/');
+  return String(value)
+    .replace(/[\r\n\s]/g, '')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
 }
 
 function padBase64String(value) {

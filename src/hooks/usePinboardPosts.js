@@ -80,7 +80,8 @@ function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc'
         setHasMore(Boolean(nextPagination.has_more));
         setPagination({
           page: typeof nextPagination.page === 'number' ? nextPagination.page : page,
-          page_size: typeof nextPagination.page_size === 'number' ? nextPagination.page_size : pageSize,
+          page_size:
+            typeof nextPagination.page_size === 'number' ? nextPagination.page_size : pageSize,
           next_cursor: nextPagination.next_cursor ?? null,
         });
       } catch (err) {

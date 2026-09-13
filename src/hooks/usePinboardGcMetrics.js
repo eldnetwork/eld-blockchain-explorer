@@ -50,7 +50,10 @@ function usePinboardGcMetrics(refreshMs = 10000) {
         const code = data?.result?.response?.code;
 
         if (code !== 0) {
-          const log = data?.result?.response?.log || data?.result?.response?.info || 'GC metrics query failed';
+          const log =
+            data?.result?.response?.log ||
+            data?.result?.response?.info ||
+            'GC metrics query failed';
           if (!cancelled) setError(log);
           return;
         }
@@ -86,4 +89,3 @@ function usePinboardGcMetrics(refreshMs = 10000) {
 }
 
 export default usePinboardGcMetrics;
-

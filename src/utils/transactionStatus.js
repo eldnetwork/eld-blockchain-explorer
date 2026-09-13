@@ -18,7 +18,7 @@ export function deliverTxLogFromAbciResult(abciResult) {
     abciResult.log,
     abciResult.info,
     abciResult.raw_log,
-    abciResult.message
+    abciResult.message,
   );
 }
 
@@ -36,7 +36,7 @@ export function deliverTxFailureMessage(tx) {
     tx.error,
     tx.message,
     tx.info,
-    tx.raw_log
+    tx.raw_log,
   );
 }
 

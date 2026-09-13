@@ -1,4 +1,3 @@
-import React from 'react';
 import './NewDocsPage.css';
 
 const docGroups = [
@@ -49,13 +48,23 @@ function NewDocsPage() {
         </div>
 
         <nav className="new-docs__nav" aria-label="New docs navigation">
-          <a href="/" className="new-docs__nav-link">Home</a>
-          <a href="/new_home_explorer" className="new-docs__nav-link">Explorer</a>
-          <a href="/new_docs" className="new-docs__nav-link new-docs__nav-link--active">Docs</a>
-          <a href="#node-ops" className="new-docs__nav-link">My Node</a>
+          <a href="/" className="new-docs__nav-link">
+            Home
+          </a>
+          <a href="/new_home_explorer" className="new-docs__nav-link">
+            Explorer
+          </a>
+          <a href="/new_docs" className="new-docs__nav-link new-docs__nav-link--active">
+            Docs
+          </a>
+          <a href="#node-ops" className="new-docs__nav-link">
+            My Node
+          </a>
         </nav>
 
-        <a href="#community" className="new-docs__follow">X Follow</a>
+        <a href="#community" className="new-docs__follow">
+          X Follow
+        </a>
       </header>
 
       <main className="new-docs__content">
@@ -63,14 +72,20 @@ function NewDocsPage() {
           {docGroups.map((group, groupIndex) => (
             <section key={group.title} className="new-docs__sidebar-group">
               <h2>
-                <span className="new-docs__sidebar-icon">{groupIndex === 0 ? 'S' : groupIndex === 1 ? 'C' : groupIndex === 2 ? 'N' : 'T'}</span>
+                <span className="new-docs__sidebar-icon">
+                  {groupIndex === 0 ? 'S' : groupIndex === 1 ? 'C' : groupIndex === 2 ? 'N' : 'T'}
+                </span>
                 {group.title}
               </h2>
               <div className="new-docs__sidebar-list">
                 {group.items.map((item, itemIndex) => (
                   <a
                     key={item}
-                    href={item === 'Running a Node' ? '#node-ops' : `#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={
+                      item === 'Running a Node'
+                        ? '#node-ops'
+                        : `#${item.toLowerCase().replace(/\s+/g, '-')}`
+                    }
                     className={`new-docs__sidebar-item${groupIndex === 0 && itemIndex === 0 ? ' new-docs__sidebar-item--active' : ''}`}
                   >
                     {item}
@@ -92,18 +107,18 @@ function NewDocsPage() {
             <h1>Introduction to Eld</h1>
             <p>
               Eld is a next-generation decentralized blockchain protocol designed for
-              content-addressed storage and data sharing. The name comes from the Old
-              Nordic word for "fire" - symbolizing the spark that ignites a new era of
-              decentralized infrastructure.
+              content-addressed storage and data sharing. The name comes from the Old Nordic word
+              for &quot;fire&quot; - symbolizing the spark that ignites a new era of decentralized
+              infrastructure.
             </p>
           </section>
 
           <section id="what-is-eld" className="new-docs__section">
             <h2>What is Eld?</h2>
             <p>
-              Eld enables anyone with a compatible device to participate in a global
-              storage network. By contributing disk space, participants earn ELD tokens
-              while helping to secure and maintain the network.
+              Eld enables anyone with a compatible device to participate in a global storage
+              network. By contributing disk space, participants earn ELD tokens while helping to
+              secure and maintain the network.
             </p>
           </section>
 
@@ -129,13 +144,14 @@ function NewDocsPage() {
           <section id="node-ops" className="new-docs__section">
             <h2>Running a Node</h2>
             <p>
-              Node operations are designed to feel lightweight and terminal-native. Install
-              the CLI, initialize the node, allocate storage, and join the testnet with a
-              minimal setup flow.
+              Node operations are designed to feel lightweight and terminal-native. Install the CLI,
+              initialize the node, allocate storage, and join the testnet with a minimal setup flow.
             </p>
             <div className="new-docs__callout">
               <div className="new-docs__callout-label">CLI</div>
-              <pre>$ npm install -g @eld/cli{'\n'}$ eld init --testnet{'\n'}$ eld start</pre>
+              <pre>
+                $ npm install -g @eld/cli{'\n'}$ eld init --testnet{'\n'}$ eld start
+              </pre>
             </div>
           </section>
         </article>

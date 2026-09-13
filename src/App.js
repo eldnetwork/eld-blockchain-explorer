@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link as RouterLink,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import { Box, Flex, Heading, Input, Button, VStack, HStack, Link, Text } from '@chakra-ui/react';
 import TransactionPage from './pages/TransactionPage';
 import AccountPage from './pages/AccountPage';
@@ -29,7 +37,13 @@ import useChainId from './hooks/useChainId';
 import useTestnetAvailability from './hooks/useTestnetAvailability';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { BACKGROUND_COLOR, BOX_BG_COLOR, DARK_TEXT_COLOR, LIGHT_TEXT_COLOR, BORDER_RADIUS } from './constants';
+import {
+  BACKGROUND_COLOR,
+  BOX_BG_COLOR,
+  DARK_TEXT_COLOR,
+  LIGHT_TEXT_COLOR,
+  BORDER_RADIUS,
+} from './constants';
 
 function LegacyStorageValidatorRedirect() {
   const { address } = useParams();
@@ -56,10 +70,14 @@ function HomePage() {
       } else if (inputLength === 42) {
         navigate(`/account/${trimmedInput}`);
       } else {
-        alert('Invalid hex length: Transaction hash (66 chars with 0x) or account ID (42 chars with 0x)');
+        alert(
+          'Invalid hex length: Transaction hash (66 chars with 0x) or account ID (42 chars with 0x)',
+        );
       }
     } else {
-      alert('Invalid input: Enter a block height (numbers), transaction hash (66-char hex with 0x), or account ID (42-char hex with 0x)');
+      alert(
+        'Invalid input: Enter a block height (numbers), transaction hash (66-char hex with 0x), or account ID (42-char hex with 0x)',
+      );
     }
     setSearchInput('');
   };
@@ -78,8 +96,21 @@ function HomePage() {
   // Show error message if testnet is not available - hide everything else
   if (!isTestnetAvailable) {
     return (
-      <Box p={4} w="100%" maxW="100%" overflowX="hidden" display="flex" justifyContent="center" alignItems="center" minH="50vh">
-        <AsciiBox className="explorer-home-shell__testnet-unavailable-panel" p={8} borderRadius={BORDER_RADIUS}>
+      <Box
+        p={4}
+        w="100%"
+        maxW="100%"
+        overflowX="hidden"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minH="50vh"
+      >
+        <AsciiBox
+          className="explorer-home-shell__testnet-unavailable-panel"
+          p={8}
+          borderRadius={BORDER_RADIUS}
+        >
           <Text textAlign="center" fontSize="lg" fontWeight="medium">
             Testnet is not available at the moment
           </Text>
@@ -99,9 +130,13 @@ function HomePage() {
       bg={BACKGROUND_COLOR}
       color={DARK_TEXT_COLOR}
     >
-      
       <VStack className="explorer-home__stack" spacing={4} align="stretch" w="100%" maxW="100%">
-        <Flex className="explorer-home__intro" align="center" justify="center" gap={{ base: 3, md: 5 }}>
+        <Flex
+          className="explorer-home__intro"
+          align="center"
+          justify="center"
+          gap={{ base: 3, md: 5 }}
+        >
           <Box
             as="img"
             className="explorer-home__logo"
@@ -119,8 +154,22 @@ function HomePage() {
               </Text>
             </Box>
 
-            <HStack className="explorer-home__search-row" spacing={2} align="flex-start" w="100%" maxW="100%">
-              <AsciiBox className="explorer-home__search-shell" p={0} bg={BOX_BG_COLOR} borderRadius={BORDER_RADIUS} display="inline-block" w={{ base: 'calc(100% - 48px)', md: 'auto' }} maxW="100%">
+            <HStack
+              className="explorer-home__search-row"
+              spacing={2}
+              align="flex-start"
+              w="100%"
+              maxW="100%"
+            >
+              <AsciiBox
+                className="explorer-home__search-shell"
+                p={0}
+                bg={BOX_BG_COLOR}
+                borderRadius={BORDER_RADIUS}
+                display="inline-block"
+                w={{ base: 'calc(100% - 48px)', md: 'auto' }}
+                maxW="100%"
+              >
                 <Input
                   className="explorer-home__search-input"
                   value={searchInput}
@@ -134,14 +183,22 @@ function HomePage() {
                   border="none"
                   px={2}
                   py={2}
-                  _hover={{ bg: "transparent" }}
-                  _focus={{ bg: "transparent" }}
+                  _hover={{ bg: 'transparent' }}
+                  _focus={{ bg: 'transparent' }}
                   _focusVisible={{
-                    outline: "none",
+                    outline: 'none',
                   }}
                 />
               </AsciiBox>
-              <Button className="explorer-home__search-button" onClick={handleSearch} colorScheme="gray" flexShrink={0} sx={{ borderRadius: `${BORDER_RADIUS} !important` }}><FontAwesomeIcon icon={faMagnifyingGlass} /></Button>
+              <Button
+                className="explorer-home__search-button"
+                onClick={handleSearch}
+                colorScheme="gray"
+                flexShrink={0}
+                sx={{ borderRadius: `${BORDER_RADIUS} !important` }}
+              >
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </Button>
             </HStack>
           </VStack>
         </Flex>
@@ -235,7 +292,7 @@ function ExplorerAppShell() {
         if (isMounted) {
           setNodeVersion(resolvedVersion);
         }
-      } catch (error) {
+      } catch (_error) {
         if (isMounted) {
           setNodeVersion('--');
         }
@@ -268,7 +325,12 @@ function ExplorerAppShell() {
           align="center"
           sx={{ borderRadius: '0 !important' }}
         >
-          <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }} className="explorer-home-shell__brand">
+          <Link
+            as={RouterLink}
+            to="/"
+            _hover={{ textDecoration: 'none' }}
+            className="explorer-home-shell__brand"
+          >
             <Box className="explorer-home-shell__brand-mark">E</Box>
             <HStack className="explorer-home-shell__brand-text" spacing={2} align="center">
               <Text>ELD</Text>
@@ -335,7 +397,10 @@ function ExplorerAppShell() {
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/validators" element={<ValidatorsPage />} />
           <Route path="/capacity-providers" element={<CapacityProvidersPage />} />
-          <Route path="/storage-providers" element={<Navigate to="/capacity-providers" replace />} />
+          <Route
+            path="/storage-providers"
+            element={<Navigate to="/capacity-providers" replace />}
+          />
           <Route path="/pinboard" element={<PinboardPage />} />
           <Route path="/pinboard/post/:wallet/:messageId" element={<PinboardPostPage />} />
           <Route path="/validator/:address" element={<ValidatorPage />} />

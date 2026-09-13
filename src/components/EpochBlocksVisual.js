@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, HStack } from '@chakra-ui/react';
 import AsciiBox from './AsciiBox';
 import useEpochInfo from '../hooks/useEpochInfo';
@@ -18,13 +17,7 @@ function EpochBlocksVisual() {
     <Box>
       <HStack spacing={1} flexWrap="wrap">
         {Array.from({ length: blocksToShow }).map((_, index) => (
-          <AsciiBox
-            key={index}
-            p={1}
-            minW="20px"
-            h="20px"
-            transition="all 0.3s"
-          />
+          <AsciiBox key={index} p={1} minW="20px" h="20px" transition="all 0.3s" />
         ))}
       </HStack>
     </Box>

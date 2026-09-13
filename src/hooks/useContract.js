@@ -21,14 +21,14 @@ function useContract(contractId) {
         const url = `${API_URL}/contract?id=${encodeURIComponent(id)}`;
         console.log('Fetching contract from:', url);
         const response = await fetch(url);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Contract data received:', data);
-        
+
         setContract(data);
       } catch (err) {
         console.error('Error fetching contract:', err);
@@ -45,5 +45,3 @@ function useContract(contractId) {
 }
 
 export default useContract;
-
-

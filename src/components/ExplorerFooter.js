@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Link } from '@chakra-ui/react';
 import './ExplorerFooter.css';
@@ -43,7 +42,12 @@ function ExplorerFooter() {
             {column.items.map((item) => {
               if (item.to) {
                 return (
-                  <Link key={item.label} as={RouterLink} to={item.to} className="explorer-footer__item">
+                  <Link
+                    key={item.label}
+                    as={RouterLink}
+                    to={item.to}
+                    className="explorer-footer__item"
+                  >
                     {item.label}
                   </Link>
                 );
@@ -51,7 +55,12 @@ function ExplorerFooter() {
 
               if (item.href) {
                 return (
-                  <Link key={item.label} href={item.href} isExternal className="explorer-footer__item">
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    isExternal
+                    className="explorer-footer__item"
+                  >
                     {item.label}
                   </Link>
                 );
@@ -75,4 +84,3 @@ function ExplorerFooter() {
 }
 
 export default ExplorerFooter;
-

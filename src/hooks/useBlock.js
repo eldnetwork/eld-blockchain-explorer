@@ -13,7 +13,7 @@ function useBlock(height) {
       try {
         const response = await fetch(`${RPC_URL}/block?height=${height}`);
         const data = await response.json();
-        console.log({ data })
+        console.log({ data });
         if (data.result && data.result.block) {
           setBlock(data.result.block);
         } else {

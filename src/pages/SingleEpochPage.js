@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Box, Heading, Text, HStack, Link, List, ListItem, VStack } from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -26,7 +25,11 @@ function shortenAddress(address) {
 
 function CapacityProviderList({ providers, navigate, emptyLabel }) {
   if (!providers?.length) {
-    return <Box p={4} color="gray.500">{emptyLabel}</Box>;
+    return (
+      <Box p={4} color="gray.500">
+        {emptyLabel}
+      </Box>
+    );
   }
 
   return (
@@ -52,9 +55,17 @@ function CapacityProviderList({ providers, navigate, emptyLabel }) {
                   Stake: {formatELDAmount(provider.stake)}
                 </Text>
               </HStack>
-              <HStack spacing={6} flexWrap="wrap" fontSize="xs" color="var(--lh-muted, rgba(243, 243, 240, 0.68))">
+              <HStack
+                spacing={6}
+                flexWrap="wrap"
+                fontSize="xs"
+                color="var(--lh-muted, rgba(243, 243, 240, 0.68))"
+              >
                 <Text>Storage: {formatBytes(provider.storage_capacity)}</Text>
-                <Text>Chunks: {provider.chunk_count?.toLocaleString?.() ?? provider.chunk_count ?? 'N/A'}</Text>
+                <Text>
+                  Chunks:{' '}
+                  {provider.chunk_count?.toLocaleString?.() ?? provider.chunk_count ?? 'N/A'}
+                </Text>
                 <Text>Registered block: {provider.registered_block ?? 'N/A'}</Text>
               </HStack>
               {provider.merkle_root && (
@@ -72,7 +83,11 @@ function CapacityProviderList({ providers, navigate, emptyLabel }) {
 
 function ValidatorList({ validators, navigate }) {
   if (!validators?.length) {
-    return <Box p={4} color="gray.500">No active validators</Box>;
+    return (
+      <Box p={4} color="gray.500">
+        No active validators
+      </Box>
+    );
   }
 
   return (
@@ -120,7 +135,10 @@ function SingleEpochPage() {
   };
 
   if (loading) return <Box className="explorer-record__state">Loading epoch...</Box>;
-  if (error) return <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>;
+  if (error)
+    return (
+      <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>
+    );
   if (!epoch) return <Box className="explorer-record__state">No epoch found</Box>;
 
   const storageValidator = epoch.storage_validator || {};
@@ -129,7 +147,9 @@ function SingleEpochPage() {
   return (
     <Box className="explorer-record">
       <HStack className="explorer-record__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-record__crumb-link">← Explorer</Link>
+        <Link as={RouterLink} to="/" className="explorer-record__crumb-link">
+          ← Explorer
+        </Link>
         <Text className="explorer-record__crumb-sep">Epoch</Text>
         <Text className="explorer-record__crumb-current">{epochLabel}</Text>
       </HStack>
@@ -145,14 +165,22 @@ function SingleEpochPage() {
       </Box>
 
       <section className="explorer-record__section">
-        <h2><span /> BASIC INFORMATION</h2>
+        <h2>
+          <span /> BASIC INFORMATION
+        </h2>
         <div className="explorer-record__kv-grid">
-          <div><span>EPOCH</span><strong>{epoch.epoch ?? 'N/A'}</strong></div>
+          <div>
+            <span>EPOCH</span>
+            <strong>{epoch.epoch ?? 'N/A'}</strong>
+          </div>
           <div>
             <span>START BLOCK</span>
             <strong>
               {epoch.start_block != null ? (
-                <Link onClick={() => navigate(`/block/${epoch.start_block}`)} className="explorer-record__tx-hash">
+                <Link
+                  onClick={() => navigate(`/block/${epoch.start_block}`)}
+                  className="explorer-record__tx-hash"
+                >
                   {epoch.start_block}
                 </Link>
               ) : (
@@ -163,9 +191,7 @@ function SingleEpochPage() {
           <div>
             <span>TIMESTAMP</span>
             <strong>
-              {epoch.timestamp != null
-                ? new Date(epoch.timestamp * 1000).toLocaleString()
-                : 'N/A'}
+              {epoch.timestamp != null ? new Date(epoch.timestamp * 1000).toLocaleString() : 'N/A'}
             </strong>
           </div>
           <div>
@@ -185,7 +211,9 @@ function SingleEpochPage() {
 
       {storageValidator.validator_address && (
         <section className="explorer-record__section">
-          <h2><span /> STORAGE VALIDATOR</h2>
+          <h2>
+            <span /> STORAGE VALIDATOR
+          </h2>
           <div className="explorer-record__kv-grid">
             <div>
               <span>VALIDATOR ADDRESS</span>
@@ -198,7 +226,10 @@ function SingleEpochPage() {
                 </Link>
               </strong>
             </div>
-            <div><span>EPOCH</span><strong>{storageValidator.epoch ?? 'N/A'}</strong></div>
+            <div>
+              <span>EPOCH</span>
+              <strong>{storageValidator.epoch ?? 'N/A'}</strong>
+            </div>
             <div>
               <span>CHALLENGED PROVIDERS</span>
               <strong>{storageValidator.challenged_providers?.length ?? 0}</strong>
@@ -210,7 +241,13 @@ function SingleEpochPage() {
           </div>
           {storageValidator.challenged_providers?.length > 0 && (
             <Box px={4} pb={4}>
-              <Text fontSize="xs" color="var(--lh-faint)" mb={2} textTransform="uppercase" letterSpacing="0.2em">
+              <Text
+                fontSize="xs"
+                color="var(--lh-faint)"
+                mb={2}
+                textTransform="uppercase"
+                letterSpacing="0.2em"
+              >
                 Challenged provider addresses
               </Text>
               <VStack align="stretch" spacing={1}>
@@ -230,7 +267,13 @@ function SingleEpochPage() {
           )}
           {storageValidator.subscribed_topics?.length > 0 && (
             <Box px={4} pb={4}>
-              <Text fontSize="xs" color="var(--lh-faint)" mb={2} textTransform="uppercase" letterSpacing="0.2em">
+              <Text
+                fontSize="xs"
+                color="var(--lh-faint)"
+                mb={2}
+                textTransform="uppercase"
+                letterSpacing="0.2em"
+              >
                 Subscribed topics
               </Text>
               <VStack align="stretch" spacing={1}>
@@ -246,14 +289,18 @@ function SingleEpochPage() {
       )}
 
       <section className="explorer-record__section">
-        <h2><span /> ACTIVE VALIDATORS ({epoch.active_validators?.length ?? 0})</h2>
+        <h2>
+          <span /> ACTIVE VALIDATORS ({epoch.active_validators?.length ?? 0})
+        </h2>
         <Box p={4} pt={0}>
           <ValidatorList validators={epoch.active_validators} navigate={navigate} />
         </Box>
       </section>
 
       <section className="explorer-record__section">
-        <h2><span /> ACTIVE CAPACITY PROVIDERS ({epoch.active_capacity_providers?.length ?? 0})</h2>
+        <h2>
+          <span /> ACTIVE CAPACITY PROVIDERS ({epoch.active_capacity_providers?.length ?? 0})
+        </h2>
         <Box p={4} pt={0}>
           <CapacityProviderList
             providers={epoch.active_capacity_providers}
@@ -264,7 +311,10 @@ function SingleEpochPage() {
       </section>
 
       <section className="explorer-record__section">
-        <h2><span /> CHALLENGED CAPACITY PROVIDERS ({epoch.challenged_capacity_providers?.length ?? 0})</h2>
+        <h2>
+          <span /> CHALLENGED CAPACITY PROVIDERS ({epoch.challenged_capacity_providers?.length ?? 0}
+          )
+        </h2>
         <Box p={4} pt={0}>
           <CapacityProviderList
             providers={epoch.challenged_capacity_providers}

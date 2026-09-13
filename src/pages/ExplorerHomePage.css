@@ -19,8 +19,7 @@
   --lh-panel-tint: rgba(255, 255, 255, 0.01);
   --lh-ghost-primary: #1f242b;
   --lh-ghost-secondary: #13171c;
-  background:
-    var(--lh-shell-gradient) !important;
+  background: var(--lh-shell-gradient) !important;
 }
 
 .explorer-home-shell--light {
@@ -153,7 +152,7 @@
 }
 
 .explorer-home-shell__nav-link--active::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -456,13 +455,15 @@
 .explorer-home__content-message-id {
   color: var(--lh-accent) !important;
   font-weight: 700;
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.86rem !important;
 }
 
 .explorer-home__content-signer {
   color: var(--lh-muted) !important;
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.78rem !important;
 }
 

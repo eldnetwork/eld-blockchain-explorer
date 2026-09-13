@@ -75,11 +75,12 @@ const theme = extendTheme({
         color: '#f3f3f0',
         minHeight: '100%',
       },
-      '.chakra-modal__content, .chakra-popover__content, .chakra-menu__menu-list, .chakra-menu__menuitem, .chakra-tooltip': {
-        background: '#111111 !important',
-        color: '#f3f3f0 !important',
-        borderColor: 'rgba(255, 255, 255, 0.12) !important',
-      },
+      '.chakra-modal__content, .chakra-popover__content, .chakra-menu__menu-list, .chakra-menu__menuitem, .chakra-tooltip':
+        {
+          background: '#111111 !important',
+          color: '#f3f3f0 !important',
+          borderColor: 'rgba(255, 255, 255, 0.12) !important',
+        },
       '.chakra-modal__overlay': {
         background: 'rgba(0, 0, 0, 0.72) !important',
       },
@@ -88,4 +89,3 @@ const theme = extendTheme({
 });
 
 export default theme;
-

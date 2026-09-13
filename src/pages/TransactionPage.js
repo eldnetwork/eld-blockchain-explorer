@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import useTransaction from '../hooks/useTransaction';
 import useBlockTransaction from '../hooks/useBlockTransaction';
 import useEvents from '../hooks/useEvents';
 import useContract from '../hooks/useContract';
-import { Box, Heading, Text, VStack, Link, List, ListItem } from '@chakra-ui/react';
+import { Box, Heading, Text, Link, List, ListItem } from '@chakra-ui/react';
 import AsciiBox from '../components/AsciiBox';
 import { formatELDAmount } from '../utils/formatAmount';
 import { normalizeAccountAddress } from '../utils/accountAddress';
-import { resolveTransactionExecutionStatus, deliverTxFailureMessage } from '../utils/transactionStatus';
+import {
+  resolveTransactionExecutionStatus,
+  deliverTxFailureMessage,
+} from '../utils/transactionStatus';
 import { formatEventForDisplay } from '../utils/eventDisplay';
 import { formatJsonForDisplay } from '../utils/formatJsonForDisplay';
 import './TransactionPage.css';
@@ -26,13 +29,16 @@ function TransactionPage() {
   const blockHeight = fromBlockRoute ? blockHeightParam : null;
   const blockIndex = fromBlockRoute ? parseInt(blockIndexParam, 10) : null;
 
-  const { transaction: blockTx, loading: blockLoading, error: blockError } = useBlockTransaction(
-    blockHeight,
-    blockIndex
-  );
-  const { transaction: indexerTx, loading: indexerLoading, error: indexerError } = useTransaction(
-    fromBlockRoute ? null : transactionId
-  );
+  const {
+    transaction: blockTx,
+    loading: blockLoading,
+    error: blockError,
+  } = useBlockTransaction(blockHeight, blockIndex);
+  const {
+    transaction: indexerTx,
+    loading: indexerLoading,
+    error: indexerError,
+  } = useTransaction(fromBlockRoute ? null : transactionId);
   const transaction = fromBlockRoute ? blockTx : indexerTx;
   const loading = fromBlockRoute ? blockLoading : indexerLoading;
   const error = fromBlockRoute ? blockError : indexerError;
@@ -49,21 +55,21 @@ function TransactionPage() {
   // Extract contract_id from AddContract transaction
   useEffect(() => {
     if (!transaction) return;
-    
+
     const tx = transaction.tx || {};
     const payload = tx.payload || {};
     const txType = payload.type || 'Unknown';
-    
+
     if (txType === 'AddContract') {
       // Check payload first
       let id = payload.contract_id || payload.id;
-      
+
       // If not in payload, check events for contract_id
       if (!id && events && events.length > 0) {
-        const contractEvent = events.find(e => e.contract_id || e.id);
+        const contractEvent = events.find((e) => e.contract_id || e.id);
         id = contractEvent?.contract_id || contractEvent?.id;
       }
-      
+
       setContractId(id);
     } else {
       setContractId(null);
@@ -81,7 +87,8 @@ function TransactionPage() {
   const wasmBytecode = isAddContract ? payload.wasm_byte_code : null;
 
   if (loading) return <Box className="explorer-tx__state">Loading transaction...</Box>;
-  if (error) return <Box className="explorer-tx__state explorer-tx__state--error">Error: {error}</Box>;
+  if (error)
+    return <Box className="explorer-tx__state explorer-tx__state--error">Error: {error}</Box>;
   if (!transaction) return <Box className="explorer-tx__state">No transaction found</Box>;
 
   const isTransfer = txType === 'Transfer';
@@ -124,12 +131,17 @@ function TransactionPage() {
       ? 'This transaction failed on chain, but no deliver log was included in the API response.'
       : null);
 
-  const payloadEntries = Object.entries(payload).filter(([key]) => key !== 'type' && key !== 'sender' && (!isAddContract || key !== 'wasm_byte_code'));
+  const payloadEntries = Object.entries(payload).filter(
+    ([key]) => key !== 'type' && key !== 'sender' && (!isAddContract || key !== 'wasm_byte_code'),
+  );
   const renderAccountLink = (rawValue, className) => {
     const value = String(rawValue);
 
     return (
-      <Link onClick={() => navigate(`/account/${normalizeAccountAddress(value) || value}`)} className={className || 'explorer-tx__sender-link'}>
+      <Link
+        onClick={() => navigate(`/account/${normalizeAccountAddress(value) || value}`)}
+        className={className || 'explorer-tx__sender-link'}
+      >
         {value}
       </Link>
     );
@@ -150,55 +162,108 @@ function TransactionPage() {
       {executionStatus.failed && failureCalloutText && (
         <AsciiBox mb={5} p={4} className="explorer-tx__failure-callout">
           <Text className="explorer-tx__failure-callout-label">Failure reason (DeliverTx)</Text>
-          <Text className="explorer-tx__mono explorer-tx__pre explorer-tx__failure-callout-body">{failureCalloutText}</Text>
+          <Text className="explorer-tx__mono explorer-tx__pre explorer-tx__failure-callout-body">
+            {failureCalloutText}
+          </Text>
         </AsciiBox>
       )}
 
       <section className="explorer-tx__section">
-        <h2><span /> GENERAL INFORMATION</h2>
+        <h2>
+          <span /> GENERAL INFORMATION
+        </h2>
         <div className="explorer-tx__kv-grid">
-          <div><span>TRANSACTION ID</span><strong className="explorer-tx__mono">{txId}</strong></div>
+          <div>
+            <span>TRANSACTION ID</span>
+            <strong className="explorer-tx__mono">{txId}</strong>
+          </div>
           <div>
             <span>STATUS</span>
             <strong>
-              <em className={`explorer-tx__status ${statusClass}`}>
-                ● {statusLabel}
-              </em>
+              <em className={`explorer-tx__status ${statusClass}`}>● {statusLabel}</em>
             </strong>
           </div>
           <div>
             <span>BLOCK HEIGHT</span>
             <strong>
-              <Link onClick={() => navigate(`/block/${transaction.block_height}`)} className="explorer-tx__block-link">
+              <Link
+                onClick={() => navigate(`/block/${transaction.block_height}`)}
+                className="explorer-tx__block-link"
+              >
                 {transaction.block_height}
               </Link>
             </strong>
           </div>
-          <div><span>BLOCK INDEX</span><strong>{transaction.block_index}</strong></div>
-          <div><span>TIMESTAMP</span><strong>{timestampDisplay}</strong></div>
-          {transaction.gas_used != null && <div><span>GAS USED</span><strong>{transaction.gas_used}</strong></div>}
+          <div>
+            <span>BLOCK INDEX</span>
+            <strong>{transaction.block_index}</strong>
+          </div>
+          <div>
+            <span>TIMESTAMP</span>
+            <strong>{timestampDisplay}</strong>
+          </div>
+          {transaction.gas_used != null && (
+            <div>
+              <span>GAS USED</span>
+              <strong>{transaction.gas_used}</strong>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="explorer-tx__section">
-        <h2><span /> TRANSACTION DATA</h2>
+        <h2>
+          <span /> TRANSACTION DATA
+        </h2>
         <div className="explorer-tx__kv-grid">
-          <div><span>TYPE</span><strong>{txType}</strong></div>
-          {tx.nonce !== undefined && <div><span>NONCE</span><strong>{tx.nonce}</strong></div>}
-          {tx.fee !== undefined && <div><span>FEE</span><strong className="explorer-tx__mono">{formatELDAmount(tx.fee)}</strong></div>}
-          {tx.sig && <div><span>SIGNATURE</span><strong className="explorer-tx__mono">{tx.sig}</strong></div>}
-          {tx.public_key && <div><span>PUBLIC KEY</span><strong className="explorer-tx__mono">{tx.public_key}</strong></div>}
+          <div>
+            <span>TYPE</span>
+            <strong>{txType}</strong>
+          </div>
+          {tx.nonce !== undefined && (
+            <div>
+              <span>NONCE</span>
+              <strong>{tx.nonce}</strong>
+            </div>
+          )}
+          {tx.fee !== undefined && (
+            <div>
+              <span>FEE</span>
+              <strong className="explorer-tx__mono">{formatELDAmount(tx.fee)}</strong>
+            </div>
+          )}
+          {tx.sig && (
+            <div>
+              <span>SIGNATURE</span>
+              <strong className="explorer-tx__mono">{tx.sig}</strong>
+            </div>
+          )}
+          {tx.public_key && (
+            <div>
+              <span>PUBLIC KEY</span>
+              <strong className="explorer-tx__mono">{tx.public_key}</strong>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="explorer-tx__section">
-        <h2><span /> PAYLOAD DETAILS</h2>
+        <h2>
+          <span /> PAYLOAD DETAILS
+        </h2>
         <div className="explorer-tx__kv-grid">
           {payload.sender && (
             <div>
               <span>SENDER</span>
               <strong>
-                <Link onClick={() => navigate(`/account/${normalizeAccountAddress(payload.sender) || payload.sender}`)} className="explorer-tx__sender-link">
+                <Link
+                  onClick={() =>
+                    navigate(
+                      `/account/${normalizeAccountAddress(payload.sender) || payload.sender}`,
+                    )
+                  }
+                  className="explorer-tx__sender-link"
+                >
                   {payload.sender}
                 </Link>
               </strong>
@@ -210,7 +275,12 @@ function TransactionPage() {
                 <div key={key}>
                   <span>RECIPIENT</span>
                   <strong>
-                    <Link onClick={() => navigate(`/account/${normalizeAccountAddress(String(value)) || value}`)} className="explorer-tx__mono">
+                    <Link
+                      onClick={() =>
+                        navigate(`/account/${normalizeAccountAddress(String(value)) || value}`)
+                      }
+                      className="explorer-tx__mono"
+                    >
                       {String(value)}
                     </Link>
                   </strong>
@@ -219,13 +289,32 @@ function TransactionPage() {
             }
 
             const shouldFormatAmount = key === 'amount';
-            const isAddressField = /(address|owner|signer|sender|recipient|account)/i.test(String(key));
-            const valueAsString = typeof value === 'object' && value !== null ? formatJsonForDisplay(value) : shouldFormatAmount ? formatELDAmount(value) : String(value);
+            const isAddressField = /(address|owner|signer|sender|recipient|account)/i.test(
+              String(key),
+            );
+            const valueAsString =
+              typeof value === 'object' && value !== null
+                ? formatJsonForDisplay(value)
+                : shouldFormatAmount
+                  ? formatELDAmount(value)
+                  : String(value);
             return (
               <div key={key}>
                 <span>{String(key).replace(/_/g, ' ').toUpperCase()}</span>
-                <strong className={typeof value === 'object' ? 'explorer-tx__mono explorer-tx__pre' : shouldFormatAmount ? 'explorer-tx__mono' : undefined}>
-                  {typeof value === 'object' && value !== null ? valueAsString : isAddressField ? renderAccountLink(valueAsString) : valueAsString}
+                <strong
+                  className={
+                    typeof value === 'object'
+                      ? 'explorer-tx__mono explorer-tx__pre'
+                      : shouldFormatAmount
+                        ? 'explorer-tx__mono'
+                        : undefined
+                  }
+                >
+                  {typeof value === 'object' && value !== null
+                    ? valueAsString
+                    : isAddressField
+                      ? renderAccountLink(valueAsString)
+                      : valueAsString}
                 </strong>
               </div>
             );
@@ -234,7 +323,9 @@ function TransactionPage() {
       </section>
 
       <section className="explorer-tx__section">
-        <h2><span /> EVENTS</h2>
+        <h2>
+          <span /> EVENTS
+        </h2>
         {eventsLoadingResolved ? (
           <Text className="explorer-tx__muted">Loading events...</Text>
         ) : eventsErrorResolved ? (
@@ -246,7 +337,9 @@ function TransactionPage() {
             {events.map((event, index) => (
               <ListItem key={index}>
                 <AsciiBox p={2} className="explorer-tx__event-item">
-                  <Text className="explorer-tx__mono explorer-tx__pre">{JSON.stringify(formatEventForDisplay(event), null, 2)}</Text>
+                  <Text className="explorer-tx__mono explorer-tx__pre">
+                    {JSON.stringify(formatEventForDisplay(event), null, 2)}
+                  </Text>
                 </AsciiBox>
               </ListItem>
             ))}
@@ -256,9 +349,16 @@ function TransactionPage() {
 
       {isAddContract && (wasmBytecode || contractId) && (
         <section className="explorer-tx__section">
-          <h2><span /> CONTRACT CODE</h2>
+          <h2>
+            <span /> CONTRACT CODE
+          </h2>
           <div className="explorer-tx__kv-grid">
-            {contractId && <div><span>CONTRACT ID</span><strong className="explorer-tx__mono">{contractId}</strong></div>}
+            {contractId && (
+              <div>
+                <span>CONTRACT ID</span>
+                <strong className="explorer-tx__mono">{contractId}</strong>
+              </div>
+            )}
             {wasmBytecode && (
               <div>
                 <span>WASM BYTECODE</span>
@@ -267,13 +367,27 @@ function TransactionPage() {
                 </strong>
               </div>
             )}
-            {!wasmBytecode && contractLoading && <div><span>STATUS</span><strong>Loading contract code...</strong></div>}
-            {!wasmBytecode && contractError && <div><span>ERROR</span><strong>{contractError}</strong></div>}
-            {!wasmBytecode && contract && <div><span>WASM BYTECODE</span><strong className="explorer-tx__mono explorer-tx__pre">{contract.code}</strong></div>}
+            {!wasmBytecode && contractLoading && (
+              <div>
+                <span>STATUS</span>
+                <strong>Loading contract code...</strong>
+              </div>
+            )}
+            {!wasmBytecode && contractError && (
+              <div>
+                <span>ERROR</span>
+                <strong>{contractError}</strong>
+              </div>
+            )}
+            {!wasmBytecode && contract && (
+              <div>
+                <span>WASM BYTECODE</span>
+                <strong className="explorer-tx__mono explorer-tx__pre">{contract.code}</strong>
+              </div>
+            )}
           </div>
         </section>
       )}
-
     </Box>
   );
 }

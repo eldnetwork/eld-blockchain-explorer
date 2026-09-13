@@ -16,7 +16,7 @@ export function formatELDAmount(amount) {
   } else {
     numAmount = Number(amount);
   }
-  
+
   if (isNaN(numAmount) || !isFinite(numAmount)) {
     return '$ELD 0.000000';
   }
@@ -48,7 +48,7 @@ export function formatAccountBalance(amount) {
   } else {
     numAmount = Number(amount);
   }
-  
+
   if (isNaN(numAmount) || !isFinite(numAmount)) {
     return '$ELD 0.00000000';
   }
@@ -58,4 +58,3 @@ export function formatAccountBalance(amount) {
 
   return `$ELD ${formatted}`;
 }
-

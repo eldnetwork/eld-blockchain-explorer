@@ -25,17 +25,17 @@ function useTransaction(hash) {
         const url = `${API_URL}/transaction?id=${encodeURIComponent(hash)}`;
         console.log('Fetching transaction from:', url);
         const response = await fetch(url);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Transaction data received:', data);
-        
+
         // Handle different response structures
         const transaction = data.transaction || data.data || data;
-        
+
         if (transaction && (transaction.id || transaction.tx)) {
           let merged = transaction;
           const status = String(transaction.status || '').toLowerCase();
@@ -47,9 +47,7 @@ function useTransaction(hash) {
             transaction.block_index != null
           ) {
             const results = await fetchBlockTxResults(Number(transaction.block_height));
-            const rpcLog = deliverTxLogFromAbciResult(
-              results?.[Number(transaction.block_index)]
-            );
+            const rpcLog = deliverTxLogFromAbciResult(results?.[Number(transaction.block_index)]);
             if (rpcLog) {
               merged = { ...transaction, abci_log: rpcLog };
             }

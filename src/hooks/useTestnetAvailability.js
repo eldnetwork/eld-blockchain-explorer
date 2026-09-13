@@ -36,4 +36,3 @@ function useTestnetAvailability() {
 }
 
 export default useTestnetAvailability;
-

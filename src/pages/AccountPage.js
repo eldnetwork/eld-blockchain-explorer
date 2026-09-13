@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import useAccount from '../hooks/useAccount';
 import useTransactionsBySender from '../hooks/useTransactionsBySender';
@@ -20,7 +19,7 @@ function AccountPage() {
   // Helper to convert byte array to hex string
   const bytesToHex = (bytes) => {
     if (!Array.isArray(bytes)) return 'N/A';
-    return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+    return bytes.map((b) => b.toString(16).padStart(2, '0')).join('');
   };
 
   // Helper to format datetime
@@ -71,15 +70,21 @@ function AccountPage() {
   return (
     <Box className="explorer-page">
       <HStack className="explorer-page__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">← Explorer</Link>
+        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">
+          ← Explorer
+        </Link>
         <Text className="explorer-page__crumb-sep">Account</Text>
         <Text className="explorer-page__crumb-current">{address}</Text>
       </HStack>
 
-      <Heading className="explorer-page__title" as="h1">ACCOUNT DETAILS</Heading>
+      <Heading className="explorer-page__title" as="h1">
+        ACCOUNT DETAILS
+      </Heading>
 
       <section className="explorer-page__section">
-        <h2><span /> GENERAL INFORMATION</h2>
+        <h2>
+          <span /> GENERAL INFORMATION
+        </h2>
         <div className="explorer-page__kv-grid">
           <div>
             <span>ADDRESS</span>
@@ -107,7 +112,14 @@ function AccountPage() {
             <div>
               <span>OWNER</span>
               <strong className="explorer-page__mono">
-                <Link onClick={() => navigate(`/account/${normalizeAccountAddress(metadata.owner) || metadata.owner}`)} className="explorer-page__clickable explorer-page__mono">
+                <Link
+                  onClick={() =>
+                    navigate(
+                      `/account/${normalizeAccountAddress(metadata.owner) || metadata.owner}`,
+                    )
+                  }
+                  className="explorer-page__clickable explorer-page__mono"
+                >
                   {metadata.owner}
                 </Link>
               </strong>
@@ -118,7 +130,9 @@ function AccountPage() {
 
       {mutable.hash && (
         <section className="explorer-page__section">
-          <h2><span /> HASH</h2>
+          <h2>
+            <span /> HASH
+          </h2>
           <div className="explorer-page__kv-grid">
             <div>
               <span>HASH</span>
@@ -130,7 +144,9 @@ function AccountPage() {
 
       {mutable.latest_hash && (
         <section className="explorer-page__section">
-          <h2><span /> LATEST HASH</h2>
+          <h2>
+            <span /> LATEST HASH
+          </h2>
           <div className="explorer-page__kv-grid">
             <div>
               <span>LATEST HASH</span>
@@ -141,12 +157,16 @@ function AccountPage() {
       )}
 
       <section className="explorer-page__section">
-        <h2><span /> TRANSACTIONS</h2>
+        <h2>
+          <span /> TRANSACTIONS
+        </h2>
         <Box p={4}>
           {txLoading ? (
             <Text className="explorer-page__muted">Loading transactions...</Text>
           ) : txError ? (
-            <Text className="explorer-page__state--error">Error loading transactions: {txError}</Text>
+            <Text className="explorer-page__state--error">
+              Error loading transactions: {txError}
+            </Text>
           ) : transactions.length === 0 ? (
             <Text className="explorer-page__muted">No transactions found</Text>
           ) : (
@@ -154,13 +174,14 @@ function AccountPage() {
               {transactions.map((tx) => {
                 const txHash = tx.id || tx.hash || tx.tx_hash || 'unknown';
                 const timestamp = tx.timestamp || tx.time || tx.created_at || 'N/A';
-                const txType = tx.tx?.payload?.type || 
-                              tx.type || 
-                              tx.transaction_type || 
-                              tx.payload?.type || 
-                              tx.payload_type ||
-                              'Unknown';
-                
+                const txType =
+                  tx.tx?.payload?.type ||
+                  tx.type ||
+                  tx.transaction_type ||
+                  tx.payload?.type ||
+                  tx.payload_type ||
+                  'Unknown';
+
                 return (
                   <ListItem
                     key={txHash}
@@ -173,21 +194,29 @@ function AccountPage() {
                       <VStack spacing={2} align="stretch" display={{ base: 'flex', md: 'none' }}>
                         <HStack spacing={4} w="full" minW="0">
                           <FontAwesomeIcon icon={faReceipt} flexShrink={0} />
-                          <Text 
-                            flex="1"
-                            minW="0"
-                            isTruncated
-                            title={txHash}
-                          >
-                            {txHash.length > 20 ? `${txHash.slice(0, 10)}...${txHash.slice(-10)}` : txHash}
+                          <Text flex="1" minW="0" isTruncated title={txHash}>
+                            {txHash.length > 20
+                              ? `${txHash.slice(0, 10)}...${txHash.slice(-10)}`
+                              : txHash}
                           </Text>
-                          <HStack spacing={1} flexShrink={0} minW="0" maxW={{ base: "150px", md: "none" }}>
+                          <HStack
+                            spacing={1}
+                            flexShrink={0}
+                            minW="0"
+                            maxW={{ base: '150px', md: 'none' }}
+                          >
                             <FontAwesomeIcon icon={faClock} color="grey" flexShrink={0} />
-                            <Text className="explorer-page__muted" fontSize="sm" noOfLines={{ base: 1 }}>{formatDateTime(timestamp)}</Text>
+                            <Text
+                              className="explorer-page__muted"
+                              fontSize="sm"
+                              noOfLines={{ base: 1 }}
+                            >
+                              {formatDateTime(timestamp)}
+                            </Text>
                           </HStack>
                         </HStack>
-                        <Text 
-                          fontSize="sm" 
+                        <Text
+                          fontSize="sm"
                           className="explorer-page__muted"
                           fontWeight="medium"
                           isTruncated
@@ -196,25 +225,38 @@ function AccountPage() {
                           {txType}
                         </Text>
                       </VStack>
-                      <HStack spacing={4} w="full" justify="space-between" minW="0" display={{ base: 'none', md: 'flex' }}>
+                      <HStack
+                        spacing={4}
+                        w="full"
+                        justify="space-between"
+                        minW="0"
+                        display={{ base: 'none', md: 'flex' }}
+                      >
                         <HStack spacing={4} flex="1" minW="0">
                           <FontAwesomeIcon icon={faReceipt} flexShrink={0} />
-                          <Text 
+                          <Text flex="0 0 auto" minW="0" maxW="200px" isTruncated title={txHash}>
+                            {txHash.length > 20
+                              ? `${txHash.slice(0, 10)}...${txHash.slice(-10)}`
+                              : txHash}
+                          </Text>
+                          <HStack
+                            spacing={1}
                             flex="0 0 auto"
                             minW="0"
-                            maxW="200px"
-                            isTruncated
-                            title={txHash}
+                            maxW={{ base: '150px', md: 'none' }}
                           >
-                            {txHash.length > 20 ? `${txHash.slice(0, 10)}...${txHash.slice(-10)}` : txHash}
-                          </Text>
-                          <HStack spacing={1} flex="0 0 auto" minW="0" maxW={{ base: "150px", md: "none" }}>
                             <FontAwesomeIcon icon={faClock} color="grey" flexShrink={0} />
-                            <Text className="explorer-page__muted" fontSize="sm" noOfLines={{ base: 1 }}>{formatDateTime(timestamp)}</Text>
+                            <Text
+                              className="explorer-page__muted"
+                              fontSize="sm"
+                              noOfLines={{ base: 1 }}
+                            >
+                              {formatDateTime(timestamp)}
+                            </Text>
                           </HStack>
                         </HStack>
-                        <Text 
-                          fontSize="sm" 
+                        <Text
+                          fontSize="sm"
                           className="explorer-page__muted"
                           fontWeight="medium"
                           flex="0 0 auto"

@@ -24,7 +24,7 @@ function useEvents(txid) {
         }
 
         const data = await response.json();
-        
+
         // Handle different response formats
         if (Array.isArray(data)) {
           setEvents(data);
@@ -51,4 +51,3 @@ function useEvents(txid) {
 }
 
 export default useEvents;
-

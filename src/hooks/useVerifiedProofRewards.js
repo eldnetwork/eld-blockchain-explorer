@@ -34,7 +34,10 @@ function useVerifiedProofRewards(normalizedAddress) {
 
     (async () => {
       try {
-        const statusRes = await fetch(`${RPC_URL}/status`, { signal: ac.signal, credentials: 'omit' });
+        const statusRes = await fetch(`${RPC_URL}/status`, {
+          signal: ac.signal,
+          credentials: 'omit',
+        });
         if (!statusRes.ok) {
           throw new Error(`RPC status HTTP ${statusRes.status}`);
         }
@@ -47,7 +50,7 @@ function useVerifiedProofRewards(normalizedAddress) {
 
         const params = new URLSearchParams({ from_height: '0', to_height: String(toHeight) });
         const rewardsUrl = `${API_URL}/v1/capacity/verified-proof-rewards/${encodeURIComponent(
-          normalizedAddress
+          normalizedAddress,
         )}?${params.toString()}`;
 
         const rewardsRes = await fetch(rewardsUrl, { signal: ac.signal, credentials: 'omit' });

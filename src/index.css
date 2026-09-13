@@ -63,7 +63,8 @@ body {
   color: #f3f3f0;
 }
 
-html, #root {
+html,
+#root {
   min-height: 100%;
   background: #070707;
   color: #f3f3f0;
@@ -73,10 +74,25 @@ code {
   font-family: 'IoskeleyMono', monospace;
 }
 
-input, textarea, select, button {
+input,
+textarea,
+select,
+button {
   font-family: 'IoskeleyMono', monospace;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+a,
+li,
+td,
+th {
   font-family: 'IoskeleyMono', monospace;
 }

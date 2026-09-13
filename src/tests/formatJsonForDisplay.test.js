@@ -2,17 +2,18 @@ import { formatJsonForDisplay } from '../utils/formatJsonForDisplay';
 
 describe('formatJsonForDisplay', () => {
   test('keeps small primitive arrays on one line', () => {
-    expect(formatJsonForDisplay({ values: [1, 2, 3] })).toBe(
-      '{\n  "values": [1, 2, 3]\n}'
-    );
+    expect(formatJsonForDisplay({ values: [1, 2, 3] })).toBe('{\n  "values": [1, 2, 3]\n}');
   });
 
   test('groups long primitive arrays across multiple lines', () => {
     const chunkData = Array.from({ length: 10 }, (_, index) => index);
-    const formatted = formatJsonForDisplay({
-      chunk_index: 44408,
-      chunk_data: chunkData,
-    }, { itemsPerLine: 4 });
+    const formatted = formatJsonForDisplay(
+      {
+        chunk_index: 44408,
+        chunk_data: chunkData,
+      },
+      { itemsPerLine: 4 },
+    );
 
     expect(formatted).toContain('"chunk_index": 44408');
     expect(formatted).toContain('"chunk_data": [');

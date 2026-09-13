@@ -1,16 +1,15 @@
-import { decodeTxFromHex, encodeTxToHex, TransferTx, Tx, Payload } from "../tx";
+import { decodeTxFromHex, encodeTxToHex, TransferTx, Tx, Payload } from '../tx';
 import { Buffer } from 'buffer';
-import nacl from 'tweetnacl';
 import { sha256 } from 'js-sha256';
 
 describe('tx json tests', () => {
-    test("address generation from public key", () => {
-        const publicKey = "880a32920a393b8a11d469c0714124f2055e0734618a61b0a3d769131205f707";
-        // Decode hex string to binary (Buffer or Uint8Array)
-        const publicKeyBytes = Buffer.from(publicKey, 'hex');
-        const digest = sha256.array(publicKeyBytes); // SHA-256 digest (32 bytes)
-        console.log({digest});
-        /*
+  test('address generation from public key', () => {
+    const publicKey = '880a32920a393b8a11d469c0714124f2055e0734618a61b0a3d769131205f707';
+    // Decode hex string to binary (Buffer or Uint8Array)
+    const publicKeyBytes = Buffer.from(publicKey, 'hex');
+    const digest = sha256.array(publicKeyBytes); // SHA-256 digest (32 bytes)
+    console.log({ digest });
+    /*
        digest: [
          35, 177, 240, 182, 25, 148, 121, 181,
         208,  79, 181,  78, 33, 223,  20, 213,
@@ -18,44 +17,40 @@ describe('tx json tests', () => {
         251,  49, 133, 154, 22, 142, 132, 115
       ]
         */
-        const addressBytes = digest.slice(0, 20); // First 20 bytes
-        let address = "0x" + Buffer.from(addressBytes).toString('hex'); // Hex encode (40 chars)
-        console.log("derived address: ", address); //0x12a94169cf2dc0e49ac13fc3911076d2f15f5a43
-        // vs Rust: "23b1f0b6199479b5d04fb54e21df14d51530b7b1"
-    })
-    test("tx conversion", () => {
-        const keyPair = {
-            publicKey: new Uint8Array([
-                190, 210, 254, 163, 46, 119, 115, 151,
-                69, 17, 11, 15, 20, 167, 75, 189,
-                148, 79, 216, 64, 254, 239, 40, 72,
-                28, 103, 23, 74, 216, 118, 108, 34
-            ]),
-            secretKey: new Uint8Array([
-                184, 23, 137, 134, 250, 123, 19, 125, 107, 168, 117,
-                168, 205, 21, 219, 239, 221, 49, 150, 157, 155, 28,
-                30, 101, 120, 166, 23, 166, 126, 171, 152, 206, 190,
-                210, 254, 163, 46, 119, 115, 151, 69, 17, 11, 15,
-                20, 167, 75, 189, 148, 79, 216, 64, 254, 239, 40,
-                72, 28, 103, 23, 74, 216, 118, 108, 34
-            ])
-        };
-        let transfer = new TransferTx("1", "B", 1);
-        let transferPayload = new Payload("Transfer", transfer);
-        let tx = new Tx("A", "", 1, transferPayload, Buffer.from(keyPair.publicKey).toString('hex'));
-        
-        tx.sign(keyPair);
-        const jsonTransfer = JSON.stringify(tx);
-        console.log('JS JSON (Transfer):', jsonTransfer);
-        const hexTransfer = encodeTxToHex(tx);
-        console.log('JS Hex (Transfer):', hexTransfer);
+    const addressBytes = digest.slice(0, 20); // First 20 bytes
+    let address = '0x' + Buffer.from(addressBytes).toString('hex'); // Hex encode (40 chars)
+    console.log('derived address: ', address); //0x12a94169cf2dc0e49ac13fc3911076d2f15f5a43
+    // vs Rust: "23b1f0b6199479b5d04fb54e21df14d51530b7b1"
+  });
+  test('tx conversion', () => {
+    const keyPair = {
+      publicKey: new Uint8Array([
+        190, 210, 254, 163, 46, 119, 115, 151, 69, 17, 11, 15, 20, 167, 75, 189, 148, 79, 216, 64,
+        254, 239, 40, 72, 28, 103, 23, 74, 216, 118, 108, 34,
+      ]),
+      secretKey: new Uint8Array([
+        184, 23, 137, 134, 250, 123, 19, 125, 107, 168, 117, 168, 205, 21, 219, 239, 221, 49, 150,
+        157, 155, 28, 30, 101, 120, 166, 23, 166, 126, 171, 152, 206, 190, 210, 254, 163, 46, 119,
+        115, 151, 69, 17, 11, 15, 20, 167, 75, 189, 148, 79, 216, 64, 254, 239, 40, 72, 28, 103, 23,
+        74, 216, 118, 108, 34,
+      ]),
+    };
+    let transfer = new TransferTx('1', 'B', 1);
+    let transferPayload = new Payload('Transfer', transfer);
+    let tx = new Tx('A', '', 1, transferPayload, Buffer.from(keyPair.publicKey).toString('hex'));
 
-        // Parse hex back to Tx object
-        const decodedTx = decodeTxFromHex(hexTransfer);
-        const decodedJson = JSON.stringify(decodedTx);
+    tx.sign(keyPair);
+    const jsonTransfer = JSON.stringify(tx);
+    console.log('JS JSON (Transfer):', jsonTransfer);
+    const hexTransfer = encodeTxToHex(tx);
+    console.log('JS Hex (Transfer):', hexTransfer);
 
-        console.log({ decodedJson });
-    })
+    // Parse hex back to Tx object
+    const decodedTx = decodeTxFromHex(hexTransfer);
+    const decodedJson = JSON.stringify(decodedTx);
+
+    console.log({ decodedJson });
+  });
 });
 /*
 

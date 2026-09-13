@@ -111,7 +111,8 @@
 }
 
 .explorer-record__mono {
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.78rem !important;
   word-break: break-all;
 }
@@ -124,7 +125,8 @@
 .explorer-record__tx-hash {
   color: var(--lh-accent, #ff7a18) !important;
   font-weight: 700;
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
 .explorer-record__tx-type {
@@ -134,7 +136,8 @@
 
 .explorer-record__tx-index {
   color: var(--lh-muted, rgba(243, 243, 240, 0.68)) !important;
-  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.82rem;
 }
 

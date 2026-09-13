@@ -10,7 +10,7 @@ function useChainId() {
       try {
         const response = await fetch(`${RPC_URL}/status`);
         const data = await response.json();
-        
+
         if (data.result?.node_info?.network) {
           setChainId(data.result.node_info.network);
         }
@@ -28,4 +28,3 @@ function useChainId() {
 }
 
 export default useChainId;
-

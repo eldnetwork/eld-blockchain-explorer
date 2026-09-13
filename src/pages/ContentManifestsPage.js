@@ -1,6 +1,15 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Heading, List, ListItem, HStack, Text, Skeleton, Badge, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Heading,
+  List,
+  ListItem,
+  HStack,
+  Text,
+  Skeleton,
+  Badge,
+  VStack,
+} from '@chakra-ui/react';
 import useContentManifests from '../hooks/useContentManifests';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder } from '@fortawesome/free-solid-svg-icons';
@@ -13,17 +22,19 @@ function ContentManifestList({ manifests, loading }) {
   if (loading) {
     return (
       <List spacing={3}>
-        {Array(10).fill(0).map((_, index) => (
-          <ListItem key={index}>
-            <AsciiBox p={4}>
-              <HStack spacing={4} w="full">
-                <Skeleton height="20px" width="40px" />
-                <Skeleton height="20px" width="300px" />
-                <Skeleton height="20px" width="150px" />
-              </HStack>
-            </AsciiBox>
-          </ListItem>
-        ))}
+        {Array(10)
+          .fill(0)
+          .map((_, index) => (
+            <ListItem key={index}>
+              <AsciiBox p={4}>
+                <HStack spacing={4} w="full">
+                  <Skeleton height="20px" width="40px" />
+                  <Skeleton height="20px" width="300px" />
+                  <Skeleton height="20px" width="150px" />
+                </HStack>
+              </AsciiBox>
+            </ListItem>
+          ))}
       </List>
     );
   }
@@ -39,12 +50,13 @@ function ContentManifestList({ manifests, loading }) {
         // Also handle nested metadata structure
         const manifestId = manifest.id || manifest.manifest_id || manifest;
         const manifestData = typeof manifest === 'object' ? manifest : { id: manifest };
-        
+
         // Extract metadata if nested
         const name = manifestData.name || manifestData.metadata?.name;
         const content_type = manifestData.content_type || manifestData.metadata?.content_type;
-        const size = manifestData.size !== undefined ? manifestData.size : manifestData.metadata?.size;
-        
+        const size =
+          manifestData.size !== undefined ? manifestData.size : manifestData.metadata?.size;
+
         return (
           <ListItem
             key={manifestId || index}
@@ -61,12 +73,18 @@ function ContentManifestList({ manifests, loading }) {
               <VStack align="stretch" spacing={2}>
                 <HStack justify="space-between">
                   <HStack spacing={3}>
-                    <Badge bg="white" color="gray.700" fontSize="sm">#{index + 1}</Badge>
+                    <Badge bg="white" color="gray.700" fontSize="sm">
+                      #{index + 1}
+                    </Badge>
                     <Text fontWeight="semibold" fontSize="sm" color="gray.700" fontFamily="mono">
-                      {manifestId ? `${String(manifestId).slice(0, 20)}...${String(manifestId).slice(-10)}` : 'N/A'}
+                      {manifestId
+                        ? `${String(manifestId).slice(0, 20)}...${String(manifestId).slice(-10)}`
+                        : 'N/A'}
                     </Text>
                     {manifestData._cadoType && (
-                      <Badge bg="gray.200" color="gray.700" fontSize="xs">{manifestData._cadoType}</Badge>
+                      <Badge bg="gray.200" color="gray.700" fontSize="xs">
+                        {manifestData._cadoType}
+                      </Badge>
                     )}
                   </HStack>
                   {size !== undefined && (
@@ -92,7 +110,10 @@ function ContentManifestList({ manifests, loading }) {
                 )}
                 {manifestData.total_size !== undefined && (
                   <Text fontSize="xs" color="gray.500">
-                    Total Size: {typeof manifestData.total_size === 'number' ? manifestData.total_size.toLocaleString() : manifestData.total_size}
+                    Total Size:{' '}
+                    {typeof manifestData.total_size === 'number'
+                      ? manifestData.total_size.toLocaleString()
+                      : manifestData.total_size}
                   </Text>
                 )}
                 {manifestData.redundancy_factor !== undefined && (
@@ -102,7 +123,10 @@ function ContentManifestList({ manifests, loading }) {
                 )}
                 {manifestData.created_at !== undefined && (
                   <Text fontSize="xs" color="gray.500">
-                    Created At: {typeof manifestData.created_at === 'number' ? new Date(manifestData.created_at).toLocaleString() : manifestData.created_at}
+                    Created At:{' '}
+                    {typeof manifestData.created_at === 'number'
+                      ? new Date(manifestData.created_at).toLocaleString()
+                      : manifestData.created_at}
                   </Text>
                 )}
                 {manifestData.chunks && Array.isArray(manifestData.chunks) && (
@@ -112,7 +136,10 @@ function ContentManifestList({ manifests, loading }) {
                 )}
                 {manifestData.status && (
                   <Text fontSize="xs" color="gray.500">
-                    Status: {typeof manifestData.status === 'object' ? JSON.stringify(manifestData.status) : manifestData.status}
+                    Status:{' '}
+                    {typeof manifestData.status === 'object'
+                      ? JSON.stringify(manifestData.status)
+                      : manifestData.status}
                   </Text>
                 )}
                 {manifestData._note && (
@@ -120,21 +147,31 @@ function ContentManifestList({ manifests, loading }) {
                     {manifestData._note}
                   </Text>
                 )}
-                {manifestData._cado && (manifestData._cado.key || manifestData._cado.Immutable?.key || manifestData._cado.Mutable?.key) && (
-                  <Text fontSize="xs" color="gray.500" fontFamily="mono" isTruncated>
-                    CADO Key: {manifestData._cado.key || manifestData._cado.Immutable?.key || manifestData._cado.Mutable?.key}
-                  </Text>
-                )}
+                {manifestData._cado &&
+                  (manifestData._cado.key ||
+                    manifestData._cado.Immutable?.key ||
+                    manifestData._cado.Mutable?.key) && (
+                    <Text fontSize="xs" color="gray.500" fontFamily="mono" isTruncated>
+                      CADO Key:{' '}
+                      {manifestData._cado.key ||
+                        manifestData._cado.Immutable?.key ||
+                        manifestData._cado.Mutable?.key}
+                    </Text>
+                  )}
                 {manifestData._error && (
                   <Text fontSize="xs" color="red.500">
                     Error: {manifestData._error}
                   </Text>
                 )}
-                {!name && !content_type && !manifestData.content_id && !manifestData.total_size && !manifestData._note && (
-                  <Text fontSize="xs" color="gray.400" fontStyle="italic">
-                    CADO data available (deserialization may be required for full details)
-                  </Text>
-                )}
+                {!name &&
+                  !content_type &&
+                  !manifestData.content_id &&
+                  !manifestData.total_size &&
+                  !manifestData._note && (
+                    <Text fontSize="xs" color="gray.400" fontStyle="italic">
+                      CADO data available (deserialization may be required for full details)
+                    </Text>
+                  )}
               </VStack>
             </AsciiBox>
           </ListItem>
@@ -157,7 +194,9 @@ function ContentManifestsPage() {
       </HStack>
 
       {error ? (
-        <Box p={4} className="explorer-page__state--error">Error: {error}</Box>
+        <Box p={4} className="explorer-page__state--error">
+          Error: {error}
+        </Box>
       ) : (
         <>
           {!loading && manifests.length > 0 && (

@@ -62,7 +62,8 @@ function usePinboardMessagesByTag(tag, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
-          const log = data?.result?.response?.log || data?.result?.response?.info || 'Pinboard query failed';
+          const log =
+            data?.result?.response?.log || data?.result?.response?.info || 'Pinboard query failed';
           setError(log);
           setMessages([]);
           setHasMore(false);
@@ -97,4 +98,3 @@ function usePinboardMessagesByTag(tag, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
 }
 
 export default usePinboardMessagesByTag;
-

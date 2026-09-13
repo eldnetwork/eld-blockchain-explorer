@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Box, Heading, Text, HStack, Skeleton, Link } from '@chakra-ui/react';
 import useCapacityProviders from '../hooks/useCapacityProviders';
@@ -20,11 +20,19 @@ function bytesToGb(bytes) {
 function formatGb(bytes, fractionDigits = 2) {
   const gb = bytesToGb(bytes);
   if (gb == null) return null;
-  return gb.toLocaleString(undefined, { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits });
+  return gb.toLocaleString(undefined, {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  });
 }
 
 function formatPct(numerator, denominator, fractionDigits = 1) {
-  if (typeof numerator !== 'number' || typeof denominator !== 'number' || denominator <= 0 || !Number.isFinite(numerator)) {
+  if (
+    typeof numerator !== 'number' ||
+    typeof denominator !== 'number' ||
+    denominator <= 0 ||
+    !Number.isFinite(numerator)
+  ) {
     return null;
   }
   return ((100 * numerator) / denominator).toLocaleString(undefined, {
@@ -61,9 +69,7 @@ function AdminSlotsSection({ capacity }) {
       <div className="explorer-page__kv-grid">
         <div>
           <span>TOTAL</span>
-          <strong>
-            {total.toLocaleString()} (100%)
-          </strong>
+          <strong>{total.toLocaleString()} (100%)</strong>
         </div>
         {row('PROOFS', proof)}
         {row('OPEN', open)}
@@ -106,9 +112,17 @@ function AdminHostStorageSection({ host }) {
 
 function AdminBlockchainStorageSection({ blockchainState }) {
   if (!blockchainState) return null;
-  const { bytes_used: bytesUsed, max_storable_bytes_on_same_volume: maxBytes, volume_available_bytes: availBytes } =
-    blockchainState;
-  if (typeof bytesUsed !== 'number' || typeof maxBytes !== 'number' || typeof availBytes !== 'number') return null;
+  const {
+    bytes_used: bytesUsed,
+    max_storable_bytes_on_same_volume: maxBytes,
+    volume_available_bytes: availBytes,
+  } = blockchainState;
+  if (
+    typeof bytesUsed !== 'number' ||
+    typeof maxBytes !== 'number' ||
+    typeof availBytes !== 'number'
+  )
+    return null;
 
   const usedGb = formatGb(bytesUsed);
   const maxGb = formatGb(maxBytes);
@@ -196,7 +210,11 @@ function SingleValidatorPage() {
     return () => ac.abort();
   }, [adminStatusUrl]);
 
-  const { data: rewardsData, loading: rewardsLoading, error: rewardsError } = useVerifiedProofRewards(normalizedParam);
+  const {
+    data: rewardsData,
+    loading: rewardsLoading,
+    error: rewardsError,
+  } = useVerifiedProofRewards(normalizedParam);
 
   if (providersLoading) {
     return (
@@ -251,7 +269,9 @@ function SingleValidatorPage() {
               <strong className="explorer-page__mono">
                 <Link
                   onClick={() =>
-                    navigate(`/account/${normalizeAccountAddress(provider.address) || provider.address}`)
+                    navigate(
+                      `/account/${normalizeAccountAddress(provider.address) || provider.address}`,
+                    )
                   }
                   className="explorer-page__clickable explorer-page__mono"
                 >
@@ -263,7 +283,9 @@ function SingleValidatorPage() {
               <div>
                 <span>STAKE</span>
                 <strong>
-                  {typeof provider.stake === 'number' ? provider.stake.toLocaleString() : provider.stake}
+                  {typeof provider.stake === 'number'
+                    ? provider.stake.toLocaleString()
+                    : provider.stake}
                 </strong>
               </div>
             )}
@@ -318,7 +340,9 @@ function SingleValidatorPage() {
                   : Number(provider.registered_at));
               const duration = Number(provider.registration_duration);
               const expirationBlock =
-                !Number.isNaN(createdBlock) && !Number.isNaN(duration) ? createdBlock + duration : null;
+                !Number.isNaN(createdBlock) && !Number.isNaN(duration)
+                  ? createdBlock + duration
+                  : null;
               return expirationBlock != null ? (
                 <div>
                   <span>EXPIRATION BLOCK</span>
@@ -341,7 +365,9 @@ function SingleValidatorPage() {
               <strong className="explorer-page__mono">
                 <Link
                   onClick={() =>
-                    navigate(`/account/${normalizeAccountAddress(displayAddress) || displayAddress}`)
+                    navigate(
+                      `/account/${normalizeAccountAddress(displayAddress) || displayAddress}`,
+                    )
                   }
                   className="explorer-page__clickable explorer-page__mono"
                 >
@@ -374,12 +400,13 @@ function SingleValidatorPage() {
                   <span>TOTAL REWARDS (STORAGE)</span>
                   <strong>{formatELDAmount(rewardsData.total_rewards)}</strong>
                 </div>
-                {typeof rewardsData.successful_proofs === 'number' && Number.isFinite(rewardsData.successful_proofs) && (
-                  <div>
-                    <span>SUCCESSFUL PROOFS</span>
-                    <strong>{rewardsData.successful_proofs.toLocaleString()}</strong>
-                  </div>
-                )}
+                {typeof rewardsData.successful_proofs === 'number' &&
+                  Number.isFinite(rewardsData.successful_proofs) && (
+                    <div>
+                      <span>SUCCESSFUL PROOFS</span>
+                      <strong>{rewardsData.successful_proofs.toLocaleString()}</strong>
+                    </div>
+                  )}
                 {typeof rewardsData.from_height === 'number' &&
                   typeof rewardsData.to_height === 'number' &&
                   Number.isFinite(rewardsData.from_height) &&
@@ -387,7 +414,8 @@ function SingleValidatorPage() {
                     <div>
                       <span>AGGREGATION RANGE (BLOCKS)</span>
                       <strong>
-                        {rewardsData.from_height.toLocaleString()}–{rewardsData.to_height.toLocaleString()}
+                        {rewardsData.from_height.toLocaleString()}–
+                        {rewardsData.to_height.toLocaleString()}
                       </strong>
                     </div>
                   )}
@@ -425,25 +453,32 @@ function SingleValidatorPage() {
         </section>
       )}
 
-      {ENABLE_VALIDATOR_ADMIN_STATUS && adminStatusUrl && !adminLoading && !adminError && adminPayload != null && (
-        <>
-          <AdminSlotsSection capacity={adminPayload.capacity} />
-          <AdminHostStorageSection host={adminPayload.host} />
-          <AdminBlockchainStorageSection blockchainState={adminPayload.blockchain_state} />
-          <section className="explorer-page__section">
-            <h2>
-              <span /> JSON
-            </h2>
-            <Box p={4}>
-              <AsciiBox p={4} className="explorer-page__card">
-                <pre className="explorer-page__mono" style={{ margin: 0, whiteSpace: 'pre-wrap', overflowX: 'auto' }}>
-                  {JSON.stringify(adminPayload, null, 2)}
-                </pre>
-              </AsciiBox>
-            </Box>
-          </section>
-        </>
-      )}
+      {ENABLE_VALIDATOR_ADMIN_STATUS &&
+        adminStatusUrl &&
+        !adminLoading &&
+        !adminError &&
+        adminPayload != null && (
+          <>
+            <AdminSlotsSection capacity={adminPayload.capacity} />
+            <AdminHostStorageSection host={adminPayload.host} />
+            <AdminBlockchainStorageSection blockchainState={adminPayload.blockchain_state} />
+            <section className="explorer-page__section">
+              <h2>
+                <span /> JSON
+              </h2>
+              <Box p={4}>
+                <AsciiBox p={4} className="explorer-page__card">
+                  <pre
+                    className="explorer-page__mono"
+                    style={{ margin: 0, whiteSpace: 'pre-wrap', overflowX: 'auto' }}
+                  >
+                    {JSON.stringify(adminPayload, null, 2)}
+                  </pre>
+                </AsciiBox>
+              </Box>
+            </section>
+          </>
+        )}
     </Box>
   );
 }

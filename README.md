@@ -33,11 +33,11 @@ This starts a local dev server at [http://localhost:3000](http://localhost:3000)
 
 Copy `.env.example` into `.env.development` (and `.env.production` for production builds), then set:
 
-| Variable | Description |
-| --- | --- |
-| `REACT_APP_RPC_URL` | Tendermint / node RPC base URL |
-| `REACT_APP_API_URL` | Explorer / indexer API base URL |
-| `REACT_APP_FAUCET_URL` | Testnet faucet base URL |
+| Variable                                  | Description                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------ |
+| `REACT_APP_RPC_URL`                       | Tendermint / node RPC base URL                                     |
+| `REACT_APP_API_URL`                       | Explorer / indexer API base URL                                    |
+| `REACT_APP_FAUCET_URL`                    | Testnet faucet base URL                                            |
 | `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | `true` to load optional validator admin status URLs (dev-oriented) |
 
 For local validator admin status (optional), also copy the example config files:
@@ -69,7 +69,7 @@ npm run preview
 npm run ci
 ```
 
-Runs tests (non-interactive) and a production build.
+Runs format check, lint, tests, audit, and production build.
 
 ## Links
 

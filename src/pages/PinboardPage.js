@@ -1,5 +1,15 @@
-import React, { useMemo, useState } from 'react';
-import { Box, Heading, HStack, Text, Input, Button, VStack, SimpleGrid, Link } from '@chakra-ui/react';
+import { useMemo, useState } from 'react';
+import {
+  Box,
+  Heading,
+  HStack,
+  Text,
+  Input,
+  Button,
+  VStack,
+  SimpleGrid,
+  Link,
+} from '@chakra-ui/react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import PinIcon from '../components/PinIcon';
 import { DARK_TEXT_COLOR } from '../constants';
@@ -30,8 +40,16 @@ function GcMetricsDashboard() {
         </Text>
       </HStack>
 
-      {loading && <Text fontSize="sm" color="gray.600">Loading metrics...</Text>}
-      {error && <Text fontSize="sm" color="red.500">Error: {error}</Text>}
+      {loading && (
+        <Text fontSize="sm" color="gray.600">
+          Loading metrics...
+        </Text>
+      )}
+      {error && (
+        <Text fontSize="sm" color="red.500">
+          Error: {error}
+        </Text>
+      )}
 
       {!loading && !error && entries.length > 0 && (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
@@ -40,8 +58,16 @@ function GcMetricsDashboard() {
               <Text fontSize="xs" color="gray.500" textTransform="uppercase" letterSpacing="0.02em">
                 {key}
               </Text>
-              <Text fontSize="sm" color="gray.700" fontFamily="mono" isTruncated title={typeof value === 'string' ? value : JSON.stringify(value)}>
-                {typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value)}
+              <Text
+                fontSize="sm"
+                color="gray.700"
+                fontFamily="mono"
+                isTruncated
+                title={typeof value === 'string' ? value : JSON.stringify(value)}
+              >
+                {typeof value === 'object' && value !== null
+                  ? JSON.stringify(value)
+                  : String(value)}
               </Text>
             </Box>
           ))}
@@ -77,10 +103,30 @@ function PinboardPage() {
 
   const effectiveMode = isFeedActive ? 'feed' : mode;
 
-  const items = effectiveMode === 'feed' ? feedQuery.items : effectiveMode === 'wallet' ? walletQuery.messages : tagQuery.messages;
-  const loading = effectiveMode === 'feed' ? feedQuery.loading : effectiveMode === 'wallet' ? walletQuery.loading : tagQuery.loading;
-  const error = effectiveMode === 'feed' ? feedQuery.error : effectiveMode === 'wallet' ? walletQuery.error : tagQuery.error;
-  const hasMore = effectiveMode === 'feed' ? feedQuery.hasMore : effectiveMode === 'wallet' ? walletQuery.hasMore : tagQuery.hasMore;
+  const items =
+    effectiveMode === 'feed'
+      ? feedQuery.items
+      : effectiveMode === 'wallet'
+        ? walletQuery.messages
+        : tagQuery.messages;
+  const loading =
+    effectiveMode === 'feed'
+      ? feedQuery.loading
+      : effectiveMode === 'wallet'
+        ? walletQuery.loading
+        : tagQuery.loading;
+  const error =
+    effectiveMode === 'feed'
+      ? feedQuery.error
+      : effectiveMode === 'wallet'
+        ? walletQuery.error
+        : tagQuery.error;
+  const hasMore =
+    effectiveMode === 'feed'
+      ? feedQuery.hasMore
+      : effectiveMode === 'wallet'
+        ? walletQuery.hasMore
+        : tagQuery.hasMore;
 
   function handleLoad() {
     setPage(0);
@@ -96,7 +142,9 @@ function PinboardPage() {
   return (
     <Box className="explorer-page" color={DARK_TEXT_COLOR}>
       <HStack className="explorer-page__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">← Explorer</Link>
+        <Link as={RouterLink} to="/" className="explorer-page__crumb-link">
+          ← Explorer
+        </Link>
         <Text className="explorer-page__crumb-sep">Social</Text>
         <Text className="explorer-page__crumb-current">Pinboard</Text>
       </HStack>
@@ -193,7 +241,12 @@ function PinboardPage() {
               fontFamily="mono"
               className="explorer-page__input"
             />
-            <Button onClick={handleLoad} colorScheme="blue" isDisabled={!walletInput.trim()} className="explorer-page__action">
+            <Button
+              onClick={handleLoad}
+              colorScheme="blue"
+              isDisabled={!walletInput.trim()}
+              className="explorer-page__action"
+            >
               Load
             </Button>
           </HStack>
@@ -206,7 +259,12 @@ function PinboardPage() {
               fontFamily="mono"
               className="explorer-page__input"
             />
-            <Button onClick={handleLoad} colorScheme="blue" isDisabled={!tagInput.trim()} className="explorer-page__action">
+            <Button
+              onClick={handleLoad}
+              colorScheme="blue"
+              isDisabled={!tagInput.trim()}
+              className="explorer-page__action"
+            >
               Load
             </Button>
           </HStack>
@@ -215,7 +273,8 @@ function PinboardPage() {
         <Box>
           {!loading && items?.length > 0 && (
             <Text fontSize="sm" color="gray.600" mb={2}>
-              Page {page + 1} (0-based index used by the node){effectiveMode === 'feed' ? `, order=${feedOrder}` : ''}
+              Page {page + 1} (0-based index used by the node)
+              {effectiveMode === 'feed' ? `, order=${feedOrder}` : ''}
             </Text>
           )}
           {error && <Text color="red.500">Error: {error}</Text>}
@@ -228,7 +287,9 @@ function PinboardPage() {
         onMessageClick={({ wallet, messageId }) => {
           const targetWallet = wallet || activeWallet;
           if (!targetWallet || !messageId) return;
-          navigate(`/pinboard/post/${encodeURIComponent(targetWallet)}/${encodeURIComponent(messageId)}`);
+          navigate(
+            `/pinboard/post/${encodeURIComponent(targetWallet)}/${encodeURIComponent(messageId)}`,
+          );
         }}
       />
 

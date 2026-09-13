@@ -58,9 +58,7 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
     total: null,
   });
   /** `boundaries[i]` — continuation tuple for fetching slice `i` (`boundaries[0]` is always null). */
-  const [boundaries, setBoundaries] = useState(
-    /** @type {Continuation[]} */ ([null])
-  );
+  const [boundaries, setBoundaries] = useState(/** @type {Continuation[]} */ ([null]));
   const [activePage, setActivePage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

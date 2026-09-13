@@ -6,7 +6,7 @@ const REFRESH_INTERVAL_MS = 2000;
 
 async function fetchEpochInfoOnce() {
   const response = await fetch(
-    `${RPC_URL}/abci_query?path="epoch_info"&data=""&height=0&prove=false`
+    `${RPC_URL}/abci_query?path="epoch_info"&data=""&height=0&prove=false`,
   );
   if (!response.ok) {
     throw new Error(`Epoch info request failed (${response.status})`);

@@ -8,10 +8,7 @@ const REFRESH_INTERVAL_MS = 10000;
 function pickTotalRewards(payload) {
   if (payload == null || typeof payload !== 'object') return null;
   const raw =
-    payload.total_rewards ??
-    payload.totalRewards ??
-    payload.sum ??
-    payload.total_reward_sum;
+    payload.total_rewards ?? payload.totalRewards ?? payload.sum ?? payload.total_reward_sum;
   if (raw === undefined || raw === null) return null;
   return String(raw);
 }
@@ -49,18 +46,15 @@ function useVerifiedProofRewardsSum() {
         setError(null);
       }
 
-      const result = await fetchWithRetry(
-        () => fetchSumOnce(ac.signal),
-        {
-          cancelled: () => cancelled,
-          isRefresh,
-          onExhausted: () => {
-            retryTimeoutId = setTimeout(() => {
-              if (!cancelled) fetchSum(false);
-            }, REFRESH_INTERVAL_MS);
-          },
-        }
-      );
+      const result = await fetchWithRetry(() => fetchSumOnce(ac.signal), {
+        cancelled: () => cancelled,
+        isRefresh,
+        onExhausted: () => {
+          retryTimeoutId = setTimeout(() => {
+            if (!cancelled) fetchSum(false);
+          }, REFRESH_INTERVAL_MS);
+        },
+      });
 
       if (!result.ok || cancelled) return;
 

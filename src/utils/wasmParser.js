@@ -10,16 +10,16 @@ export function base64ToUint8Array(base64) {
     console.error('Invalid base64 input: not a string');
     return null;
   }
-  
+
   try {
     // Remove any whitespace and newlines
     let cleanBase64 = base64.replace(/\s/g, '').trim();
-    
+
     // Remove data URL prefix if present (e.g., "data:application/wasm;base64,")
     if (cleanBase64.includes(',')) {
       cleanBase64 = cleanBase64.split(',')[1];
     }
-    
+
     // Validate base64 characters (A-Z, a-z, 0-9, +, /, =)
     const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
     if (!base64Regex.test(cleanBase64)) {
@@ -27,12 +27,12 @@ export function base64ToUint8Array(base64) {
       console.error('First 100 chars:', cleanBase64.substring(0, 100));
       return null;
     }
-    
+
     // Add padding if needed (base64 strings should be multiples of 4)
     while (cleanBase64.length % 4 !== 0) {
       cleanBase64 += '=';
     }
-    
+
     const binaryString = atob(cleanBase64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -53,7 +53,7 @@ export function base64ToUint8Array(base64) {
 export function uint8ArrayToHex(bytes) {
   if (!bytes) return '';
   return Array.from(bytes)
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join(' ');
 }
 
@@ -66,45 +66,47 @@ export async function parseWasm(wasmBytes) {
     if (wasmBytes.length < 4) {
       return { error: 'Invalid WASM: too short' };
     }
-    
+
     const magic = Array.from(wasmBytes.slice(0, 4))
-      .map(b => String.fromCharCode(b))
+      .map((b) => String.fromCharCode(b))
       .join('');
-    
+
     if (magic !== '\0asm') {
       return { error: 'Invalid WASM: missing magic number' };
     }
-    
+
     // Check version (should be 0x01 0x00 0x00 0x00)
     const version = wasmBytes.slice(4, 8);
-    
+
     // Try to compile the module to get more info
     let moduleInfo = {
       magic: 'WASM',
-      version: Array.from(version).map(b => b.toString(16).padStart(2, '0')).join(' '),
+      version: Array.from(version)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' '),
       size: wasmBytes.length,
-      sections: []
+      sections: [],
     };
-    
+
     try {
       const module = await WebAssembly.compile(wasmBytes);
       const exports = WebAssembly.Module.exports(module);
       const imports = WebAssembly.Module.imports(module);
-      
-      moduleInfo.exports = exports.map(exp => ({
+
+      moduleInfo.exports = exports.map((exp) => ({
         name: exp.name,
-        kind: exp.kind
+        kind: exp.kind,
       }));
-      
-      moduleInfo.imports = imports.map(imp => ({
+
+      moduleInfo.imports = imports.map((imp) => ({
         module: imp.module,
         name: imp.name,
-        kind: imp.kind
+        kind: imp.kind,
       }));
     } catch (compileError) {
       moduleInfo.compileError = compileError.message;
     }
-    
+
     return moduleInfo;
   } catch (error) {
     return { error: error.message };
@@ -119,23 +121,23 @@ export function wasmToText(wasmBytes) {
   if (!wasmBytes || wasmBytes.length < 8) {
     return 'Invalid WASM binary';
   }
-  
+
   let output = [];
   let offset = 0;
-  
+
   // Magic number
   const magic = Array.from(wasmBytes.slice(0, 4))
-    .map(b => String.fromCharCode(b))
+    .map((b) => String.fromCharCode(b))
     .join('');
   output.push(`Magic: ${magic === '\0asm' ? 'WASM' : 'INVALID'}`);
   offset += 4;
-  
+
   // Version
   const version = wasmBytes.slice(4, 8);
   const versionNum = version[0] | (version[1] << 8) | (version[2] << 16) | (version[3] << 24);
   output.push(`Version: ${versionNum}`);
   offset += 4;
-  
+
   // Parse sections
   const sectionNames = {
     0: 'Custom',
@@ -149,13 +151,13 @@ export function wasmToText(wasmBytes) {
     8: 'Start',
     9: 'Element',
     10: 'Code',
-    11: 'Data'
+    11: 'Data',
   };
-  
+
   while (offset < wasmBytes.length) {
     const sectionId = wasmBytes[offset];
     offset++;
-    
+
     if (sectionId === 0) {
       // Custom section - skip it
       const size = readLEB128(wasmBytes, offset);
@@ -176,7 +178,7 @@ export function wasmToText(wasmBytes) {
       break;
     }
   }
-  
+
   return output.join('\n');
 }
 
@@ -187,24 +189,24 @@ function readLEB128(bytes, offset) {
   let result = 0;
   let shift = 0;
   let bytesRead = 0;
-  
+
   while (offset < bytes.length) {
     const byte = bytes[offset];
     offset++;
     bytesRead++;
-    
-    result |= (byte & 0x7F) << shift;
-    
+
+    result |= (byte & 0x7f) << shift;
+
     if ((byte & 0x80) === 0) {
       break;
     }
-    
+
     shift += 7;
     if (shift >= 32) {
       break;
     }
   }
-  
+
   return { value: result, bytesRead };
 }
 
@@ -250,14 +252,14 @@ export async function wasmBytecodeToText(bytecode) {
     if (!bytecode) {
       return { error: 'No bytecode provided' };
     }
-    
+
     console.log('Bytecode input type:', typeof bytecode);
     console.log('Is array:', Array.isArray(bytecode));
     console.log('Is Uint8Array:', bytecode instanceof Uint8Array);
-    
+
     let wasmBytes = null;
     let format = 'unknown';
-    
+
     // If it's already a Uint8Array, use it directly
     if (bytecode instanceof Uint8Array) {
       wasmBytes = bytecode;
@@ -276,7 +278,7 @@ export async function wasmBytecodeToText(bytecode) {
     else if (typeof bytecode === 'string') {
       console.log('String input, length:', bytecode.length);
       console.log('First 50 chars:', bytecode.substring(0, 50));
-      
+
       // Try base64 first (most common)
       wasmBytes = base64ToUint8Array(bytecode);
       if (wasmBytes) {
@@ -301,66 +303,73 @@ export async function wasmBytecodeToText(bytecode) {
         return await wasmBytecodeToText(bytecode.bytes);
       } else {
         console.log('Object bytecode, keys:', Object.keys(bytecode));
-        return { 
+        return {
           error: 'Cannot decode object bytecode. Expected string, array, or Uint8Array.',
           debug: {
             inputType: typeof bytecode,
-            inputKeys: Object.keys(bytecode)
-          }
+            inputKeys: Object.keys(bytecode),
+          },
         };
       }
     }
-    
+
     if (!wasmBytes) {
-      return { 
-        error: 'Failed to decode bytecode. Expected base64 string, hex string, array of numbers, or Uint8Array.',
+      return {
+        error:
+          'Failed to decode bytecode. Expected base64 string, hex string, array of numbers, or Uint8Array.',
         debug: {
           inputType: typeof bytecode,
           isArray: Array.isArray(bytecode),
           isUint8Array: bytecode instanceof Uint8Array,
-          inputPreview: typeof bytecode === 'string' ? bytecode.substring(0, 100) : 
-                        Array.isArray(bytecode) ? `Array[${bytecode.length}]` : 
-                        String(bytecode)
-        }
+          inputPreview:
+            typeof bytecode === 'string'
+              ? bytecode.substring(0, 100)
+              : Array.isArray(bytecode)
+                ? `Array[${bytecode.length}]`
+                : String(bytecode),
+        },
       };
     }
-    
+
     // Validate WASM magic number
     if (wasmBytes.length < 4) {
       return { error: 'Bytecode too short to be valid WASM' };
     }
-    
+
     const magic = String.fromCharCode(wasmBytes[0], wasmBytes[1], wasmBytes[2], wasmBytes[3]);
     if (magic !== '\0asm') {
-      return { 
+      return {
         error: 'Invalid WASM magic number. Expected WASM binary format.',
         debug: {
-          magic: Array.from(wasmBytes.slice(0, 4)).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' '),
-          firstBytes: Array.from(wasmBytes.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')
-        }
+          magic: Array.from(wasmBytes.slice(0, 4))
+            .map((b) => `0x${b.toString(16).padStart(2, '0')}`)
+            .join(' '),
+          firstBytes: Array.from(wasmBytes.slice(0, 8))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join(' '),
+        },
       };
     }
-    
+
     const hex = uint8ArrayToHex(wasmBytes);
     const text = wasmToText(wasmBytes);
     const info = await parseWasm(wasmBytes);
-    
+
     return {
       hex,
       text,
       info,
       size: wasmBytes.length,
       format,
-      note: 'Note: This is WASM disassembly (WAT format), not the original Rust source code. Full source code recovery from WASM is not possible.'
+      note: 'Note: This is WASM disassembly (WAT format), not the original Rust source code. Full source code recovery from WASM is not possible.',
     };
   } catch (error) {
     console.error('Error in wasmBytecodeToText:', error);
     console.error('Bytecode type:', typeof bytecode);
     console.error('Bytecode value:', bytecode);
-    return { 
+    return {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     };
   }
 }
-

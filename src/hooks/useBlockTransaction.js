@@ -10,11 +10,7 @@ function useBlockTransaction(blockHeight, blockIndex) {
     let cancelled = false;
 
     async function load() {
-      if (
-        blockHeight == null ||
-        blockIndex == null ||
-        Number.isNaN(Number(blockIndex))
-      ) {
+      if (blockHeight == null || blockIndex == null || Number.isNaN(Number(blockIndex))) {
         setTransaction(null);
         setLoading(false);
         return;

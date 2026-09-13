@@ -128,7 +128,7 @@
 }
 
 .new-docs__nav-link--active::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -218,7 +218,7 @@
 }
 
 .new-docs__breadcrumbs span:not(:last-child)::after {
-  content: ">";
+  content: '>';
   margin-left: 10px;
 }
 

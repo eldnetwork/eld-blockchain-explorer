@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import useEpochInfo from '../hooks/useEpochInfo';
@@ -24,7 +23,11 @@ function EpochDashboard() {
               <StatLabel className="explorer-home__stat-label">
                 <Skeleton height="10px" width="120px" />
               </StatLabel>
-              <StatNumber className="explorer-home__stat-value" fontFamily="mono" transition="all 0.2s">
+              <StatNumber
+                className="explorer-home__stat-value"
+                fontFamily="mono"
+                transition="all 0.2s"
+              >
                 <Skeleton height="30px" width="80px" display="block" mt={2} />
               </StatNumber>
             </Stat>
@@ -44,7 +47,11 @@ function EpochDashboard() {
         >
           <Stat>
             <StatLabel className="explorer-home__stat-label">{stat.label}</StatLabel>
-            <StatNumber className="explorer-home__stat-value" fontFamily="mono" transition="all 0.2s">
+            <StatNumber
+              className="explorer-home__stat-value"
+              fontFamily="mono"
+              transition="all 0.2s"
+            >
               {epochInfo[stat.key]}
             </StatNumber>
           </Stat>

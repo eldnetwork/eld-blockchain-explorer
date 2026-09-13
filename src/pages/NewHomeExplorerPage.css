@@ -136,7 +136,10 @@
   font-size: 0.7rem;
   padding: 22px 18px;
   border-left: 1px solid var(--nhe-border);
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
 .new-home-explorer__nav-link:hover,
@@ -150,7 +153,7 @@
 }
 
 .new-home-explorer__nav-link--active::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;

@@ -4,7 +4,7 @@ import { normalizeAccountAddress } from '../utils/accountAddress';
 
 function abciQueryGet(path, data) {
   return fetch(
-    `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify(path))}&data=${encodeURIComponent(JSON.stringify(data))}&prove=false`
+    `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify(path))}&data=${encodeURIComponent(JSON.stringify(data))}&prove=false`,
   ).then((response) => response.json());
 }
 
@@ -39,7 +39,12 @@ function useAccount(address) {
           typeof address === 'string' ? address.toLowerCase() : null,
           normalized ? normalized.slice(2) : null,
           normalized ? normalized.slice(2).toUpperCase() : null,
-        ].filter((candidate, index, arr) => typeof candidate === 'string' && candidate.length > 0 && arr.indexOf(candidate) === index);
+        ].filter(
+          (candidate, index, arr) =>
+            typeof candidate === 'string' &&
+            candidate.length > 0 &&
+            arr.indexOf(candidate) === index,
+        );
 
         let foundData = null;
         let resolvedAddress = normalized || address;

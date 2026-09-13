@@ -17,9 +17,7 @@ import { API_URL } from '../config';
  * @param {string | undefined} namespaceSlug
  */
 function useNamespace(namespaceSlug) {
-  const [namespace, setNamespace] = useState(
-    /** @type {NamespaceDetail | null} */ (null)
-  );
+  const [namespace, setNamespace] = useState(/** @type {NamespaceDetail | null} */ (null));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -56,9 +54,7 @@ function useNamespace(namespaceSlug) {
         }
 
         const message =
-          data.message ||
-          data.details ||
-          `HTTP ${response.status}: ${response.statusText}`;
+          data.message || data.details || `HTTP ${response.status}: ${response.statusText}`;
         setError(message);
       } catch (err) {
         if (ac.signal.aborted) return;

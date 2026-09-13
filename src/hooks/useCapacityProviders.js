@@ -8,9 +8,7 @@ async function abciQuery(path) {
   // Tendermint-style GET:
   //   /abci_query?path="..."&data=""&prove=false
   // where `path` and `data` are JSON-string parameters.
-  const response = await fetch(
-    `${RPC_URL}/abci_query?path="${path}"&data=""&prove=false`
-  );
+  const response = await fetch(`${RPC_URL}/abci_query?path="${path}"&data=""&prove=false`);
 
   if (!response.ok) {
     throw new Error(`ABCI query failed (${response.status})`);
@@ -73,7 +71,8 @@ function useCapacityProviders() {
       }
 
       const data = result.value;
-      const providers = data.capacity_validators || data.all_providers || data.active_providers || [];
+      const providers =
+        data.capacity_validators || data.all_providers || data.active_providers || [];
       const totalStake = data.total_stake || data.all_total_stake || data.active_total_stake || 0;
       const totalCapacity =
         data.total_capacity || data.all_total_capacity || data.active_total_capacity || 0;

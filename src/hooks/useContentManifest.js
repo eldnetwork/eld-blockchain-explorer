@@ -44,4 +44,3 @@ function useContentManifest(manifestId) {
 }
 
 export default useContentManifest;
-

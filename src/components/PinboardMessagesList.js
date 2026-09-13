@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, HStack, List, ListItem, Text } from '@chakra-ui/react';
 import AsciiBox from './AsciiBox';
@@ -33,11 +32,7 @@ function resolveOriginalSigner(item) {
 
 function resolveTag(item) {
   const meta = item?.meta ?? item;
-  return (
-    getFirstDefined(item, ['tag', 'tags']) ??
-    getFirstDefined(meta, ['tag', 'tags']) ??
-    null
-  );
+  return getFirstDefined(item, ['tag', 'tags']) ?? getFirstDefined(meta, ['tag', 'tags']) ?? null;
 }
 
 function PinboardMessagesList({ messages, onMessageClick, loading, showIndex = true }) {
@@ -52,8 +47,19 @@ function PinboardMessagesList({ messages, onMessageClick, loading, showIndex = t
             <ListItem key={idx}>
               <AsciiBox p={4}>
                 <HStack spacing={4} w="full">
-                  <Box flex="0 0 auto" width="40px" height="20px" bg="var(--lh-ghost-primary, #1f242b)" borderRadius={BORDER_RADIUS} />
-                  <Box flex="1" height="20px" bg="var(--lh-ghost-primary, #1f242b)" borderRadius={BORDER_RADIUS} />
+                  <Box
+                    flex="0 0 auto"
+                    width="40px"
+                    height="20px"
+                    bg="var(--lh-ghost-primary, #1f242b)"
+                    borderRadius={BORDER_RADIUS}
+                  />
+                  <Box
+                    flex="1"
+                    height="20px"
+                    bg="var(--lh-ghost-primary, #1f242b)"
+                    borderRadius={BORDER_RADIUS}
+                  />
                 </HStack>
               </AsciiBox>
             </ListItem>
@@ -88,7 +94,14 @@ function PinboardMessagesList({ messages, onMessageClick, loading, showIndex = t
                   <Text fontSize="xs" className="explorer-page__muted" fontFamily="mono">
                     {showIndex ? `#${index + 1}` : ''}
                   </Text>
-                  <Text fontSize="sm" fontWeight="semibold" color="gray.100" fontFamily="mono" isTruncated title={messageId || ''}>
+                  <Text
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="gray.100"
+                    fontFamily="mono"
+                    isTruncated
+                    title={messageId || ''}
+                  >
                     {messageId ? `Message: ${String(messageId)}` : 'Message: (unknown id)'}
                   </Text>
                   <Text
@@ -103,7 +116,9 @@ function PinboardMessagesList({ messages, onMessageClick, loading, showIndex = t
                     onClick={(event) => {
                       event.stopPropagation();
                       if (!originalSigner) return;
-                      navigate(`/account/${normalizeAccountAddress(originalSigner) || originalSigner}`);
+                      navigate(
+                        `/account/${normalizeAccountAddress(originalSigner) || originalSigner}`,
+                      );
                     }}
                   >
                     {originalSigner ? `Signer: ${originalSigner}` : 'Signer: (unknown)'}
@@ -124,4 +139,3 @@ function PinboardMessagesList({ messages, onMessageClick, loading, showIndex = t
 }
 
 export default PinboardMessagesList;
-

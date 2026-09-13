@@ -103,9 +103,7 @@ export function buildTransactionViewFromRpc({
 }) {
   const code = abciResult?.code != null ? Number(abciResult.code) : null;
   const status = code === 0 ? 'Success' : code != null ? 'Failed' : 'Unknown';
-  const timestamp = blockTime
-    ? Math.floor(new Date(blockTime).getTime() / 1000)
-    : 0;
+  const timestamp = blockTime ? Math.floor(new Date(blockTime).getTime() / 1000) : 0;
 
   return {
     id: null,
@@ -136,7 +134,7 @@ export function mergeIndexedWithRpcView(indexed, rpcView) {
       indexed.log,
       indexed.reason,
       indexed.error,
-      indexed.message
+      indexed.message,
     ),
     gas_used: indexed.gas_used ?? rpcView.gas_used,
     timestamp: indexed.timestamp ?? rpcView.timestamp,
@@ -202,11 +200,9 @@ export function buildBlockTransactionRows(
   parsedTxs,
   indexedTransactions,
   blockResults,
-  blockHeight
+  blockHeight,
 ) {
-  const indexedByBlockIndex = new Map(
-    indexedTransactions.map((tx) => [tx.block_index, tx])
-  );
+  const indexedByBlockIndex = new Map(indexedTransactions.map((tx) => [tx.block_index, tx]));
 
   return parsedTxs.map(({ parsedData, index }) => {
     const indexed = indexedByBlockIndex.get(index);
@@ -230,7 +226,7 @@ export function buildBlockTransactionRows(
       executionStatus,
       abciLog: firstNonEmptyTrimmed(
         deliverTxFailureMessage(indexed),
-        deliverTxLogFromAbciResult(abciResult)
+        deliverTxLogFromAbciResult(abciResult),
       ),
     };
   });

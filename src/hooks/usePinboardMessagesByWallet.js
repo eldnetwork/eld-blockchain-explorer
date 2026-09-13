@@ -63,7 +63,8 @@ function usePinboardMessagesByWallet(wallet, page = 0, pageSize = DEFAULT_PAGE_S
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
-          const log = data?.result?.response?.log || data?.result?.response?.info || 'Pinboard query failed';
+          const log =
+            data?.result?.response?.log || data?.result?.response?.info || 'Pinboard query failed';
           setError(log);
           setMessages([]);
           setHasMore(false);
@@ -98,4 +99,3 @@ function usePinboardMessagesByWallet(wallet, page = 0, pageSize = DEFAULT_PAGE_S
 }
 
 export default usePinboardMessagesByWallet;
-

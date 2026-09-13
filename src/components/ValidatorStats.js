@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import useValidators from '../hooks/useValidators';
@@ -14,9 +13,22 @@ const STAT_DEFINITIONS = [
 
 function ValidatorStats() {
   const navigate = useNavigate();
-  const { validators, loading: validatorsLoading, isInitialLoad: validatorsInitialLoad } = useValidators();
-  const { allProviders, loading: providersLoading, isInitialLoad: providersInitialLoad } = useCapacityProviders();
-  const { totalRewards, loading: rewardsSumLoading, error: rewardsSumError, isInitialLoad: rewardsInitialLoad } = useVerifiedProofRewardsSum();
+  const {
+    validators,
+    loading: validatorsLoading,
+    isInitialLoad: validatorsInitialLoad,
+  } = useValidators();
+  const {
+    allProviders,
+    loading: providersLoading,
+    isInitialLoad: providersInitialLoad,
+  } = useCapacityProviders();
+  const {
+    totalRewards,
+    loading: rewardsSumLoading,
+    error: rewardsSumError,
+    isInitialLoad: rewardsInitialLoad,
+  } = useVerifiedProofRewardsSum();
 
   const isInitialLoad = validatorsInitialLoad || providersInitialLoad;
 
@@ -64,14 +76,21 @@ function ValidatorStats() {
 
   if (isInitialLoad) {
     return (
-      <section className="explorer-home__stats-grid explorer-home__stats-grid--validators" aria-label="Validator stats">
+      <section
+        className="explorer-home__stats-grid explorer-home__stats-grid--validators"
+        aria-label="Validator stats"
+      >
         {STAT_DEFINITIONS.map((stat) => (
           <div key={stat.label} className="explorer-home__stat-card">
             <Stat>
               <StatLabel className="explorer-home__stat-label">
                 <Skeleton height="10px" width="140px" />
               </StatLabel>
-              <StatNumber className="explorer-home__stat-value" fontFamily="mono" transition="all 0.2s">
+              <StatNumber
+                className="explorer-home__stat-value"
+                fontFamily="mono"
+                transition="all 0.2s"
+              >
                 <Skeleton height="32px" width="80px" display="block" mt={2} />
               </StatNumber>
             </Stat>
@@ -82,7 +101,10 @@ function ValidatorStats() {
   }
 
   return (
-    <section className="explorer-home__stats-grid explorer-home__stats-grid--validators" aria-label="Validator stats">
+    <section
+      className="explorer-home__stats-grid explorer-home__stats-grid--validators"
+      aria-label="Validator stats"
+    >
       {STAT_DEFINITIONS.map((stat, index) => (
         <div
           key={stat.label}

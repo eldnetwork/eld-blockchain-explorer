@@ -58,9 +58,7 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
     total: null,
   });
   /** `boundaries[i]` — `after_epoch` for slice `i` (`boundaries[0]` is always null). */
-  const [boundaries, setBoundaries] = useState(
-    /** @type {AfterEpochContinuation[]} */ ([null])
-  );
+  const [boundaries, setBoundaries] = useState(/** @type {AfterEpochContinuation[]} */ ([null]));
   const [activePage, setActivePage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

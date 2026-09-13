@@ -26,10 +26,14 @@ async function deserializeManifest(bincodeBytes) {
   try {
     // Dynamic import to avoid errors if package is not installed
     const bincodeModule = await import('@bincode/bincode-js').catch(() => null);
-    if (bincodeModule && bincodeModule.deserialize && typeof bincodeModule.deserialize === 'function') {
+    if (
+      bincodeModule &&
+      bincodeModule.deserialize &&
+      typeof bincodeModule.deserialize === 'function'
+    ) {
       return bincodeModule.deserialize(bincodeBytes);
     }
-  } catch (e) {
+  } catch (_e) {
     // Package not available, continue with fallback
   }
 
@@ -38,7 +42,7 @@ async function deserializeManifest(bincodeBytes) {
   // Structure: id, content_id, metadata, status, created_at, chunks, redundancy_factor, total_size
   return {
     _raw: Array.from(bincodeBytes),
-    _note: 'Bincode deserialization requires @bincode/bincode-js package'
+    _note: 'Bincode deserialization requires @bincode/bincode-js package',
   };
 }
 
@@ -53,13 +57,13 @@ function useContentManifests() {
       setError(null);
       try {
         const response = await fetch(
-          `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify('cado_list'))}&data=${encodeURIComponent(JSON.stringify(CONTENT_MANIFEST_PATH))}&prove=false`
+          `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify('cado_list'))}&data=${encodeURIComponent(JSON.stringify(CONTENT_MANIFEST_PATH))}&prove=false`,
         );
 
         const data = await response.json();
-        
+
         console.log('Content manifests response:', data);
-        
+
         if (data.error || data.result?.response?.code !== 0) {
           const errorMsg = data.result?.response?.log || data.error?.message || 'Query failed';
           console.error('Query failed:', errorMsg, data);
@@ -87,16 +91,23 @@ function useContentManifests() {
             console.error('Failed to parse value field:', e);
           }
         }
-        
+
         if (!cados) {
-          console.warn('No CADO data found in response. Response structure:', data.result?.response);
+          console.warn(
+            'No CADO data found in response. Response structure:',
+            data.result?.response,
+          );
           setManifests([]);
           setLoading(false);
           return;
         }
-          
+
         if (!Array.isArray(cados)) {
-          console.error('Invalid response format: expected array of CADOs, got:', typeof cados, cados);
+          console.error(
+            'Invalid response format: expected array of CADOs, got:',
+            typeof cados,
+            cados,
+          );
           setError('Invalid response format: expected array of CADOs');
           setLoading(false);
           return;
@@ -108,33 +119,37 @@ function useContentManifests() {
         const deserializationPromises = cados.map(async (cado, index) => {
           try {
             console.log(`Processing CADO ${index + 1}/${cados.length}:`, cado);
-            
+
             // Extract a key/ID from the CADO structure
-            let manifestId = cado.key || cado.Immutable?.key || cado.Mutable?.key || `cado-${index}`;
-            
+            let manifestId =
+              cado.key || cado.Immutable?.key || cado.Mutable?.key || `cado-${index}`;
+
             // Extract data based on CADO type
             const cadoData = cado.Immutable?.data || cado.Mutable?.data;
-            
+
             // Base manifest object from CADO
             const baseManifest = {
               id: manifestId,
               _cadoType: cado.Immutable ? 'Immutable' : 'Mutable',
               _cado: cado,
-              _index: index
+              _index: index,
             };
-            
+
             // Try to deserialize if we have data
             if (cadoData) {
               try {
                 // Decode base64 to get bincode bytes
                 const bincodeBytes = base64ToUint8Array(cadoData);
-                
+
                 if (bincodeBytes) {
-                  console.log(`CADO ${index + 1} decoded, bincode bytes length:`, bincodeBytes.length);
-                  
+                  console.log(
+                    `CADO ${index + 1} decoded, bincode bytes length:`,
+                    bincodeBytes.length,
+                  );
+
                   // Try to deserialize bincode to ContentManifest
                   const deserialized = await deserializeManifest(bincodeBytes);
-                  
+
                   // If deserialization returned something useful (not just _raw), merge it
                   if (deserialized && !deserialized._note) {
                     console.log(`CADO ${index + 1} deserialized successfully:`, deserialized);
@@ -144,17 +159,22 @@ function useContentManifests() {
                     }
                     return {
                       ...deserialized,
-                      ...baseManifest
+                      ...baseManifest,
                     };
                   } else {
-                    console.log(`CADO ${index + 1} deserialization returned raw data, using CADO structure`);
+                    console.log(
+                      `CADO ${index + 1} deserialization returned raw data, using CADO structure`,
+                    );
                   }
                 }
               } catch (deserializeErr) {
-                console.warn(`Failed to deserialize CADO ${index + 1}, using CADO data:`, deserializeErr);
+                console.warn(
+                  `Failed to deserialize CADO ${index + 1}, using CADO data:`,
+                  deserializeErr,
+                );
               }
             }
-            
+
             // Return CADO data even if deserialization failed or wasn't attempted
             return baseManifest;
           } catch (err) {
@@ -165,16 +185,16 @@ function useContentManifests() {
               _cadoType: cado.Immutable ? 'Immutable' : 'Mutable',
               _cado: cado,
               _index: index,
-              _error: err.message
+              _error: err.message,
             };
           }
         });
-        
+
         // Wait for all processing to complete
         const processedManifests = await Promise.all(deserializationPromises);
-        
+
         console.log(`Processed ${processedManifests.length} manifests from ${cados.length} CADOs`);
-        
+
         setManifests(processedManifests);
       } catch (err) {
         setError('Failed to fetch content manifests: ' + err.message);

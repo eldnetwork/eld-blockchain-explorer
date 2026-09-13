@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Heading, HStack, Link, Text } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import usePinboardPostByPath from '../hooks/usePinboardPostByPath';
@@ -28,7 +28,10 @@ function decodeBase64Payload(messageB64) {
   }
 
   try {
-    const normalized = String(messageB64).replace(/[\r\n]/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    const normalized = String(messageB64)
+      .replace(/[\r\n]/g, '')
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
     const padding = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
     const base64 = normalized + padding;
     const binary = atob(base64);
@@ -184,18 +187,25 @@ function PinboardPostPage() {
   const blobStatus = String(post?.blob_status || 'unknown').toLowerCase();
 
   if (loading) return <Box className="explorer-record__state">Loading post...</Box>;
-  if (error) return <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>;
+  if (error)
+    return (
+      <Box className="explorer-record__state explorer-record__state--error">Error: {error}</Box>
+    );
   if (!post) return <Box className="explorer-record__state">No post found</Box>;
 
   return (
     <Box className="explorer-record">
       <HStack className="explorer-record__crumbs" spacing={4}>
-        <Link as={RouterLink} to="/" className="explorer-record__crumb-link">← Explorer</Link>
+        <Link as={RouterLink} to="/" className="explorer-record__crumb-link">
+          ← Explorer
+        </Link>
         <Text className="explorer-record__crumb-sep">Post</Text>
         <Text className="explorer-record__crumb-current">{messageId}</Text>
       </HStack>
 
-      <Heading className="explorer-record__title" as="h1">PINBOARD POST</Heading>
+      <Heading className="explorer-record__title" as="h1">
+        PINBOARD POST
+      </Heading>
 
       <Box mb={6}>
         <Link as={RouterLink} to="/" className="explorer-record__crumb-link">
@@ -204,36 +214,89 @@ function PinboardPostPage() {
       </Box>
 
       <section className="explorer-record__section">
-        <h2><span /> GENERAL INFORMATION</h2>
+        <h2>
+          <span /> GENERAL INFORMATION
+        </h2>
         <div className="explorer-record__kv-grid">
-          <div><span>MESSAGE ID</span><strong className="explorer-record__mono">{post?.meta?.message_id || messageId || 'N/A'}</strong></div>
+          <div>
+            <span>MESSAGE ID</span>
+            <strong className="explorer-record__mono">
+              {post?.meta?.message_id || messageId || 'N/A'}
+            </strong>
+          </div>
           <div>
             <span>SIGNER</span>
             <strong className="explorer-record__mono">
               <Link
-                onClick={() => navigate(`/account/${normalizeAccountAddress(post?.meta?.original_signer || wallet) || (post?.meta?.original_signer || wallet)}`)}
+                onClick={() =>
+                  navigate(
+                    `/account/${normalizeAccountAddress(post?.meta?.original_signer || wallet) || post?.meta?.original_signer || wallet}`,
+                  )
+                }
                 className="explorer-record__tx-hash"
               >
                 {post?.meta?.original_signer || wallet || 'N/A'}
               </Link>
             </strong>
           </div>
-          <div><span>BLOB STATUS</span><strong>{blobStatus}</strong></div>
-          <div><span>CONTENT TYPE</span><strong>{contentType || 'N/A'}</strong></div>
-          <div><span>TOPIC</span><strong>{post?.meta?.topic || 'N/A'}</strong></div>
-          <div><span>VISIBILITY</span><strong>{post?.meta?.visibility || 'N/A'}</strong></div>
-          <div><span>RECEIVED</span><strong>{post?.meta?.received_timestamp ? new Date(post.meta.received_timestamp * 1000).toLocaleString() : 'N/A'}</strong></div>
-          <div><span>COMMITTED HEIGHT</span><strong>{post?.meta?.committed_height ?? 'N/A'}</strong></div>
-          <div><span>EXPIRES HEIGHT</span><strong>{post?.meta?.expires_height ?? 'N/A'}</strong></div>
-          <div><span>CONTENT KEY</span><strong className="explorer-record__mono">{post?.meta?.content_key || 'N/A'}</strong></div>
-          <div><span>CADO PATH</span><strong className="explorer-record__mono">{post?.cado_path || cadoPath || 'N/A'}</strong></div>
-          <div><span>TAGS</span><strong>{Array.isArray(post?.meta?.tags) && post.meta.tags.length > 0 ? post.meta.tags.join(', ') : 'N/A'}</strong></div>
+          <div>
+            <span>BLOB STATUS</span>
+            <strong>{blobStatus}</strong>
+          </div>
+          <div>
+            <span>CONTENT TYPE</span>
+            <strong>{contentType || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>TOPIC</span>
+            <strong>{post?.meta?.topic || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>VISIBILITY</span>
+            <strong>{post?.meta?.visibility || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>RECEIVED</span>
+            <strong>
+              {post?.meta?.received_timestamp
+                ? new Date(post.meta.received_timestamp * 1000).toLocaleString()
+                : 'N/A'}
+            </strong>
+          </div>
+          <div>
+            <span>COMMITTED HEIGHT</span>
+            <strong>{post?.meta?.committed_height ?? 'N/A'}</strong>
+          </div>
+          <div>
+            <span>EXPIRES HEIGHT</span>
+            <strong>{post?.meta?.expires_height ?? 'N/A'}</strong>
+          </div>
+          <div>
+            <span>CONTENT KEY</span>
+            <strong className="explorer-record__mono">{post?.meta?.content_key || 'N/A'}</strong>
+          </div>
+          <div>
+            <span>CADO PATH</span>
+            <strong className="explorer-record__mono">
+              {post?.cado_path || cadoPath || 'N/A'}
+            </strong>
+          </div>
+          <div>
+            <span>TAGS</span>
+            <strong>
+              {Array.isArray(post?.meta?.tags) && post.meta.tags.length > 0
+                ? post.meta.tags.join(', ')
+                : 'N/A'}
+            </strong>
+          </div>
         </div>
       </section>
 
       {customNamespace?.registered === true && (
         <section className="explorer-record__section">
-          <h2><span /> CUSTOM NAMESPACE</h2>
+          <h2>
+            <span /> CUSTOM NAMESPACE
+          </h2>
           <div className="explorer-record__kv-grid">
             <div>
               <span>SCOPE</span>
@@ -284,7 +347,9 @@ function PinboardPostPage() {
       )}
 
       <section className="explorer-record__section">
-        <h2><span /> CONTENT</h2>
+        <h2>
+          <span /> CONTENT
+        </h2>
         {blobStatus === 'expired' || blobStatus === 'missing' ? (
           <Text className="explorer-tx__muted">
             This post is {blobStatus}. Metadata is available, but blob content is not.
@@ -301,7 +366,11 @@ function PinboardPostPage() {
               </Text>
             )}
             <Box className="explorer-pinboard-post__image-wrap">
-              <img src={decoded.dataUrl} alt="Pinboard attachment" className="explorer-pinboard-post__image" />
+              <img
+                src={decoded.dataUrl}
+                alt="Pinboard attachment"
+                className="explorer-pinboard-post__image"
+              />
             </Box>
           </Box>
         ) : decoded.renderKind === 'json-error' && decoded.text != null ? (
@@ -313,7 +382,10 @@ function PinboardPostPage() {
             <Text className="explorer-tx__muted" fontSize="sm" mb={2}>
               {decoded.jsonError}
             </Text>
-            <Box as="pre" className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre">
+            <Box
+              as="pre"
+              className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre"
+            >
               {decoded.text}
             </Box>
           </Box>
@@ -323,12 +395,17 @@ function PinboardPostPage() {
               {decoded.declared ? `${decoded.declared} · ` : ''}
               rendered as {decoded.effectiveKind} ({decoded.bytesLength} bytes)
             </Text>
-            <Box as="pre" className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre">
+            <Box
+              as="pre"
+              className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre"
+            >
               {decoded.text}
             </Box>
           </Box>
         ) : decoded.renderKind === 'invalid' ? (
-          <Text className="explorer-tx__muted">Unable to decode message payload (invalid base64).</Text>
+          <Text className="explorer-tx__muted">
+            Unable to decode message payload (invalid base64).
+          </Text>
         ) : decoded.renderKind === 'binary' ? (
           <Text className="explorer-tx__muted">
             Payload is not valid UTF-8 text for this content type
@@ -344,16 +421,19 @@ function PinboardPostPage() {
 
       {post?.message_b64 && (
         <section className="explorer-record__section">
-          <h2><span /> RAW BASE64</h2>
-          <Box as="pre" className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre">
+          <h2>
+            <span /> RAW BASE64
+          </h2>
+          <Box
+            as="pre"
+            className="explorer-tx__pre explorer-record__mono explorer-pinboard-post__pre"
+          >
             {post.message_b64}
           </Box>
         </section>
       )}
-
     </Box>
   );
 }
 
 export default PinboardPostPage;
-

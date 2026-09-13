@@ -18,4 +18,3 @@ export function normalizeAccountAddress(value) {
 export function isAccountHexAddress(value) {
   return normalizeAccountAddress(value) !== null;
 }
-

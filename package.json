@@ -15,39 +15,30 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.15.0",
+    "axios": "^1.20.0",
     "buffer": "^6.0.3",
     "crypto-js": "^4.2.0",
     "framer-motion": "^10.16.0",
     "js-sha256": "^0.11.0",
-    "protobufjs": "^7.4.0",
+    "protobufjs": "^8.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0",
-    "react-scripts": "5.0.1",
-    "tweetnacl": "^1.0.3",
-    "web-vitals": "^2.1.4"
+    "react-router-dom": "^7.18.3",
+    "tweetnacl": "^1.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "DISABLE_ESLint_PLUGIN=true react-scripts build",
     "preview": "npx --yes serve -s build",
+    "lint": "eslint src eslint.config.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "react-scripts test",
-    "ci": "CI=true npm test -- --watchAll=false && npm run build",
+    "ci": "npm run format:check && npm run lint && CI=true npm test -- --watchAll=false && npm audit --omit=dev --audit-level=high && npm run build",
     "eject": "react-scripts eject"
   },
   "engines": {
     "node": ">=20.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -60,5 +51,19 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "5.17.0",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^13.5.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
   }
 }

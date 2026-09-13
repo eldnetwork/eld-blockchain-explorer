@@ -48,9 +48,7 @@ function useNamespaces(pageSize = DEFAULT_PAGE_SIZE) {
     /** @type {number | null} */
     total: null,
   });
-  const [boundaries, setBoundaries] = useState(
-    /** @type {Continuation[]} */ ([null])
-  );
+  const [boundaries, setBoundaries] = useState(/** @type {Continuation[]} */ ([null]));
   const [activePage, setActivePage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
