@@ -1,9 +1,13 @@
 {
   "name": "eld-blockchain-explorer",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Block explorer UI for the Eld decentralized ephemeral storage protocol",
   "homepage": "https://explorer.eld.network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eldnetwork/eld-blockchain-explorer.git"
+  },
   "author": "Eld",
   "license": "MIT",
   "dependencies": {
