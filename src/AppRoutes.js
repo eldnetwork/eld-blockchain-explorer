@@ -5,7 +5,7 @@ import BlockPage from './pages/BlockPage';
 import ContentPage from './pages/ContentPage';
 import ValidatorsPage from './pages/ValidatorsPage';
 import ValidatorPage from './pages/ValidatorPage';
-import SingleValidatorPage from './pages/SingleValidatorPage';
+import CapacityProviderPage from './pages/CapacityProviderPage';
 import CapacityProvidersPage from './pages/CapacityProvidersPage';
 import PinboardPage from './pages/PinboardPage';
 import PinboardPostPage from './pages/PinboardPostPage';
@@ -13,7 +13,7 @@ import SingleEpochPage from './pages/SingleEpochPage';
 import NamespacePage from './pages/NamespacePage';
 import HomePage from './pages/HomePage';
 
-function LegacyStorageValidatorRedirect() {
+function LegacyCapacityProviderRedirect() {
   const { address } = useParams();
   return <Navigate to={`/capacity-provider/${address ?? ''}`} replace />;
 }
@@ -32,8 +32,8 @@ function AppRoutes() {
       <Route path="/pinboard" element={<PinboardPage />} />
       <Route path="/pinboard/post/:wallet/:messageId" element={<PinboardPostPage />} />
       <Route path="/validator/:address" element={<ValidatorPage />} />
-      <Route path="/capacity-provider/:address" element={<SingleValidatorPage />} />
-      <Route path="/storage-validator/:address" element={<LegacyStorageValidatorRedirect />} />
+      <Route path="/capacity-provider/:address" element={<CapacityProviderPage />} />
+      <Route path="/storage-validator/:address" element={<LegacyCapacityProviderRedirect />} />
       <Route path="/content/:contentId" element={<ContentPage />} />
       <Route path="/epoch/:epochId" element={<SingleEpochPage />} />
       <Route path="/namespaces/:namespaceSlug" element={<NamespacePage />} />

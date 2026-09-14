@@ -156,7 +156,7 @@ function AdminBlockchainStorageSection({ blockchainState }) {
   );
 }
 
-function SingleValidatorPage() {
+function CapacityProviderPage() {
   const { address } = useParams();
   const navigate = useNavigate();
   const decodedAddress = address ? decodeURIComponent(address) : null;
@@ -291,7 +291,7 @@ function SingleValidatorPage() {
             )}
             {provider.storage_capacity !== undefined && (
               <div>
-                <span>STORAGE CAPACITY</span>
+                <span>CAPACITY</span>
                 <strong>
                   {typeof provider.storage_capacity === 'number'
                     ? provider.storage_capacity.toLocaleString()
@@ -397,7 +397,7 @@ function SingleValidatorPage() {
             {!rewardsLoading && !rewardsError && rewardsData != null && (
               <>
                 <div>
-                  <span>TOTAL REWARDS (STORAGE)</span>
+                  <span>TOTAL REWARDS (CAPACITY)</span>
                   <strong>{formatELDAmount(rewardsData.total_rewards)}</strong>
                 </div>
                 {typeof rewardsData.successful_proofs === 'number' &&
@@ -483,4 +483,4 @@ function SingleValidatorPage() {
   );
 }
 
-export default SingleValidatorPage;
+export default CapacityProviderPage;

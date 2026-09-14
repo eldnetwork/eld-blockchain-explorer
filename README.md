@@ -20,7 +20,7 @@ This repository is the **explorer frontend only** — not the Eld protocol, cons
 
 - It reads public RPC and indexer HTTP APIs; it does not custody keys or submit transactions.
 - Displayed chain data depends on those backends and may be incomplete, delayed, or wrong.
-- **Capacity provider** is the canonical product term; legacy `/storage-providers` and `/storage-validator/:address` routes redirect to the capacity-provider pages.
+- The UI uses **capacity provider** as the product term for that role.
 - For protocol docs and the marketing site, see [Documentation](https://docs.eld.network) and [eld.network](https://www.eld.network).
 
 ## Architecture

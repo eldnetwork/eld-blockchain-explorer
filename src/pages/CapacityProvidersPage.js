@@ -91,7 +91,7 @@ function CapacityProviderList({ providers, loading }) {
                 </HStack>
                 {provider.storage_capacity !== undefined && (
                   <Text fontSize="xs" className="explorer-page__muted">
-                    Storage Capacity:{' '}
+                    Capacity:{' '}
                     {typeof provider.storage_capacity === 'number'
                       ? provider.storage_capacity.toLocaleString()
                       : provider.storage_capacity}

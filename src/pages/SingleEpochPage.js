@@ -61,7 +61,7 @@ function CapacityProviderList({ providers, navigate, emptyLabel }) {
                 fontSize="xs"
                 color="var(--lh-muted, rgba(243, 243, 240, 0.68))"
               >
-                <Text>Storage: {formatBytes(provider.storage_capacity)}</Text>
+                <Text>Capacity: {formatBytes(provider.storage_capacity)}</Text>
                 <Text>
                   Chunks:{' '}
                   {provider.chunk_count?.toLocaleString?.() ?? provider.chunk_count ?? 'N/A'}
@@ -141,7 +141,7 @@ function SingleEpochPage() {
     );
   if (!epoch) return <Box className="explorer-record__state">No epoch found</Box>;
 
-  const storageValidator = epoch.storage_validator || {};
+  const capacityValidator = epoch.capacity_validator || epoch.storage_validator || {};
   const epochLabel = epoch.epoch ?? epochId;
 
   return (
@@ -209,37 +209,37 @@ function SingleEpochPage() {
         </div>
       </section>
 
-      {storageValidator.validator_address && (
+      {capacityValidator.validator_address && (
         <section className="explorer-record__section">
           <h2>
-            <span /> STORAGE VALIDATOR
+            <span /> CAPACITY VALIDATOR
           </h2>
           <div className="explorer-record__kv-grid">
             <div>
               <span>VALIDATOR ADDRESS</span>
               <strong className="explorer-record__mono">
                 <Link
-                  onClick={() => goToAccount(storageValidator.validator_address)}
+                  onClick={() => goToAccount(capacityValidator.validator_address)}
                   className="explorer-record__tx-hash"
                 >
-                  {storageValidator.validator_address}
+                  {capacityValidator.validator_address}
                 </Link>
               </strong>
             </div>
             <div>
               <span>EPOCH</span>
-              <strong>{storageValidator.epoch ?? 'N/A'}</strong>
+              <strong>{capacityValidator.epoch ?? 'N/A'}</strong>
             </div>
             <div>
               <span>CHALLENGED PROVIDERS</span>
-              <strong>{storageValidator.challenged_providers?.length ?? 0}</strong>
+              <strong>{capacityValidator.challenged_providers?.length ?? 0}</strong>
             </div>
             <div>
               <span>SUBSCRIBED TOPICS</span>
-              <strong>{storageValidator.subscribed_topics?.length ?? 0}</strong>
+              <strong>{capacityValidator.subscribed_topics?.length ?? 0}</strong>
             </div>
           </div>
-          {storageValidator.challenged_providers?.length > 0 && (
+          {capacityValidator.challenged_providers?.length > 0 && (
             <Box px={4} pb={4}>
               <Text
                 fontSize="xs"
@@ -251,7 +251,7 @@ function SingleEpochPage() {
                 Challenged provider addresses
               </Text>
               <VStack align="stretch" spacing={1}>
-                {storageValidator.challenged_providers.map((address) => (
+                {capacityValidator.challenged_providers.map((address) => (
                   <Text
                     key={address}
                     className="explorer-record__mono explorer-record__tx-hash"
@@ -265,7 +265,7 @@ function SingleEpochPage() {
               </VStack>
             </Box>
           )}
-          {storageValidator.subscribed_topics?.length > 0 && (
+          {capacityValidator.subscribed_topics?.length > 0 && (
             <Box px={4} pb={4}>
               <Text
                 fontSize="xs"
@@ -277,7 +277,7 @@ function SingleEpochPage() {
                 Subscribed topics
               </Text>
               <VStack align="stretch" spacing={1}>
-                {storageValidator.subscribed_topics.map((topic) => (
+                {capacityValidator.subscribed_topics.map((topic) => (
                   <Text key={topic} className="explorer-record__mono" fontSize="xs">
                     {topic}
                   </Text>
