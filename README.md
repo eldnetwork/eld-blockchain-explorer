@@ -37,7 +37,6 @@ Copy `.env.example` into `.env.development` (and `.env.production` for productio
 | ----------------------------------------- | ------------------------------------------------------------------ |
 | `REACT_APP_RPC_URL`                       | Tendermint / node RPC base URL                                     |
 | `REACT_APP_API_URL`                       | Explorer / indexer API base URL                                    |
-| `REACT_APP_FAUCET_URL`                    | Testnet faucet base URL                                            |
 | `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | `true` to load optional validator admin status URLs (dev-oriented) |
 
 For local validator admin status (optional), also copy the example config files:

@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import TransactionPage from './pages/TransactionPage';
 import AccountPage from './pages/AccountPage';
 import BlockPage from './pages/BlockPage';
-import WalletPage from './pages/WalletPage';
 import ContentPage from './pages/ContentPage';
 import ValidatorsPage from './pages/ValidatorsPage';
 import ValidatorPage from './pages/ValidatorPage';
@@ -27,7 +26,6 @@ function AppRoutes() {
       <Route path="/account/:address" element={<AccountPage />} />
       <Route path="/block/:height/tx/:index" element={<TransactionPage />} />
       <Route path="/block/:height" element={<BlockPage />} />
-      <Route path="/wallet" element={<WalletPage />} />
       <Route path="/validators" element={<ValidatorsPage />} />
       <Route path="/capacity-providers" element={<CapacityProvidersPage />} />
       <Route path="/storage-providers" element={<Navigate to="/capacity-providers" replace />} />
