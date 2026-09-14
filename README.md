@@ -10,11 +10,43 @@
 
 Eld Blockchain Explorer is the public block explorer UI for the [Eld](https://www.eld.network) decentralized ephemeral storage protocol, built with [Create React App](https://create-react-app.dev/) and React.
 
-This repository is the explorer frontend only — not the Eld protocol, node software, or SDKs. For protocol docs and the marketing site, see [Documentation](https://docs.eld.network) and [eld.network](https://www.eld.network).
-
-In the UI and docs, **capacity provider** is the canonical term (legacy `/storage-providers` and `/storage-validator/:address` routes redirect to the capacity-provider pages).
-
 **Live site:** [https://explorer.eld.network](https://explorer.eld.network)
+
+![Eld Blockchain Explorer home page](docs/screenshot-home.png)
+
+## Disclaimer
+
+This repository is the **explorer frontend only** — not the Eld protocol, consensus node, indexer, SDKs, or a wallet.
+
+- It reads public RPC and indexer HTTP APIs; it does not custody keys or submit transactions.
+- Displayed chain data depends on those backends and may be incomplete, delayed, or wrong.
+- **Capacity provider** is the canonical product term; legacy `/storage-providers` and `/storage-validator/:address` routes redirect to the capacity-provider pages.
+- For protocol docs and the marketing site, see [Documentation](https://docs.eld.network) and [eld.network](https://www.eld.network).
+
+## Architecture
+
+```text
+Browser (React SPA)
+  └─ App → ExplorerAppShell → AppRoutes → pages/
+       ├─ hooks/          data fetching (blocks, txs, epochs, pinboard, …)
+       ├─ components/     shared UI (lists, shell, footer, …)
+       ├─ utils/          formatting and helpers
+       └─ config/         RPC_URL, API_URL, feature flags
+              │
+              ├─ REACT_APP_RPC_URL  → Tendermint / node RPC
+              └─ REACT_APP_API_URL  → explorer / indexer API
+```
+
+| Layer | Role |
+| --- | --- |
+| `src/App.js` | `BrowserRouter` entry |
+| `src/components/ExplorerAppShell.js` | chrome (header, theme, footer) |
+| `src/AppRoutes.js` | client-side routes |
+| `src/pages/` | route screens (home, block, tx, account, validators, pinboard, …) |
+| `src/hooks/` | `fetch` wrappers against `RPC_URL` / `API_URL` |
+| `src/config/` | env-backed endpoints and optional validator admin status maps |
+
+Static output is a CRA `build/` folder; deploy that behind any static host / CDN.
 
 ## Prerequisites
 
@@ -29,19 +61,19 @@ cp .env.example .env.production
 npm start
 ```
 
-This starts a local dev server at [http://localhost:3000](http://localhost:3000). Most changes reload automatically.
+Dev server: [http://localhost:3000](http://localhost:3000). CRA loads `.env.development` for `npm start`.
+
+Calling production RPC/API hosts from `localhost` may fail CORS; use local backends, a same-origin proxy, or an allowlisted origin.
 
 ### Environment variables
 
-Copy `.env.example` into `.env.development` (and `.env.production` for production builds), then set:
+| Variable | Required | Description |
+| --- | --- | --- |
+| `REACT_APP_RPC_URL` | yes | Tendermint / node RPC base URL (default `http://localhost:26657`) |
+| `REACT_APP_API_URL` | yes | Explorer / indexer API base URL (default `http://localhost:9001`) |
+| `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | no | `true` to load optional per-validator admin status URLs (dev-oriented; default off) |
 
-| Variable                                  | Description                                                        |
-| ----------------------------------------- | ------------------------------------------------------------------ |
-| `REACT_APP_RPC_URL`                       | Tendermint / node RPC base URL                                     |
-| `REACT_APP_API_URL`                       | Explorer / indexer API base URL                                    |
-| `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | `true` to load optional validator admin status URLs (dev-oriented) |
-
-For local validator admin status (optional), also copy the example config files:
+Optional admin-status URL maps (only when the flag is enabled):
 
 ```bash
 cp src/config/validator-admin-status-urls.development.json.example \
@@ -50,27 +82,22 @@ cp src/config/validator-admin-status-urls.production.json.example \
    src/config/validator-admin-status-urls.production.json
 ```
 
-## Build
+## Scripts
 
-```bash
-npm run build
-```
-
-Static output is written to the `build/` directory.
-
-To preview the production build locally:
-
-```bash
-npm run preview
-```
-
-## CI
+| Script | Description |
+| --- | --- |
+| `npm start` | CRA dev server |
+| `npm run build` | Production build → `build/` |
+| `npm run preview` | Serve the production build locally |
+| `npm test` | Jest (interactive by default) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier write |
+| `npm run format:check` | Prettier check |
+| `npm run ci` | `format:check` → `lint` → tests → `npm audit --omit=dev --audit-level=high` → `build` |
 
 ```bash
 npm run ci
 ```
-
-Runs format check, lint, tests, audit, and production build.
 
 ## Links
 
