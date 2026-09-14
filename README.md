@@ -75,14 +75,10 @@ Calling production RPC/API hosts from `localhost` may fail CORS; use local backe
 | `VITE_API_URL`                       | yes      | Explorer / indexer API base URL (default `http://localhost:9001`)                   |
 | `VITE_ENABLE_VALIDATOR_ADMIN_STATUS` | no       | `true` to load optional per-validator admin status URLs (dev-oriented; default off) |
 
-Optional admin-status URL maps (only when the flag is enabled):
+When the flag is on, URL maps come from committed JSON:
 
-```bash
-cp src/config/validator-admin-status-urls.development.json.example \
-   src/config/validator-admin-status-urls.development.json
-cp src/config/validator-admin-status-urls.production.json.example \
-   src/config/validator-admin-status-urls.production.json
-```
+- `src/config/validator-admin-status-urls.development.json` — localhost examples for local runs
+- `src/config/validator-admin-status-urls.production.json` — empty by default; add production URLs here if needed
 
 ## Scripts
 
