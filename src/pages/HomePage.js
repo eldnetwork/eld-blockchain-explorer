@@ -205,10 +205,10 @@ function HomePage() {
             gap={4}
           >
             <Box order={{ base: 2, lg: 'unset' }} w="full">
-              <PinboardContentList />
+              <TransactionsList />
             </Box>
             <Box order={{ base: 3, lg: 'unset' }} w="full">
-              <TransactionsList />
+              <PinboardContentList />
             </Box>
           </Box>
         </Flex>
