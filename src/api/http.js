@@ -69,7 +69,7 @@ export async function requestJson(url, options = {}) {
  * @param {...unknown} args
  */
 export function debugLog(...args) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.DEV) {
     console.log(...args);
   }
 }

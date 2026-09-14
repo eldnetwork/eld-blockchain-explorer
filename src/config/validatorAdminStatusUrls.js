@@ -3,7 +3,7 @@ import devUrls from './validator-admin-status-urls.development.json';
 import prodUrls from './validator-admin-status-urls.production.json';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
-const byEnv = process.env.NODE_ENV === 'production' ? prodUrls : devUrls;
+const byEnv = import.meta.env.PROD ? prodUrls : devUrls;
 
 /**
  * @param {string | undefined | null} address

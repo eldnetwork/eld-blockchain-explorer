@@ -2,6 +2,7 @@
   "name": "eld-blockchain-explorer",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Eld Blockchain Explorer — UI for the Eld decentralized ephemeral storage protocol",
   "homepage": "https://explorer.eld.network",
   "repository": {
@@ -25,15 +26,16 @@
     "react-router-dom": "^7.18.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "DISABLE_ESLint_PLUGIN=true react-scripts build",
-    "preview": "npx --yes serve -s build",
-    "lint": "eslint src eslint.config.mjs",
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src eslint.config.mjs vite.config.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "react-scripts test",
-    "ci": "npm run format:check && npm run lint && CI=true npm test -- --watchAll=false && npm audit --omit=dev --audit-level=high && npm run build",
-    "eject": "react-scripts eject"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ci": "npm run format:check && npm run lint && npm test && npm audit --omit=dev --audit-level=high && npm run build"
   },
   "engines": {
     "node": ">=20.0"
@@ -50,18 +52,41 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "@chakra-ui/react": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@chakra-ui/system": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@emotion/react": {
+      "react": "$react"
+    },
+    "@emotion/styled": {
+      "react": "$react"
+    },
+    "framer-motion": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "5.17.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^17.12.0",
+    "jsdom": "^26.0.0",
     "prettier": "^3.9.6",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "vite": "^6.2.0",
+    "vitest": "^3.0.5"
   }
 }

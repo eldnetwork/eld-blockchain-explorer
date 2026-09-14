@@ -16,7 +16,7 @@ class RouteErrorBoundary extends Component {
   }
 
   componentDidCatch(error) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       console.error('RouteErrorBoundary', error);
     }
   }
