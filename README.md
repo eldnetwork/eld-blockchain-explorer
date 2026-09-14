@@ -37,14 +37,14 @@ Browser (React SPA)
               └─ REACT_APP_API_URL  → explorer / indexer API
 ```
 
-| Layer | Role |
-| --- | --- |
-| `src/App.js` | `BrowserRouter` entry |
-| `src/components/ExplorerAppShell.js` | chrome (header, theme, footer) |
-| `src/AppRoutes.js` | client-side routes |
-| `src/pages/` | route screens (home, block, tx, account, validators, pinboard, …) |
-| `src/hooks/` | `fetch` wrappers against `RPC_URL` / `API_URL` |
-| `src/config/` | env-backed endpoints and optional validator admin status maps |
+| Layer                                | Role                                                              |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| `src/App.js`                         | `BrowserRouter` entry                                             |
+| `src/components/ExplorerAppShell.js` | chrome (header, theme, footer)                                    |
+| `src/AppRoutes.js`                   | client-side routes                                                |
+| `src/pages/`                         | route screens (home, block, tx, account, validators, pinboard, …) |
+| `src/hooks/`                         | `fetch` wrappers against `RPC_URL` / `API_URL`                    |
+| `src/config/`                        | env-backed endpoints and optional validator admin status maps     |
 
 Static output is a CRA `build/` folder; deploy that behind any static host / CDN.
 
@@ -67,11 +67,11 @@ Calling production RPC/API hosts from `localhost` may fail CORS; use local backe
 
 ### Environment variables
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `REACT_APP_RPC_URL` | yes | Tendermint / node RPC base URL (default `http://localhost:26657`) |
-| `REACT_APP_API_URL` | yes | Explorer / indexer API base URL (default `http://localhost:9001`) |
-| `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | no | `true` to load optional per-validator admin status URLs (dev-oriented; default off) |
+| Variable                                  | Required | Description                                                                         |
+| ----------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `REACT_APP_RPC_URL`                       | yes      | Tendermint / node RPC base URL (default `http://localhost:26657`)                   |
+| `REACT_APP_API_URL`                       | yes      | Explorer / indexer API base URL (default `http://localhost:9001`)                   |
+| `REACT_APP_ENABLE_VALIDATOR_ADMIN_STATUS` | no       | `true` to load optional per-validator admin status URLs (dev-oriented; default off) |
 
 Optional admin-status URL maps (only when the flag is enabled):
 
@@ -84,16 +84,16 @@ cp src/config/validator-admin-status-urls.production.json.example \
 
 ## Scripts
 
-| Script | Description |
-| --- | --- |
-| `npm start` | CRA dev server |
-| `npm run build` | Production build → `build/` |
-| `npm run preview` | Serve the production build locally |
-| `npm test` | Jest (interactive by default) |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier write |
-| `npm run format:check` | Prettier check |
-| `npm run ci` | `format:check` → `lint` → tests → `npm audit --omit=dev --audit-level=high` → `build` |
+| Script                 | Description                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| `npm start`            | CRA dev server                                                                        |
+| `npm run build`        | Production build → `build/`                                                           |
+| `npm run preview`      | Serve the production build locally                                                    |
+| `npm test`             | Jest (interactive by default)                                                         |
+| `npm run lint`         | ESLint                                                                                |
+| `npm run format`       | Prettier write                                                                        |
+| `npm run format:check` | Prettier check                                                                        |
+| `npm run ci`           | `format:check` → `lint` → tests → `npm audit --omit=dev --audit-level=high` → `build` |
 
 ```bash
 npm run ci
