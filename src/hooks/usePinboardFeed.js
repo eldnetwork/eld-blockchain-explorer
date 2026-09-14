@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { rpcPost, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -34,69 +34,62 @@ async function pinboardFeedQuery({ order, page, pageSize, signal }) {
 }
 
 function usePinboardFeed(order = 'desc', page = 0, pageSize = DEFAULT_PAGE_SIZE) {
-  const [items, setItems] = useState([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [effectivePage, setEffectivePage] = useState(page);
-  const [effectivePageSize, setEffectivePageSize] = useState(pageSize);
-  const [effectiveOrder, setEffectiveOrder] = useState(order);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const ac = new AbortController();
-
-    async function fetchFeed() {
-      setLoading(true);
-      setError(null);
-
+  const { data, loading, error } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await pinboardFeedQuery({ order, page, pageSize, signal: ac.signal });
+        const rpcData = await pinboardFeedQuery({ order, page, pageSize, signal });
 
-        const code = data?.result?.response?.code;
+        const code = rpcData?.result?.response?.code;
         if (code !== 0) {
-          const log =
-            data?.result?.response?.log ||
-            data?.result?.response?.info ||
-            'Pinboard feed query failed';
-          setError(log);
-          setItems([]);
-          setHasMore(false);
-          return;
+          throw new Error(
+            rpcData?.result?.response?.log ||
+              rpcData?.result?.response?.info ||
+              'Pinboard feed query failed',
+          );
         }
 
-        if (!data?.result?.response?.info) {
-          setError('Missing response.info payload from pinboard_feed query');
-          setItems([]);
-          setHasMore(false);
-          return;
+        if (!rpcData?.result?.response?.info) {
+          throw new Error('Missing response.info payload from pinboard_feed query');
         }
 
-        const payload = JSON.parse(data.result.response.info);
-        setItems(Array.isArray(payload.items) ? payload.items : []);
-        setEffectivePage(typeof payload.page === 'number' ? payload.page : page);
-        setEffectivePageSize(typeof payload.page_size === 'number' ? payload.page_size : pageSize);
-        setEffectiveOrder(typeof payload.order === 'string' ? payload.order : order);
-        setHasMore(Boolean(payload.has_more));
+        const payload = JSON.parse(rpcData.result.response.info);
+        return {
+          items: Array.isArray(payload.items) ? payload.items : [],
+          hasMore: Boolean(payload.has_more),
+          page: typeof payload.page === 'number' ? payload.page : page,
+          pageSize: typeof payload.page_size === 'number' ? payload.page_size : pageSize,
+          order: typeof payload.order === 'string' ? payload.order : order,
+        };
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(`Failed to fetch pinboard feed: ${err.message}`);
-        setItems([]);
-        setHasMore(false);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        if (
+          err instanceof Error &&
+          (err.message === 'Missing response.info payload from pinboard_feed query' ||
+            err.message === 'Pinboard feed query failed' ||
+            !err.message.startsWith('HTTP'))
+        ) {
+          throw err;
+        }
+        throw new Error(`Failed to fetch pinboard feed: ${err.message}`);
       }
-    }
-
-    fetchFeed();
-    return () => ac.abort();
-  }, [order, page, pageSize]);
+    },
+    deps: [order, page, pageSize],
+    initialData: {
+      items: [],
+      hasMore: false,
+      page,
+      pageSize,
+      order,
+    },
+    resetDataOnError: true,
+  });
 
   return {
-    items,
-    hasMore,
-    page: effectivePage,
-    pageSize: effectivePageSize,
-    order: effectiveOrder,
+    items: data?.items ?? [],
+    hasMore: data?.hasMore ?? false,
+    page: data?.page ?? page,
+    pageSize: data?.pageSize ?? pageSize,
+    order: data?.order ?? order,
     loading,
     error,
   };

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 /**
  * @typedef {object} NamespaceDetail
@@ -17,48 +17,31 @@ import { indexerGet, isAbortError } from '../api';
  * @param {string | undefined} namespaceSlug
  */
 function useNamespace(namespaceSlug) {
-  const [namespace, setNamespace] = useState(/** @type {NamespaceDetail | null} */ (null));
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const trimmed = namespaceSlug?.trim() || '';
 
-  useEffect(() => {
-    if (!namespaceSlug?.trim()) {
-      setNamespace(null);
-      setLoading(false);
-      setError(null);
-      return undefined;
-    }
-
-    const trimmed = namespaceSlug.trim();
-    const slug = encodeURIComponent(trimmed);
-    const ac = new AbortController();
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      setNamespace(null);
-
+  const {
+    data: namespace,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await indexerGet(`/v1/namespace/${slug}`, { signal: ac.signal });
-        setNamespace(data);
+        const slug = encodeURIComponent(trimmed);
+        return await indexerGet(`/v1/namespace/${slug}`, { signal });
       } catch (err) {
-        if (isAbortError(err) || ac.signal.aborted) return;
-        // Indexer returns 404 with `{ registered: false, ... }` for unknown slugs.
-        if (err.status === 404) {
-          setNamespace({ registered: false, namespace_slug: trimmed });
-          return;
+        if (isAbortError(err) || err?.status === 404) {
+          if (err?.status === 404) {
+            return { registered: false, namespace_slug: trimmed };
+          }
+          throw err;
         }
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        if (!ac.signal.aborted) {
-          setLoading(false);
-        }
+        throw new Error(err instanceof Error ? err.message : String(err));
       }
-    }
-
-    load();
-    return () => ac.abort();
-  }, [namespaceSlug]);
+    },
+    deps: [trimmed],
+    enabled: Boolean(trimmed),
+    clearOnDisabled: true,
+  });
 
   return { namespace, loading, error };
 }

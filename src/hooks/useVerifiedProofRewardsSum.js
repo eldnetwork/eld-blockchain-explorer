@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
 import { indexerGet } from '../api';
-import { fetchWithRetry } from '../utils/retryFetch';
+import useAsyncResource from './useAsyncResource';
 
 const SUM_PATH = '/v1/capacity/verified-proof-rewards/sum';
 const REFRESH_INTERVAL_MS = 10000;
@@ -23,56 +22,18 @@ async function fetchSumOnce(signal) {
  * @returns {{ totalRewards: string | null, loading: boolean, error: string | null, isInitialLoad: boolean }}
  */
 function useVerifiedProofRewardsSum() {
-  const [totalRewards, setTotalRewards] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    let retryTimeoutId = null;
-    const ac = new AbortController();
-
-    async function fetchSum(isRefresh = false) {
-      if (!isRefresh) {
-        setLoading(true);
-        setError(null);
-      }
-
-      const result = await fetchWithRetry(() => fetchSumOnce(ac.signal), {
-        signal: ac.signal,
-        cancelled: () => cancelled,
-        isRefresh,
-        onExhausted: () => {
-          retryTimeoutId = setTimeout(() => {
-            if (!cancelled) fetchSum(false);
-          }, REFRESH_INTERVAL_MS);
-        },
-      });
-
-      if (cancelled || result.aborted || !result.ok) return;
-
-      setTotalRewards(result.value);
-      setError(null);
-      if (!isRefresh) {
-        setLoading(false);
-        setIsInitialLoad(false);
-      }
-    }
-
-    fetchSum();
-
-    const intervalId = setInterval(() => {
-      fetchSum(true);
-    }, REFRESH_INTERVAL_MS);
-
-    return () => {
-      cancelled = true;
-      ac.abort();
-      clearInterval(intervalId);
-      if (retryTimeoutId) clearTimeout(retryTimeoutId);
-    };
-  }, []);
+  const {
+    data: totalRewards,
+    loading,
+    error,
+    isInitialLoad,
+  } = useAsyncResource({
+    fetcher: fetchSumOnce,
+    deps: [],
+    intervalMs: REFRESH_INTERVAL_MS,
+    retry: true,
+    errorMessage: 'Failed to load verified proof rewards',
+  });
 
   return { totalRewards, loading, error, isInitialLoad };
 }

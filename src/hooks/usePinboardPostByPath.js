@@ -1,46 +1,30 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function usePinboardPostByPath(cadoPath) {
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!cadoPath) {
-      setPost(null);
-      setLoading(false);
-      setError(null);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-
-    async function fetchPost() {
-      setLoading(true);
-      setError(null);
+  const {
+    data: post,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
         const params = new URLSearchParams({ path: cadoPath });
-        const data = await indexerGet(`/v1/pinboard/post?${params.toString()}`, {
-          signal: ac.signal,
-        });
-        setPost(data || null);
+        const data = await indexerGet(`/v1/pinboard/post?${params.toString()}`, { signal });
+        return data || null;
       } catch (err) {
-        if (isAbortError(err)) return;
+        if (isAbortError(err)) throw err;
         if (err.status === 404) {
-          setError('Failed to fetch pinboard post: Post not found');
-        } else {
-          setError(`Failed to fetch pinboard post: ${err.message}`);
+          throw new Error('Failed to fetch pinboard post: Post not found');
         }
-        setPost(null);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        throw new Error(`Failed to fetch pinboard post: ${err.message}`);
       }
-    }
-
-    fetchPost();
-    return () => ac.abort();
-  }, [cadoPath]);
+    },
+    deps: [cadoPath],
+    enabled: Boolean(cadoPath),
+    clearOnDisabled: true,
+    resetDataOnError: true,
+  });
 
   return { post, loading, error };
 }

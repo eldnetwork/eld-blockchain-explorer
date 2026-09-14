@@ -31,7 +31,7 @@ export default [
       ...react.configs.flat['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/set-state-in-effect': 'error',
       'react-hooks/static-components': 'off',
       'react-hooks/immutability': 'off',
       'react-hooks/purity': 'off',

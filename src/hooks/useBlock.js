@@ -1,37 +1,28 @@
-import { useState, useEffect } from 'react';
 import { rpcGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function useBlock(height) {
-  const [block, setBlock] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!height) return undefined;
-
-    const ac = new AbortController();
-
-    async function fetchBlock() {
-      setLoading(true);
-      setError(null);
+  const {
+    data: block,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await rpcGet(`/block?height=${height}`, { signal: ac.signal });
-        if (data.result && data.result.block) {
-          setBlock(data.result.block);
-        } else {
-          setError('Block not found');
+        const data = await rpcGet(`/block?height=${height}`, { signal });
+        if (data.result?.block) {
+          return data.result.block;
         }
+        throw new Error('Block not found');
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError('Failed to fetch block: ' + err.message);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        if (err instanceof Error && err.message === 'Block not found') throw err;
+        throw new Error('Failed to fetch block: ' + err.message);
       }
-    }
-
-    fetchBlock();
-    return () => ac.abort();
-  }, [height]);
+    },
+    deps: [height],
+    enabled: Boolean(height),
+  });
 
   return { block, loading, error };
 }

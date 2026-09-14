@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Box, Heading, Text, HStack, Skeleton, Link } from '@chakra-ui/react';
 import useCapacityProviders from '../hooks/useCapacityProviders';
 import useVerifiedProofRewards from '../hooks/useVerifiedProofRewards';
+import useAsyncResource from '../hooks/useAsyncResource';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 import { formatELDAmount } from '../utils/formatAmount';
 import { ENABLE_VALIDATOR_ADMIN_STATUS } from '../config';
@@ -170,45 +170,24 @@ function CapacityProviderPage() {
 
   const adminStatusUrl = getValidatorAdminStatusUrl(decodedAddress);
 
-  const [adminPayload, setAdminPayload] = useState(null);
-  const [adminLoading, setAdminLoading] = useState(false);
-  const [adminError, setAdminError] = useState(null);
-
-  useEffect(() => {
-    if (!adminStatusUrl) {
-      setAdminPayload(null);
-      setAdminLoading(false);
-      setAdminError(null);
-      return;
-    }
-
-    const ac = new AbortController();
-    setAdminLoading(true);
-    setAdminError(null);
-    setAdminPayload(null);
-
-    fetch(adminStatusUrl, { signal: ac.signal, credentials: 'omit' })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setAdminPayload(data);
-        setAdminError(null);
-      })
-      .catch((err) => {
-        if (err.name === 'AbortError') return;
-        setAdminPayload(null);
-        setAdminError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        if (!ac.signal.aborted) setAdminLoading(false);
-      });
-
-    return () => ac.abort();
-  }, [adminStatusUrl]);
+  const {
+    data: adminPayload,
+    loading: adminLoading,
+    error: adminError,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
+      const res = await fetch(adminStatusUrl, { signal, credentials: 'omit' });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    },
+    deps: [adminStatusUrl],
+    enabled: Boolean(adminStatusUrl),
+    clearOnDisabled: true,
+    resetDataOnError: true,
+    errorMessage: (err) => (err instanceof Error ? err.message : String(err)),
+  });
 
   const {
     data: rewardsData,

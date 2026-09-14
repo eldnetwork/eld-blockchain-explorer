@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -50,64 +50,49 @@ export async function findLastPinboardPostsPageIndex(pageSize, order, { signal }
 }
 
 function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
-  const [items, setItems] = useState([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    page,
-    page_size: pageSize,
-    next_cursor: null,
-  });
-
-  useEffect(() => {
-    const ac = new AbortController();
-
-    async function fetchPosts() {
-      setLoading(true);
-      setError(null);
+  const { data, loading, error } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
         const params = new URLSearchParams({
           order,
           page: String(page),
           page_size: String(pageSize),
         });
-        const data = await indexerGet(`/v1/pinboard/posts?${params.toString()}`, {
-          signal: ac.signal,
-        });
-        const nextItems = Array.isArray(data?.items) ? data.items : [];
-        const nextPagination = data?.pagination || {};
-
-        setItems(nextItems);
-        setHasMore(Boolean(nextPagination.has_more));
-        setPagination({
+        const result = await indexerGet(`/v1/pinboard/posts?${params.toString()}`, { signal });
+        const nextItems = Array.isArray(result?.items) ? result.items : [];
+        const nextPagination = result?.pagination || {};
+        return {
+          items: nextItems,
+          hasMore: Boolean(nextPagination.has_more),
           page: typeof nextPagination.page === 'number' ? nextPagination.page : page,
-          page_size:
+          pageSize:
             typeof nextPagination.page_size === 'number' ? nextPagination.page_size : pageSize,
-          next_cursor: nextPagination.next_cursor ?? null,
-        });
+          nextCursor: nextPagination.next_cursor ?? null,
+        };
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(`Failed to fetch pinboard posts: ${err.message}`);
-        setItems([]);
-        setHasMore(false);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        throw new Error(`Failed to fetch pinboard posts: ${err.message}`);
       }
-    }
-
-    fetchPosts();
-    return () => ac.abort();
-  }, [order, page, pageSize]);
+    },
+    deps: [order, page, pageSize],
+    initialData: {
+      items: [],
+      hasMore: false,
+      page,
+      pageSize,
+      nextCursor: null,
+    },
+    resetDataOnError: true,
+  });
 
   return {
-    items,
-    hasMore,
+    items: data?.items ?? [],
+    hasMore: data?.hasMore ?? false,
     loading,
     error,
-    page: pagination.page,
-    pageSize: pagination.page_size,
-    nextCursor: pagination.next_cursor,
+    page: data?.page ?? page,
+    pageSize: data?.pageSize ?? pageSize,
+    nextCursor: data?.nextCursor ?? null,
   };
 }
 

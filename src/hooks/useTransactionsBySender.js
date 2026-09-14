@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 const PAGE_LIMIT = 50;
 /** Safety cap ~10k txs for one account fetch. */
@@ -17,79 +17,74 @@ async function fetchSenderPage(senderAddress, continuation, { signal } = {}) {
   return indexerGet(`/transactions?${params}`, { signal });
 }
 
-function useTransactionsBySender(senderAddress) {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+async function fetchAllSenderTransactions(senderAddress, signal) {
+  const aggregated = [];
+  let continuation = null;
+  let pages = 0;
 
-  useEffect(() => {
-    if (!senderAddress) {
-      setLoading(false);
-      return undefined;
+  while (pages < MAX_PAGES) {
+    const data = await fetchSenderPage(senderAddress, continuation, { signal });
+    if (signal.aborted) {
+      throw new DOMException('The operation was aborted.', 'AbortError');
     }
+    pages += 1;
 
-    const ac = new AbortController();
+    const batch = Array.isArray(data.transactions)
+      ? data.transactions
+      : Array.isArray(data)
+        ? data
+        : null;
+    if (!batch) {
+      throw new Error('Invalid response format');
+    }
+    aggregated.push(...batch);
 
-    async function fetchAll() {
-      setLoading(true);
-      setError(null);
+    const hasNext =
+      batch.length > 0 && data.pagination != null ? Boolean(data.pagination.has_next) : false;
+    if (!hasNext) break;
+
+    const last = batch[batch.length - 1];
+    continuation = {
+      after_height: last.block_height,
+      after_index: last.block_index,
+    };
+  }
+
+  aggregated.sort((a, b) => {
+    const ha = a.block_height ?? 0;
+    const hb = b.block_height ?? 0;
+    if (hb !== ha) return hb - ha;
+    const ia = a.block_index ?? 0;
+    const ib = b.block_index ?? 0;
+    return ib - ia;
+  });
+
+  return aggregated;
+}
+
+function useTransactionsBySender(senderAddress) {
+  const {
+    data: transactions,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const aggregated = [];
-        let continuation = null;
-        let pages = 0;
-
-        while (pages < MAX_PAGES) {
-          const data = await fetchSenderPage(senderAddress, continuation, { signal: ac.signal });
-          if (ac.signal.aborted) return;
-          pages += 1;
-
-          const batch = Array.isArray(data.transactions)
-            ? data.transactions
-            : Array.isArray(data)
-              ? data
-              : null;
-          if (!batch) {
-            setError('Invalid response format');
-            return;
-          }
-          aggregated.push(...batch);
-
-          const hasNext =
-            batch.length > 0 && data.pagination != null ? Boolean(data.pagination.has_next) : false;
-          if (!hasNext) break;
-
-          const last = batch[batch.length - 1];
-          continuation = {
-            after_height: last.block_height,
-            after_index: last.block_index,
-          };
-        }
-
-        aggregated.sort((a, b) => {
-          const ha = a.block_height ?? 0;
-          const hb = b.block_height ?? 0;
-          if (hb !== ha) return hb - ha;
-          const ia = a.block_index ?? 0;
-          const ib = b.block_index ?? 0;
-          return ib - ia;
-        });
-
-        setTransactions(aggregated);
+        return await fetchAllSenderTransactions(senderAddress, signal);
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(
+        if (isAbortError(err)) throw err;
+        if (err instanceof Error && err.message === 'Invalid response format') throw err;
+        throw new Error(
           'Failed to fetch transactions: ' + (err instanceof Error ? err.message : String(err)),
         );
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
       }
-    }
+    },
+    deps: [senderAddress],
+    enabled: Boolean(senderAddress),
+    initialData: [],
+  });
 
-    fetchAll();
-    return () => ac.abort();
-  }, [senderAddress]);
-
-  return { transactions, loading, error };
+  return { transactions: transactions ?? [], loading, error };
 }
 
 export default useTransactionsBySender;

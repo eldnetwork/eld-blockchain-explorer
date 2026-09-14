@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { Box, Text } from '@chakra-ui/react';
 import { resolveSearchQuery } from '../utils/resolveSearch';
-import { isAbortError } from '../api';
+import useAsyncResource from '../hooks/useAsyncResource';
 import NotFoundPage from './NotFoundPage';
 import './ExplorerDataPages.css';
 
@@ -12,37 +11,19 @@ import './ExplorerDataPages.css';
 function SearchPage() {
   const [params] = useSearchParams();
   const q = params.get('q') || '';
-  const navigate = useNavigate();
-  const [failed, setFailed] = useState(false);
+  const trimmed = q.trim();
+  const { data: hit, loading } = useAsyncResource({
+    fetcher: (signal) => resolveSearchQuery(q, { signal }),
+    deps: [q],
+    enabled: Boolean(trimmed),
+  });
 
-  useEffect(() => {
-    if (!q.trim()) {
-      setFailed(true);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-    setFailed(false);
-
-    resolveSearchQuery(q, { signal: ac.signal })
-      .then((hit) => {
-        if (ac.signal.aborted) return;
-        if (hit?.path) {
-          navigate(hit.path, { replace: true });
-        } else {
-          setFailed(true);
-        }
-      })
-      .catch((err) => {
-        if (isAbortError(err) || ac.signal.aborted) return;
-        setFailed(true);
-      });
-
-    return () => ac.abort();
-  }, [q, navigate]);
-
-  if (failed) {
+  if (!trimmed || (!loading && !hit?.path)) {
     return <NotFoundPage title="No results" />;
+  }
+
+  if (hit?.path) {
+    return <Navigate to={hit.path} replace />;
   }
 
   return (

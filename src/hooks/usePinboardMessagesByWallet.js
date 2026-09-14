@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { rpcPost, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -28,71 +28,60 @@ async function pinboardQuery({ innerPath, signal }) {
 }
 
 function usePinboardMessagesByWallet(wallet, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
-  const [messages, setMessages] = useState([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [effectivePage, setEffectivePage] = useState(page);
-  const [effectivePageSize, setEffectivePageSize] = useState(pageSize);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!wallet) {
-      setMessages([]);
-      setHasMore(false);
-      setEffectivePage(page);
-      setEffectivePageSize(pageSize);
-      setLoading(false);
-      setError(null);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-
-    async function fetchMessages() {
-      setLoading(true);
-      setError(null);
-
+  const { data, loading, error } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
         const innerPath = `/@eld/pinboard/wallet/${wallet}/${page}/${pageSize}`;
-        const data = await pinboardQuery({ innerPath, signal: ac.signal });
+        const rpcData = await pinboardQuery({ innerPath, signal });
 
-        const code = data?.result?.response?.code;
+        const code = rpcData?.result?.response?.code;
         if (code !== 0) {
-          const log =
-            data?.result?.response?.log || data?.result?.response?.info || 'Pinboard query failed';
-          setError(log);
-          setMessages([]);
-          setHasMore(false);
-          return;
+          throw new Error(
+            rpcData?.result?.response?.log ||
+              rpcData?.result?.response?.info ||
+              'Pinboard query failed',
+          );
         }
 
-        if (!data?.result?.response?.info) {
-          setError('Missing response.info payload from pinboard query');
-          setMessages([]);
-          setHasMore(false);
-          return;
+        if (!rpcData?.result?.response?.info) {
+          throw new Error('Missing response.info payload from pinboard query');
         }
 
-        const payload = JSON.parse(data.result.response.info);
-        setMessages(Array.isArray(payload.items) ? payload.items : []);
-        setEffectivePage(typeof payload.page === 'number' ? payload.page : page);
-        setEffectivePageSize(typeof payload.page_size === 'number' ? payload.page_size : pageSize);
-        setHasMore(Boolean(payload.has_more));
+        const payload = JSON.parse(rpcData.result.response.info);
+        return {
+          messages: Array.isArray(payload.items) ? payload.items : [],
+          hasMore: Boolean(payload.has_more),
+          page: typeof payload.page === 'number' ? payload.page : page,
+          pageSize: typeof payload.page_size === 'number' ? payload.page_size : pageSize,
+        };
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(`Failed to fetch pinboard messages: ${err.message}`);
-        setMessages([]);
-        setHasMore(false);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        if (
+          err instanceof Error &&
+          (err.message === 'Missing response.info payload from pinboard query' ||
+            err.message === 'Pinboard query failed' ||
+            !err.message.startsWith('HTTP'))
+        ) {
+          throw err;
+        }
+        throw new Error(`Failed to fetch pinboard messages: ${err.message}`);
       }
-    }
+    },
+    deps: [wallet, page, pageSize],
+    enabled: Boolean(wallet),
+    clearOnDisabled: true,
+    resetDataOnError: true,
+    initialData: { messages: [], hasMore: false, page, pageSize },
+  });
 
-    fetchMessages();
-    return () => ac.abort();
-  }, [wallet, page, pageSize]);
-
-  return { messages, hasMore, page: effectivePage, pageSize: effectivePageSize, loading, error };
+  return {
+    messages: data?.messages ?? [],
+    hasMore: data?.hasMore ?? false,
+    page: data?.page ?? page,
+    pageSize: data?.pageSize ?? pageSize,
+    loading,
+    error,
+  };
 }
 
 export default usePinboardMessagesByWallet;

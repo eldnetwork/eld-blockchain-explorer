@@ -1,51 +1,32 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError, debugLog } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function useEvents(txid) {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!txid) {
-      setLoading(false);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-
-    async function fetchEvents() {
-      setLoading(true);
-      setError(null);
+  const {
+    data: events,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await indexerGet(`/events?txid=${encodeURIComponent(txid)}`, {
-          signal: ac.signal,
-        });
-
-        if (Array.isArray(data)) {
-          setEvents(data);
-        } else if (data.events && Array.isArray(data.events)) {
-          setEvents(data.events);
-        } else if (data.event) {
-          setEvents([data.event]);
-        } else {
-          setEvents([]);
-        }
+        const data = await indexerGet(`/events?txid=${encodeURIComponent(txid)}`, { signal });
+        if (Array.isArray(data)) return data;
+        if (data.events && Array.isArray(data.events)) return data.events;
+        if (data.event) return [data.event];
+        return [];
       } catch (err) {
-        if (isAbortError(err)) return;
+        if (isAbortError(err)) throw err;
         debugLog('Error fetching events:', err);
-        setError('Failed to fetch events: ' + err.message);
-        setEvents([]);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        throw new Error('Failed to fetch events: ' + err.message);
       }
-    }
+    },
+    deps: [txid],
+    enabled: Boolean(txid),
+    initialData: [],
+    resetDataOnError: true,
+  });
 
-    fetchEvents();
-    return () => ac.abort();
-  }, [txid]);
-
-  return { events, loading, error };
+  return { events: events ?? [], loading, error };
 }
 
 export default useEvents;

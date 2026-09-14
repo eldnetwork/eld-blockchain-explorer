@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import useTransaction from '../hooks/useTransaction';
 import useBlockTransaction from '../hooks/useBlockTransaction';
@@ -50,33 +49,17 @@ function TransactionPage() {
   const eventsLoadingResolved = eventsTxId ? eventsLoading : false;
   const eventsErrorResolved = eventsTxId ? eventsError : null;
 
-  const [contractId, setContractId] = useState(null);
-
-  // Extract contract_id from AddContract transaction
-  useEffect(() => {
-    if (!transaction) return;
-
-    const tx = transaction.tx || {};
-    const payload = tx.payload || {};
-    const txType = payload.type || 'Unknown';
-
-    if (txType === 'AddContract') {
-      // Check payload first
-      let id = payload.contract_id || payload.id;
-
-      // If not in payload, check events for contract_id
-      if (!id && events && events.length > 0) {
-        const contractEvent = events.find((e) => e.contract_id || e.id);
-        id = contractEvent?.contract_id || contractEvent?.id;
-      }
-
-      setContractId(id);
-    } else {
-      setContractId(null);
+  const payloadForContract = transaction?.tx?.payload || {};
+  const isAddContractTx = (payloadForContract.type || 'Unknown') === 'AddContract';
+  let contractId = null;
+  if (isAddContractTx) {
+    contractId = payloadForContract.contract_id || payloadForContract.id || null;
+    if (!contractId && events?.length) {
+      const contractEvent = events.find((e) => e.contract_id || e.id);
+      contractId = contractEvent?.contract_id || contractEvent?.id || null;
     }
-  }, [transaction, events]);
+  }
 
-  // Call useContract hook before any early returns (React Hooks rule)
   const { contract, loading: contractLoading, error: contractError } = useContract(contractId);
 
   // Extract WASM bytecode (before early returns)

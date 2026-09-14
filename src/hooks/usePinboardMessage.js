@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { rpcPost, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function stringToHex(str) {
   let hex = '';
@@ -36,44 +36,28 @@ async function pinboardQuery({ innerPath, signal }) {
 }
 
 function usePinboardMessage(wallet, messageId) {
-  const [message, setMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!wallet || !messageId) {
-      setMessage(null);
-      setLoading(false);
-      setError(null);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-
-    async function fetchMessage() {
-      setLoading(true);
-      setError(null);
-
+  const {
+    data: message,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
         const innerPath = `/@eld/pinboard/post/${wallet}/${messageId}`;
-        const data = await pinboardQuery({ innerPath, signal: ac.signal });
+        const data = await pinboardQuery({ innerPath, signal });
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
-          const log =
+          throw new Error(
             data?.result?.response?.log ||
-            data?.result?.response?.info ||
-            'Pinboard post not found';
-          setError(log);
-          setMessage(null);
-          return;
+              data?.result?.response?.info ||
+              'Pinboard post not found',
+          );
         }
 
         const info = data?.result?.response?.info;
         if (!info) {
-          setError('Missing response.info payload from pinboard post query');
-          setMessage(null);
-          return;
+          throw new Error('Missing response.info payload from pinboard post query');
         }
 
         const payload = JSON.parse(info);
@@ -92,25 +76,31 @@ function usePinboardMessage(wallet, messageId) {
           }
         }
 
-        setMessage({
+        return {
           meta,
           message_b64: messageB64,
           decodedText,
           decodedBytesLength,
           rawResponse: data?.result?.response ?? null,
-        });
+        };
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(`Failed to fetch pinboard message: ${err.message}`);
-        setMessage(null);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        if (
+          err instanceof Error &&
+          (err.message === 'Missing response.info payload from pinboard post query' ||
+            err.message === 'Pinboard post not found' ||
+            !err.message.startsWith('HTTP'))
+        ) {
+          throw err;
+        }
+        throw new Error(`Failed to fetch pinboard message: ${err.message}`);
       }
-    }
-
-    fetchMessage();
-    return () => ac.abort();
-  }, [wallet, messageId]);
+    },
+    deps: [wallet, messageId],
+    enabled: Boolean(wallet && messageId),
+    clearOnDisabled: true,
+    resetDataOnError: true,
+  });
 
   return { message, loading, error };
 }

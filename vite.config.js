@@ -16,16 +16,7 @@ export default defineConfig({
     outDir: 'build',
     sourcemap: true,
   },
-  resolve: {
-    alias: {
-      buffer: 'buffer/',
-    },
-  },
-  define: {
-    global: 'globalThis',
-  },
   optimizeDeps: {
-    include: ['buffer'],
     esbuildOptions: {
       loader: {
         '.js': 'jsx',

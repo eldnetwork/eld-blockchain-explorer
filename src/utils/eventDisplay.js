@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { decodeBase64ToUtf8, utf8ToBase64 } from './bytes';
 
 const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
@@ -34,10 +34,10 @@ export function tryDecodeBase64Utf8(input) {
   if (!BASE64_RE.test(normalized)) return input;
 
   try {
-    const decoded = Buffer.from(normalized, 'base64').toString('utf-8');
+    const decoded = decodeBase64ToUtf8(normalized);
     if (!decoded || decoded.includes('\uFFFD')) return input;
 
-    const roundTrip = stripBase64Padding(Buffer.from(decoded, 'utf-8').toString('base64'));
+    const roundTrip = stripBase64Padding(utf8ToBase64(decoded));
     const original = stripBase64Padding(normalized);
     if (roundTrip === original) return decoded;
 

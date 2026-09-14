@@ -1,36 +1,24 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function useEpoch(epochRef = 'current') {
-  const [epoch, setEpoch] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!epochRef) return undefined;
-
-    const ac = new AbortController();
-
-    async function fetchEpoch() {
-      setLoading(true);
-      setError(null);
+  const {
+    data: epoch,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await indexerGet(`/epoch/${encodeURIComponent(epochRef)}`, {
-          signal: ac.signal,
-        });
-        setEpoch(data);
+        return await indexerGet(`/epoch/${encodeURIComponent(epochRef)}`, { signal });
       } catch (err) {
-        if (isAbortError(err)) return;
-        setError(err.message || 'Failed to fetch epoch');
-        setEpoch(null);
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        if (isAbortError(err)) throw err;
+        throw new Error(err.message || 'Failed to fetch epoch');
       }
-    }
-
-    fetchEpoch();
-    return () => ac.abort();
-  }, [epochRef]);
+    },
+    deps: [epochRef],
+    enabled: Boolean(epochRef),
+    resetDataOnError: true,
+  });
 
   return { epoch, loading, error };
 }

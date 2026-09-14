@@ -46,17 +46,18 @@ Resolve any conflicts locally, re-run the checks below, then push.
 
 ### Run the same checks as CI
 
-GitHub Actions runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which executes `npm run ci`. Run that locally before you push or request review so failures surface on your machine first:
+GitHub Actions runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which executes `npm run ci`. Run tests with `npm test`, and run the full CI gate with `npm run ci` before you push or request review so failures surface on your machine first:
 
 ```bash
+npm test
 npm run ci
 ```
 
-That runs, in order:
+`npm run ci` runs, in order:
 
 - `npm run format:check` (Prettier)
 - `npm run lint` (ESLint)
-- non-interactive tests (`CI=true npm test -- --watchAll=false`)
+- `npm test` (Vitest)
 - `npm audit --omit=dev --audit-level=high`
 - `npm run build`
 

@@ -45,6 +45,11 @@ async function fetchTransactionsPage(limit, continuation, { signal } = {}) {
  *
  * @param {number} pageSize
  */
+function continuationKey(continuation) {
+  if (continuation == null) return 'root';
+  return `${continuation.after_height}:${continuation.after_index}`;
+}
+
 function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({
@@ -56,7 +61,7 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
   /** `boundaries[i]` — continuation tuple for fetching slice `i` (`boundaries[0]` is always null). */
   const [boundaries, setBoundaries] = useState(/** @type {Continuation[]} */ ([null]));
   const [activePage, setActivePage] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [resolvedKey, setResolvedKey] = useState(null);
   const [error, setError] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [pagerJumping, setPagerJumping] = useState(false);
@@ -76,10 +81,6 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
   }, []);
 
   const loadPage = useCallback(async (continuation, isRefresh = false, signal) => {
-    if (!isRefresh) {
-      setLoading(true);
-      setError(null);
-    }
     try {
       const lim = pageSizeRef.current;
       const { transactions: txs, pagination: pag } = await fetchTransactionsPage(
@@ -96,19 +97,23 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
         has_next: Boolean(pag.has_next),
         total: pag.total == null ? null : Number(pag.total),
       });
+      setError(null);
     } catch (err) {
       if (isAbortError(err) || signal?.aborted) return;
       setError(err instanceof Error ? err.message : String(err));
       setTransactions([]);
     } finally {
       if (!isRefresh && !signal?.aborted) {
-        setLoading(false);
         setIsInitialLoad(false);
+        setResolvedKey(continuationKey(continuation));
       }
     }
   }, []);
 
   const continuation = boundaries[activePage] ?? null;
+  const requestKey = continuationKey(continuation);
+  const loading = resolvedKey !== requestKey;
+  const visibleError = resolvedKey === requestKey ? error : null;
 
   useEffect(() => {
     const ac = new AbortController();
@@ -207,7 +212,7 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
     transactions,
     pagination,
     loading,
-    error,
+    error: visibleError,
     isInitialLoad,
     activePage,
     pagerJumping,

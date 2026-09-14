@@ -1,47 +1,30 @@
-import { useState, useEffect } from 'react';
 import { isAbortError } from '../api';
 import { fetchBlockTransactionAtIndex } from '../utils/blockTransactions';
+import useAsyncResource from './useAsyncResource';
 
 function useBlockTransaction(blockHeight, blockIndex) {
-  const [transaction, setTransaction] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const enabled = blockHeight != null && blockIndex != null && !Number.isNaN(Number(blockIndex));
 
-  useEffect(() => {
-    const ac = new AbortController();
-
-    async function load() {
-      if (blockHeight == null || blockIndex == null || Number.isNaN(Number(blockIndex))) {
-        setTransaction(null);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
+  const {
+    data: transaction,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const tx = await fetchBlockTransactionAtIndex(blockHeight, blockIndex, {
-          signal: ac.signal,
-        });
-        if (ac.signal.aborted) return;
-        if (tx) {
-          setTransaction(tx);
-        } else {
-          setError('Transaction not found in block');
-        }
+        const tx = await fetchBlockTransactionAtIndex(blockHeight, blockIndex, { signal });
+        if (tx) return tx;
+        throw new Error('Transaction not found in block');
       } catch (err) {
-        if (isAbortError(err) || ac.signal.aborted) return;
-        setError(`Failed to fetch transaction: ${err.message}`);
-      } finally {
-        if (!ac.signal.aborted) {
-          setLoading(false);
-        }
+        if (isAbortError(err)) throw err;
+        if (err instanceof Error && err.message === 'Transaction not found in block') throw err;
+        throw new Error(`Failed to fetch transaction: ${err.message}`);
       }
-    }
-
-    load();
-    return () => ac.abort();
-  }, [blockHeight, blockIndex]);
+    },
+    deps: [blockHeight, blockIndex],
+    enabled,
+    clearOnDisabled: true,
+  });
 
   return { transaction, loading, error };
 }

@@ -18,7 +18,7 @@ We aim to acknowledge reports promptly, typically within a few days. After triag
 
 ## Scope
 
-This repository is the public Eld Blockchain Explorer (`https://explorer.eld.network`): a Create React App + React frontend that reads public RPC and indexer HTTP APIs and is deployed as static files.
+This repository is the public Eld Blockchain Explorer (`https://explorer.eld.network`): a Vite + React frontend that reads public RPC and indexer HTTP APIs and is deployed as static files.
 
 In scope:
 

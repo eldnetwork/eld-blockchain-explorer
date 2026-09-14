@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import useBlock from '../hooks/useBlock';
+import useAsyncResource from '../hooks/useAsyncResource';
 import { Box, Heading, Text, List, ListItem, HStack, Skeleton, Link } from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faReceipt } from '@fortawesome/free-solid-svg-icons';
@@ -9,36 +9,25 @@ import { normalizeAccountAddress } from '../utils/accountAddress';
 import { loadBlockTransactions, formatBlockTxListLabel } from '../utils/blockTransactions';
 import './BlockPage.css';
 
+const EMPTY_TXS = [];
+
 function BlockPage() {
   const { height } = useParams();
   const navigate = useNavigate();
   const { block, loading, error } = useBlock(height);
-  const [transactions, setTransactions] = useState([]);
-  const [txLoading, setTxLoading] = useState(false);
-
-  useEffect(() => {
-    async function parseTransactions() {
-      if (!block || !block.data || !block.data.txs || block.data.txs.length === 0) {
-        setTransactions([]);
-        return;
-      }
-
-      setTxLoading(true);
-      try {
-        const rows = await loadBlockTransactions(block);
-        setTransactions(rows);
-      } catch (err) {
-        console.error('Error parsing transactions:', err);
-        setTransactions([]);
-      } finally {
-        setTxLoading(false);
-      }
-    }
-
-    if (block) {
-      parseTransactions();
-    }
-  }, [block]);
+  const blockHeight = block?.header?.height;
+  const txCount = block?.data?.txs?.length ?? 0;
+  const { data: transactions, loading: txLoading } = useAsyncResource({
+    fetcher: (signal) => loadBlockTransactions(block, { signal }),
+    deps: [blockHeight, txCount],
+    enabled: txCount > 0,
+    initialData: EMPTY_TXS,
+    clearOnDisabled: true,
+    resetDataOnError: true,
+    onError: (err) => {
+      console.error('Error parsing transactions:', err);
+    },
+  });
 
   const goToBlockTransaction = (blockIndex) => {
     navigate(`/block/${height}/tx/${blockIndex}`);
@@ -65,7 +54,6 @@ function BlockPage() {
   const header = block.header || {};
   const blockId = block.block_id || {};
   const lastCommit = block.last_commit || {};
-  const txCount = block.data?.txs ? block.data.txs.length : 0;
 
   return (
     <Box className="explorer-record">
@@ -245,9 +233,9 @@ function BlockPage() {
                 </ListItem>
               ))}
             </List>
-          ) : transactions.length > 0 ? (
+          ) : (transactions ?? EMPTY_TXS).length > 0 ? (
             <List spacing={2}>
-              {transactions.map((tx) => {
+              {(transactions ?? EMPTY_TXS).map((tx) => {
                 const txType = tx.tx?.payload?.type || 'unknown';
                 const hashLabel = formatBlockTxListLabel(tx);
                 const hashTitle = tx.id || tx.abciLog || hashLabel;

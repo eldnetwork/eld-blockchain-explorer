@@ -1,30 +1,17 @@
-import { useState, useEffect } from 'react';
-import { indexerGet, isAbortError, debugLog } from '../api';
-import { fetchWithRetry } from '../utils/retryFetch';
+import { indexerGet, debugLog } from '../api';
 import { fetchBlockTxResults } from '../utils/blockTransactions';
 import { deliverTxLogFromAbciResult, deliverTxFailureMessage } from '../utils/transactionStatus';
+import useAsyncResource from './useAsyncResource';
 
 function useTransaction(hash) {
-  const [transaction, setTransaction] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!hash) {
-      setTransaction(null);
-      setLoading(false);
-      setError(null);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-    let cancelled = false;
-
-    async function fetchOnce() {
+  const {
+    data: transaction,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       debugLog('Fetching transaction', hash);
-      const data = await indexerGet(`/transaction?id=${encodeURIComponent(hash)}`, {
-        signal: ac.signal,
-      });
+      const data = await indexerGet(`/transaction?id=${encodeURIComponent(hash)}`, { signal });
       const tx = data.transaction || data.data || data;
       if (!tx || !(tx.id || tx.tx)) {
         throw new Error('Transaction not found');
@@ -34,43 +21,20 @@ function useTransaction(hash) {
       const status = String(tx.status || '').toLowerCase();
       const hasLog = Boolean(deliverTxFailureMessage(tx));
       if (status === 'failed' && !hasLog && tx.block_height != null && tx.block_index != null) {
-        const results = await fetchBlockTxResults(Number(tx.block_height), { signal: ac.signal });
+        const results = await fetchBlockTxResults(Number(tx.block_height), { signal });
         const rpcLog = deliverTxLogFromAbciResult(results?.[Number(tx.block_index)]);
         if (rpcLog) {
           merged = { ...tx, abci_log: rpcLog };
         }
       }
       return merged;
-    }
-
-    async function run() {
-      setLoading(true);
-      setError(null);
-      const result = await fetchWithRetry(fetchOnce, {
-        signal: ac.signal,
-        cancelled: () => cancelled,
-      });
-      if (cancelled || result.aborted) return;
-      if (!result.ok) {
-        setError('Failed to fetch transaction');
-        setLoading(false);
-        return;
-      }
-      setTransaction(result.value);
-      setLoading(false);
-    }
-
-    run().catch((err) => {
-      if (cancelled || isAbortError(err)) return;
-      setError('Failed to fetch transaction: ' + err.message);
-      setLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-      ac.abort();
-    };
-  }, [hash]);
+    },
+    deps: [hash],
+    enabled: Boolean(hash),
+    retry: true,
+    clearOnDisabled: true,
+    errorMessage: 'Failed to fetch transaction',
+  });
 
   return { transaction, loading, error };
 }

@@ -45,6 +45,10 @@ async function fetchEpochsPage(limit, afterEpoch, order = 'desc', { signal } = {
  * @param {number} pageSize
  * @param {'desc' | 'asc'} order
  */
+function afterEpochKey(afterEpoch) {
+  return afterEpoch == null ? 'root' : String(afterEpoch);
+}
+
 function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
   const [epochs, setEpochs] = useState([]);
   const [pagination, setPagination] = useState({
@@ -56,7 +60,7 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
   /** `boundaries[i]` — `after_epoch` for slice `i` (`boundaries[0]` is always null). */
   const [boundaries, setBoundaries] = useState(/** @type {AfterEpochContinuation[]} */ ([null]));
   const [activePage, setActivePage] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [resolvedKey, setResolvedKey] = useState(null);
   const [error, setError] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [pagerJumping, setPagerJumping] = useState(false);
@@ -78,10 +82,6 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
   }, []);
 
   const loadPage = useCallback(async (afterEpoch, isRefresh = false, signal) => {
-    if (!isRefresh) {
-      setLoading(true);
-      setError(null);
-    }
     try {
       const lim = pageSizeRef.current;
       const ord = orderRef.current;
@@ -95,19 +95,23 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
         has_next: Boolean(pag.has_next),
         total: pag.total == null ? null : Number(pag.total),
       });
+      setError(null);
     } catch (err) {
       if (isAbortError(err) || signal?.aborted) return;
       setError(err instanceof Error ? err.message : String(err));
       setEpochs([]);
     } finally {
       if (!isRefresh && !signal?.aborted) {
-        setLoading(false);
         setIsInitialLoad(false);
+        setResolvedKey(afterEpochKey(afterEpoch));
       }
     }
   }, []);
 
   const afterEpoch = boundaries[activePage] ?? null;
+  const requestKey = afterEpochKey(afterEpoch);
+  const loading = resolvedKey !== requestKey;
+  const visibleError = resolvedKey === requestKey ? error : null;
 
   useEffect(() => {
     const ac = new AbortController();
@@ -200,7 +204,7 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
     epochs,
     pagination,
     loading,
-    error,
+    error: visibleError,
     isInitialLoad,
     activePage,
     pagerJumping,

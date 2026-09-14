@@ -1,43 +1,27 @@
-import { useState, useEffect } from 'react';
 import { indexerGet, isAbortError, debugLog } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 function useContent(contentId) {
-  const [content, setContent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!contentId) {
-      setLoading(false);
-      return undefined;
-    }
-
-    const ac = new AbortController();
-
-    async function fetchContent() {
-      setLoading(true);
-      setError(null);
+  const {
+    data: content,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await indexerGet(`/content/${encodeURIComponent(contentId)}`, {
-          signal: ac.signal,
-        });
-        setContent(data);
+        return await indexerGet(`/content/${encodeURIComponent(contentId)}`, { signal });
       } catch (err) {
-        if (isAbortError(err)) return;
+        if (isAbortError(err)) throw err;
         if (err.status === 404) {
-          setError('Content not found');
-        } else {
-          debugLog('Error fetching content:', err);
-          setError('Failed to fetch content: ' + err.message);
+          throw new Error('Content not found');
         }
-      } finally {
-        if (!ac.signal.aborted) setLoading(false);
+        debugLog('Error fetching content:', err);
+        throw new Error('Failed to fetch content: ' + err.message);
       }
-    }
-
-    fetchContent();
-    return () => ac.abort();
-  }, [contentId]);
+    },
+    deps: [contentId],
+    enabled: Boolean(contentId),
+  });
 
   return { content, loading, error };
 }

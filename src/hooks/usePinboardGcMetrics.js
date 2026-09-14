@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { rpcPost, isAbortError } from '../api';
+import useAsyncResource from './useAsyncResource';
 
 const GC_METRICS_PATH = '/@eld/pinboard/gc_metrics';
 
@@ -27,64 +27,45 @@ async function queryGcMetrics(signal) {
 }
 
 function usePinboardGcMetrics(refreshMs = 10000) {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    let firstFetch = true;
-    const ac = new AbortController();
-
-    async function fetchMetrics() {
-      if (!cancelled && firstFetch) {
-        setLoading(true);
-      }
-      setError(null);
-
+  const {
+    data: metrics,
+    loading,
+    error,
+  } = useAsyncResource({
+    fetcher: async (signal) => {
       try {
-        const data = await queryGcMetrics(ac.signal);
-        if (cancelled || ac.signal.aborted) return;
-
+        const data = await queryGcMetrics(signal);
         const code = data?.result?.response?.code;
 
         if (code !== 0) {
-          const log =
+          throw new Error(
             data?.result?.response?.log ||
-            data?.result?.response?.info ||
-            'GC metrics query failed';
-          setError(log);
-          return;
+              data?.result?.response?.info ||
+              'GC metrics query failed',
+          );
         }
 
         const info = data?.result?.response?.info;
         if (!info) {
-          setError('Missing response.info payload from gc_metrics query');
-          return;
+          throw new Error('Missing response.info payload from gc_metrics query');
         }
 
-        const parsed = JSON.parse(info);
-        setMetrics(parsed);
+        return JSON.parse(info);
       } catch (err) {
-        if (isAbortError(err) || cancelled) return;
-        setError(`Failed to fetch GC metrics: ${err.message}`);
-      } finally {
-        if (!cancelled && !ac.signal.aborted) {
-          setLoading(false);
-          firstFetch = false;
+        if (isAbortError(err)) throw err;
+        if (
+          err instanceof Error &&
+          (err.message === 'Missing response.info payload from gc_metrics query' ||
+            !err.message.startsWith('HTTP'))
+        ) {
+          throw err;
         }
+        throw new Error(`Failed to fetch GC metrics: ${err.message}`);
       }
-    }
-
-    fetchMetrics();
-    const intervalId = setInterval(fetchMetrics, refreshMs);
-
-    return () => {
-      cancelled = true;
-      ac.abort();
-      clearInterval(intervalId);
-    };
-  }, [refreshMs]);
+    },
+    deps: [refreshMs],
+    intervalMs: refreshMs,
+  });
 
   return { metrics, loading, error };
 }

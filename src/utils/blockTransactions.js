@@ -1,5 +1,5 @@
-import { Buffer } from 'buffer';
 import { rpcGet, indexerGet } from '../api';
+import { decodeBase64ToUtf8, decodeHexToUtf8 } from './bytes';
 import {
   executionStatusFromBlockResult,
   resolveTransactionExecutionStatus,
@@ -15,13 +15,12 @@ import {
  */
 export function decodeEldTxFromBlockBase64(txBase64) {
   try {
-    const raw = Buffer.from(txBase64, 'base64');
-    const txHex = raw.toString('utf-8');
-    const txJson = Buffer.from(txHex, 'hex').toString('utf-8');
+    const txHex = decodeBase64ToUtf8(txBase64);
+    const txJson = decodeHexToUtf8(txHex);
     return JSON.parse(txJson);
   } catch {
     try {
-      return JSON.parse(Buffer.from(txBase64, 'base64').toString('utf-8'));
+      return JSON.parse(decodeBase64ToUtf8(txBase64));
     } catch {
       return null;
     }
