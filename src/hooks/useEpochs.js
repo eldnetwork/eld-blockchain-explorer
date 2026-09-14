@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -16,13 +16,9 @@ function epochsQueryParams(limit, afterEpoch, order) {
   return params;
 }
 
-async function fetchEpochsPage(limit, afterEpoch, order = 'desc') {
+async function fetchEpochsPage(limit, afterEpoch, order = 'desc', { signal } = {}) {
   const params = epochsQueryParams(limit, afterEpoch, order);
-  const response = await fetch(`${API_URL}/epochs?${params}`);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  }
-  const data = await response.json();
+  const data = await indexerGet(`/epochs?${params}`, { signal });
 
   if (!data.epochs || !Array.isArray(data.epochs)) {
     throw new Error('Invalid response format');
@@ -70,15 +66,18 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
   const orderRef = useRef(order);
   orderRef.current = order;
 
+  const abortRef = useRef(/** @type {AbortController | null} */ (null));
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
+    abortRef.current = new AbortController();
     return () => {
       mountedRef.current = false;
+      abortRef.current?.abort();
     };
   }, []);
 
-  const loadPage = useCallback(async (afterEpoch, isRefresh = false) => {
+  const loadPage = useCallback(async (afterEpoch, isRefresh = false, signal) => {
     if (!isRefresh) {
       setLoading(true);
       setError(null);
@@ -86,7 +85,10 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
     try {
       const lim = pageSizeRef.current;
       const ord = orderRef.current;
-      const { epochs: rows, pagination: pag } = await fetchEpochsPage(lim, afterEpoch, ord);
+      const { epochs: rows, pagination: pag } = await fetchEpochsPage(lim, afterEpoch, ord, {
+        signal,
+      });
+      if (signal?.aborted) return;
       setEpochs(rows);
       setPagination({
         limit: pag.limit ?? lim,
@@ -94,10 +96,11 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
         total: pag.total == null ? null : Number(pag.total),
       });
     } catch (err) {
+      if (isAbortError(err) || signal?.aborted) return;
       setError(err instanceof Error ? err.message : String(err));
       setEpochs([]);
     } finally {
-      if (!isRefresh) {
+      if (!isRefresh && !signal?.aborted) {
         setLoading(false);
         setIsInitialLoad(false);
       }
@@ -107,17 +110,23 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
   const afterEpoch = boundaries[activePage] ?? null;
 
   useEffect(() => {
-    loadPage(afterEpoch);
+    const ac = new AbortController();
+    loadPage(afterEpoch, false, ac.signal);
+    return () => ac.abort();
   }, [activePage, afterEpoch, loadPage]);
 
   useEffect(() => {
     if (pagerJumping) {
       return undefined;
     }
+    const ac = new AbortController();
     const id = setInterval(() => {
-      loadPage(afterEpoch, true);
+      loadPage(afterEpoch, true, ac.signal);
     }, 10000);
-    return () => clearInterval(id);
+    return () => {
+      ac.abort();
+      clearInterval(id);
+    };
   }, [afterEpoch, loadPage, pagerJumping]);
 
   const goOlder = useCallback(() => {
@@ -144,13 +153,16 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
     try {
       const lim = pageSizeRef.current;
       const ord = orderRef.current;
+      const signal = abortRef.current?.signal;
       const nextBoundaries = [null];
       let cont = null;
       for (;;) {
-        if (!mountedRef.current) {
+        if (!mountedRef.current || signal?.aborted) {
           return;
         }
-        const { epochs: rows, pagination: pag } = await fetchEpochsPage(lim, cont, ord);
+        const { epochs: rows, pagination: pag } = await fetchEpochsPage(lim, cont, ord, {
+          signal,
+        });
         if (!rows.length) {
           break;
         }
@@ -161,13 +173,14 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
         nextBoundaries.push(last.epoch);
         cont = last.epoch;
       }
-      if (!mountedRef.current) {
+      if (!mountedRef.current || signal?.aborted) {
         return;
       }
       const lastIdx = Math.max(0, nextBoundaries.length - 1);
       setBoundaries(nextBoundaries);
       setActivePage(lastIdx);
     } catch (err) {
+      if (isAbortError(err)) return;
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : String(err));
       }

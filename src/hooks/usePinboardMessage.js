@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RPC_URL } from '../config';
+import { rpcPost, isAbortError } from '../api';
 
 function stringToHex(str) {
   let hex = '';
@@ -11,7 +11,6 @@ function stringToHex(str) {
 }
 
 function base64ToUint8Array(base64) {
-  // atob expects standard base64 (not URL-safe). If your node uses URL-safe, adjust here.
   const normalized = String(base64 || '').replace(/[\r\n]/g, '');
   const binaryString = atob(normalized);
   const bytes = new Uint8Array(binaryString.length);
@@ -21,25 +20,19 @@ function base64ToUint8Array(base64) {
   return bytes;
 }
 
-async function pinboardQuery({ innerPath }) {
-  const hexData = stringToHex(innerPath);
-
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
+async function pinboardQuery({ innerPath, signal }) {
+  return rpcPost(
+    {
       id: -1,
       method: 'abci_query',
       params: {
         path: 'pinboard',
-        data: hexData,
+        data: stringToHex(innerPath),
         prove: false,
       },
-    }),
-  });
-
-  return response.json();
+    },
+    { signal },
+  );
 }
 
 function usePinboardMessage(wallet, messageId) {
@@ -48,20 +41,22 @@ function usePinboardMessage(wallet, messageId) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchMessage() {
-      if (!wallet || !messageId) {
-        setMessage(null);
-        setLoading(false);
-        setError(null);
-        return;
-      }
+    if (!wallet || !messageId) {
+      setMessage(null);
+      setLoading(false);
+      setError(null);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchMessage() {
       setLoading(true);
       setError(null);
 
       try {
         const innerPath = `/@eld/pinboard/post/${wallet}/${messageId}`;
-        const data = await pinboardQuery({ innerPath });
+        const data = await pinboardQuery({ innerPath, signal: ac.signal });
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
@@ -105,14 +100,16 @@ function usePinboardMessage(wallet, messageId) {
           rawResponse: data?.result?.response ?? null,
         });
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(`Failed to fetch pinboard message: ${err.message}`);
         setMessage(null);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchMessage();
+    return () => ac.abort();
   }, [wallet, messageId]);
 
   return { message, loading, error };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 /**
  * @typedef {object} NamespaceDetail
@@ -29,7 +29,8 @@ function useNamespace(namespaceSlug) {
       return undefined;
     }
 
-    const slug = encodeURIComponent(namespaceSlug.trim());
+    const trimmed = namespaceSlug.trim();
+    const slug = encodeURIComponent(trimmed);
     const ac = new AbortController();
 
     async function load() {
@@ -38,26 +39,15 @@ function useNamespace(namespaceSlug) {
       setNamespace(null);
 
       try {
-        const response = await fetch(`${API_URL}/v1/namespace/${slug}`, {
-          signal: ac.signal,
-        });
-        const data = await response.json().catch(() => ({}));
-
-        if (response.ok) {
-          setNamespace(data);
-          return;
-        }
-
-        if (response.status === 404 && data.registered === false) {
-          setNamespace(data);
-          return;
-        }
-
-        const message =
-          data.message || data.details || `HTTP ${response.status}: ${response.statusText}`;
-        setError(message);
+        const data = await indexerGet(`/v1/namespace/${slug}`, { signal: ac.signal });
+        setNamespace(data);
       } catch (err) {
-        if (ac.signal.aborted) return;
+        if (isAbortError(err) || ac.signal.aborted) return;
+        // Indexer returns 404 with `{ registered: false, ... }` for unknown slugs.
+        if (err.status === 404) {
+          setNamespace({ registered: false, namespace_slug: trimmed });
+          return;
+        }
         setError(err instanceof Error ? err.message : String(err));
       } finally {
         if (!ac.signal.aborted) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RPC_URL } from '../config';
+import { rpcPost, isAbortError } from '../api';
 
 const GC_METRICS_PATH = '/@eld/pinboard/gc_metrics';
 
@@ -11,12 +11,9 @@ function stringToHex(str) {
   return hex;
 }
 
-async function queryGcMetrics() {
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
+async function queryGcMetrics(signal) {
+  return rpcPost(
+    {
       id: -1,
       method: 'abci_query',
       params: {
@@ -24,10 +21,9 @@ async function queryGcMetrics() {
         data: stringToHex(GC_METRICS_PATH),
         prove: false,
       },
-    }),
-  });
-
-  return response.json();
+    },
+    { signal },
+  );
 }
 
 function usePinboardGcMetrics(refreshMs = 10000) {
@@ -38,6 +34,7 @@ function usePinboardGcMetrics(refreshMs = 10000) {
   useEffect(() => {
     let cancelled = false;
     let firstFetch = true;
+    const ac = new AbortController();
 
     async function fetchMetrics() {
       if (!cancelled && firstFetch) {
@@ -46,7 +43,9 @@ function usePinboardGcMetrics(refreshMs = 10000) {
       setError(null);
 
       try {
-        const data = await queryGcMetrics();
+        const data = await queryGcMetrics(ac.signal);
+        if (cancelled || ac.signal.aborted) return;
+
         const code = data?.result?.response?.code;
 
         if (code !== 0) {
@@ -54,22 +53,23 @@ function usePinboardGcMetrics(refreshMs = 10000) {
             data?.result?.response?.log ||
             data?.result?.response?.info ||
             'GC metrics query failed';
-          if (!cancelled) setError(log);
+          setError(log);
           return;
         }
 
         const info = data?.result?.response?.info;
         if (!info) {
-          if (!cancelled) setError('Missing response.info payload from gc_metrics query');
+          setError('Missing response.info payload from gc_metrics query');
           return;
         }
 
         const parsed = JSON.parse(info);
-        if (!cancelled) setMetrics(parsed);
+        setMetrics(parsed);
       } catch (err) {
-        if (!cancelled) setError(`Failed to fetch GC metrics: ${err.message}`);
+        if (isAbortError(err) || cancelled) return;
+        setError(`Failed to fetch GC metrics: ${err.message}`);
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !ac.signal.aborted) {
           setLoading(false);
           firstFetch = false;
         }
@@ -81,6 +81,7 @@ function usePinboardGcMetrics(refreshMs = 10000) {
 
     return () => {
       cancelled = true;
+      ac.abort();
       clearInterval(intervalId);
     };
   }, [refreshMs]);

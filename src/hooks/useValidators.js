@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcAbciQuery } from '../api';
 import { fetchWithRetry } from '../utils/retryFetch';
 
 const REFRESH_INTERVAL_MS = 10000;
 
-async function fetchValidatorsOnce() {
-  const response = await fetch(
-    `${RPC_URL}/abci_query?path="active_validators"&data=""&prove=false`,
-  );
-
-  if (!response.ok) {
-    throw new Error(`ABCI query failed (${response.status})`);
-  }
-
-  const data = await response.json();
+async function fetchValidatorsOnce(signal) {
+  const data = await rpcAbciQuery('active_validators', '', { signal });
   const queryResponse = data.result?.response;
   if (queryResponse?.code && queryResponse.code !== 0) {
     throw new Error(queryResponse.log || 'ABCI query returned error');
@@ -35,6 +27,7 @@ function useValidators() {
   useEffect(() => {
     let cancelled = false;
     let retryTimeoutId = null;
+    const ac = new AbortController();
 
     async function fetchValidators(isRefresh = false) {
       if (!isRefresh) {
@@ -42,7 +35,8 @@ function useValidators() {
         setError(null);
       }
 
-      const result = await fetchWithRetry(fetchValidatorsOnce, {
+      const result = await fetchWithRetry(() => fetchValidatorsOnce(ac.signal), {
+        signal: ac.signal,
         cancelled: () => cancelled,
         isRefresh,
         onExhausted: () => {
@@ -52,7 +46,8 @@ function useValidators() {
         },
       });
 
-      if (!result.ok || cancelled) {
+      if (cancelled || result.aborted) return;
+      if (!result.ok) {
         if (!isRefresh && !cancelled) {
           setLoading(false);
           setIsInitialLoad(false);
@@ -80,6 +75,7 @@ function useValidators() {
 
     return () => {
       cancelled = true;
+      ac.abort();
       clearInterval(intervalId);
       if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };

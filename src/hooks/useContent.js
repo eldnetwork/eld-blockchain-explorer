@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError, debugLog } from '../api';
 
 function useContent(contentId) {
   const [content, setContent] = useState(null);
@@ -7,37 +7,36 @@ function useContent(contentId) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchContent() {
-      if (!contentId) {
-        setLoading(false);
-        return;
-      }
+    if (!contentId) {
+      setLoading(false);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchContent() {
       setLoading(true);
       setError(null);
       try {
-        const url = `${API_URL}/content/${encodeURIComponent(contentId)}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            setError('Content not found');
-          } else {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-        } else {
-          const data = await response.json();
-          setContent(data);
-        }
+        const data = await indexerGet(`/content/${encodeURIComponent(contentId)}`, {
+          signal: ac.signal,
+        });
+        setContent(data);
       } catch (err) {
-        console.error('Error fetching content:', err);
-        setError('Failed to fetch content: ' + err.message);
+        if (isAbortError(err)) return;
+        if (err.status === 404) {
+          setError('Content not found');
+        } else {
+          debugLog('Error fetching content:', err);
+          setError('Failed to fetch content: ' + err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchContent();
+    return () => ac.abort();
   }, [contentId]);
 
   return { content, loading, error };

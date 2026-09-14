@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Input, Button, VStack, HStack, Text } from '@chakra-ui/react';
-import BlocksPage from './BlocksPage';
+import BlocksList from '../components/BlocksList';
 import EpochDashboard from '../components/EpochDashboard';
 import ValidatorStats from '../components/ValidatorStats';
 import TransactionsList from '../components/TransactionsList';
@@ -23,27 +23,7 @@ function HomePage() {
   const handleSearch = () => {
     const trimmedInput = searchInput.trim();
     if (!trimmedInput) return;
-
-    const isHex = trimmedInput.startsWith('0x') && /^[0-9a-fA-F]+$/.test(trimmedInput.slice(2));
-    const inputLength = trimmedInput.length;
-
-    if (/^\d+$/.test(trimmedInput)) {
-      navigate(`/block/${trimmedInput}`);
-    } else if (isHex) {
-      if (inputLength === 66) {
-        navigate(`/tx/${trimmedInput}`);
-      } else if (inputLength === 42) {
-        navigate(`/account/${trimmedInput}`);
-      } else {
-        alert(
-          'Invalid hex length: Transaction hash (66 chars with 0x) or account ID (42 chars with 0x)',
-        );
-      }
-    } else {
-      alert(
-        'Invalid input: Enter a block height (numbers), transaction hash (66-char hex with 0x), or account ID (42-char hex with 0x)',
-      );
-    }
+    navigate(`/search?q=${encodeURIComponent(trimmedInput)}`);
     setSearchInput('');
   };
 
@@ -137,7 +117,7 @@ function HomePage() {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Search by block hash, transaction, or address..."
+                  placeholder="Search block, tx, address, content, namespace…"
                   size="md"
                   width={{ base: '100%', md: '760px' }}
                   maxW="100%"
@@ -185,7 +165,7 @@ function HomePage() {
             gap={4}
           >
             <Box order={{ base: 1, lg: 'unset' }} w="full">
-              <BlocksPage />
+              <BlocksList />
             </Box>
             <Box order={{ base: 4, lg: 'unset' }} w="full">
               <EpochsList />

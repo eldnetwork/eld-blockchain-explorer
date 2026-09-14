@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcGet } from '../api';
 import { fetchWithRetry } from '../utils/retryFetch';
 
 const REFRESH_INTERVAL_MS = 2000;
 
-async function fetchEpochInfoOnce() {
-  const response = await fetch(
-    `${RPC_URL}/abci_query?path="epoch_info"&data=""&height=0&prove=false`,
-  );
-  if (!response.ok) {
-    throw new Error(`Epoch info request failed (${response.status})`);
-  }
-  const data = await response.json();
+async function fetchEpochInfoOnce(signal) {
+  // height=0 is part of the original query; use full path rather than rpcAbciQuery.
+  const data = await rpcGet('/abci_query?path="epoch_info"&data=""&height=0&prove=false', {
+    signal,
+  });
   if (!data.result?.response?.info) {
     throw new Error('No epoch info in response');
   }
@@ -26,13 +23,15 @@ function useEpochInfo() {
   useEffect(() => {
     let cancelled = false;
     let retryTimeoutId = null;
+    const ac = new AbortController();
 
     async function fetchEpochInfo(isRefresh = false) {
       if (!isRefresh) {
         setLoading(true);
       }
 
-      const result = await fetchWithRetry(fetchEpochInfoOnce, {
+      const result = await fetchWithRetry(() => fetchEpochInfoOnce(ac.signal), {
+        signal: ac.signal,
         cancelled: () => cancelled,
         isRefresh,
         onExhausted: () => {
@@ -42,7 +41,7 @@ function useEpochInfo() {
         },
       });
 
-      if (!result.ok || cancelled) return;
+      if (cancelled || result.aborted || !result.ok) return;
 
       setEpochInfo(result.value);
       if (!isRefresh) {
@@ -59,6 +58,7 @@ function useEpochInfo() {
 
     return () => {
       cancelled = true;
+      ac.abort();
       clearInterval(intervalId);
       if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };

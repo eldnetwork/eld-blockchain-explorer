@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcGet, isAbortError } from '../api';
 
 function useBlock(height) {
   const [block, setBlock] = useState(null);
@@ -7,26 +7,30 @@ function useBlock(height) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!height) return undefined;
+
+    const ac = new AbortController();
+
     async function fetchBlock() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${RPC_URL}/block?height=${height}`);
-        const data = await response.json();
-        console.log({ data });
+        const data = await rpcGet(`/block?height=${height}`, { signal: ac.signal });
         if (data.result && data.result.block) {
           setBlock(data.result.block);
         } else {
           setError('Block not found');
         }
       } catch (err) {
+        if (isAbortError(err)) return;
         setError('Failed to fetch block: ' + err.message);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
-    if (height) fetchBlock();
+    fetchBlock();
+    return () => ac.abort();
   }, [height]);
 
   return { block, loading, error };

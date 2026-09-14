@@ -1,20 +1,11 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcAbciQuery } from '../api';
 import { fetchWithRetry } from '../utils/retryFetch';
 
 const REFRESH_INTERVAL_MS = 10000;
 
-async function abciQuery(path) {
-  // Tendermint-style GET:
-  //   /abci_query?path="..."&data=""&prove=false
-  // where `path` and `data` are JSON-string parameters.
-  const response = await fetch(`${RPC_URL}/abci_query?path="${path}"&data=""&prove=false`);
-
-  if (!response.ok) {
-    throw new Error(`ABCI query failed (${response.status})`);
-  }
-
-  const data = await response.json();
+async function fetchProvidersOnce(signal) {
+  const data = await rpcAbciQuery('capacity_validators', '', { signal });
   const queryResponse = data.result?.response;
   if (queryResponse?.code && queryResponse.code !== 0) {
     throw new Error(queryResponse.log || 'ABCI query returned error');
@@ -23,10 +14,6 @@ async function abciQuery(path) {
     return JSON.parse(queryResponse.info);
   }
   throw new Error('Invalid response format');
-}
-
-async function fetchProvidersOnce() {
-  return abciQuery('capacity_validators');
 }
 
 function useCapacityProviders() {
@@ -44,6 +31,7 @@ function useCapacityProviders() {
   useEffect(() => {
     let cancelled = false;
     let retryTimeoutId = null;
+    const ac = new AbortController();
 
     async function fetchProviders(isRefresh = false) {
       if (!isRefresh) {
@@ -51,7 +39,8 @@ function useCapacityProviders() {
         setError(null);
       }
 
-      const result = await fetchWithRetry(fetchProvidersOnce, {
+      const result = await fetchWithRetry(() => fetchProvidersOnce(ac.signal), {
+        signal: ac.signal,
         cancelled: () => cancelled,
         isRefresh,
         onExhausted: () => {
@@ -61,7 +50,8 @@ function useCapacityProviders() {
         },
       });
 
-      if (!result.ok || cancelled) {
+      if (cancelled || result.aborted) return;
+      if (!result.ok) {
         if (!isRefresh && !cancelled) {
           setLoading(false);
           setIsInitialLoad(false);
@@ -77,8 +67,6 @@ function useCapacityProviders() {
       const totalCapacity =
         data.total_capacity || data.all_total_capacity || data.active_total_capacity || 0;
 
-      // `capacity_validators` is now the canonical list; mirror to active/all
-      // so existing UI surfaces continue to work.
       setActiveProviders(providers);
       setAllProviders(providers);
       setActiveTotalStake(totalStake);
@@ -101,6 +89,7 @@ function useCapacityProviders() {
 
     return () => {
       cancelled = true;
+      ac.abort();
       clearInterval(intervalId);
       if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };

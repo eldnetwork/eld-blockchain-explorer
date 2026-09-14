@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcAbciQuery, isAbortError } from '../api';
 import { normalizeAccountAddress } from '../utils/accountAddress';
 
-function abciQueryGet(path, data) {
-  return fetch(
-    `${RPC_URL}/abci_query?path=${encodeURIComponent(JSON.stringify(path))}&data=${encodeURIComponent(JSON.stringify(data))}&prove=false`,
-  ).then((response) => response.json());
+function abciQueryGet(path, data, { signal } = {}) {
+  return rpcAbciQuery(path, JSON.stringify(data), { signal });
 }
 
 function useAccount(address) {
@@ -14,24 +12,22 @@ function useAccount(address) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!address) return undefined;
+
+    const ac = new AbortController();
+
     async function queryAccountByAddress(addressValue) {
-      return abciQueryGet('cado', `/@eld/account/${addressValue}`);
+      return abciQueryGet('cado', `/@eld/account/${addressValue}`, { signal: ac.signal });
     }
 
     async function queryAccountView(addressValue) {
-      return abciQueryGet('account_view', addressValue);
+      return abciQueryGet('account_view', addressValue, { signal: ac.signal });
     }
 
     async function fetchAccount() {
       setLoading(true);
       setError(null);
       try {
-        if (!address) {
-          setError('Address is required');
-          setLoading(false);
-          return;
-        }
-
         const normalized = normalizeAccountAddress(address);
         const candidates = [
           address,
@@ -50,6 +46,7 @@ function useAccount(address) {
         let resolvedAddress = normalized || address;
         for (const candidate of candidates) {
           const data = await queryAccountByAddress(candidate);
+          if (ac.signal.aborted) return;
           if (data.result?.response?.code === 0 && data.result?.response?.info) {
             foundData = data;
             resolvedAddress = normalizeAccountAddress(candidate) || candidate;
@@ -69,6 +66,7 @@ function useAccount(address) {
           let eldBalance = null;
           let nonce = null;
           const viewData = await queryAccountView(resolvedAddress);
+          if (ac.signal.aborted) return;
           if (viewData.result?.response?.code === 0 && viewData.result?.response?.info) {
             const view = JSON.parse(viewData.result.response.info);
             eldBalance = view.balance;
@@ -86,13 +84,15 @@ function useAccount(address) {
           setError('Account not found');
         }
       } catch (err) {
+        if (isAbortError(err)) return;
         setError('Failed to fetch account: ' + err.message);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
-    if (address) fetchAccount();
+    fetchAccount();
+    return () => ac.abort();
   }, [address]);
 
   return { account, loading, error };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RPC_URL } from '../config';
+import { rpcPost, isAbortError } from '../api';
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -12,25 +12,19 @@ function stringToHex(str) {
   return hex;
 }
 
-async function pinboardQuery({ innerPath }) {
-  const hexData = stringToHex(innerPath);
-
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
+async function pinboardQuery({ innerPath, signal }) {
+  return rpcPost(
+    {
       id: -1,
       method: 'abci_query',
       params: {
         path: 'pinboard',
-        data: hexData,
+        data: stringToHex(innerPath),
         prove: false,
       },
-    }),
-  });
-
-  return response.json();
+    },
+    { signal },
+  );
 }
 
 function usePinboardMessagesByTag(tag, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
@@ -42,23 +36,25 @@ function usePinboardMessagesByTag(tag, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchMessages() {
-      if (!tag) {
-        setMessages([]);
-        setHasMore(false);
-        setEffectivePage(page);
-        setEffectivePageSize(pageSize);
-        setLoading(false);
-        setError(null);
-        return;
-      }
+    if (!tag) {
+      setMessages([]);
+      setHasMore(false);
+      setEffectivePage(page);
+      setEffectivePageSize(pageSize);
+      setLoading(false);
+      setError(null);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchMessages() {
       setLoading(true);
       setError(null);
 
       try {
         const innerPath = `/@eld/pinboard/tag/${tag}/${page}/${pageSize}`;
-        const data = await pinboardQuery({ innerPath });
+        const data = await pinboardQuery({ innerPath, signal: ac.signal });
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
@@ -83,15 +79,17 @@ function usePinboardMessagesByTag(tag, page = 0, pageSize = DEFAULT_PAGE_SIZE) {
         setEffectivePageSize(typeof payload.page_size === 'number' ? payload.page_size : pageSize);
         setHasMore(Boolean(payload.has_more));
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(`Failed to fetch pinboard messages: ${err.message}`);
         setMessages([]);
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchMessages();
+    return () => ac.abort();
   }, [tag, page, pageSize]);
 
   return { messages, hasMore, page: effectivePage, pageSize: effectivePageSize, loading, error };

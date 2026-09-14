@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcGet } from '../api';
+import { fetchWithRetry } from '../utils/retryFetch';
 
 const BLOCKS_PER_PAGE = 20;
-const MAX_RETRIES = 5;
-const RETRY_BASE_MS = 1000;
 const REFRESH_INTERVAL_MS = 10000;
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function useBlocks(page) {
   const [blocks, setBlocks] = useState([]);
@@ -18,26 +13,19 @@ function useBlocks(page) {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
+    const ac = new AbortController();
     let cancelled = false;
     let retryTimeoutId = null;
 
     async function fetchBlocksOnce() {
-      const statusResponse = await fetch(`${RPC_URL}/status`);
-      if (!statusResponse.ok) {
-        throw new Error(`Status request failed (${statusResponse.status})`);
-      }
-      const statusData = await statusResponse.json();
+      const statusData = await rpcGet('/status', { signal: ac.signal });
       const latestHeight = parseInt(statusData.result.sync_info.latest_block_height, 10);
       const maxHeight = latestHeight - (page - 1) * BLOCKS_PER_PAGE;
       const minHeight = Math.max(0, maxHeight - BLOCKS_PER_PAGE + 1);
 
-      const response = await fetch(
-        `${RPC_URL}/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`,
-      );
-      if (!response.ok) {
-        throw new Error(`Blockchain request failed (${response.status})`);
-      }
-      const data = await response.json();
+      const data = await rpcGet(`/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`, {
+        signal: ac.signal,
+      });
       if (!data.result?.block_metas) {
         throw new Error('No blocks found');
       }
@@ -54,35 +42,33 @@ function useBlocks(page) {
         setError(null);
       }
 
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        if (cancelled) return;
+      const result = await fetchWithRetry(fetchBlocksOnce, {
+        signal: ac.signal,
+        cancelled: () => cancelled,
+        isRefresh,
+        onExhausted: () => {
+          retryTimeoutId = setTimeout(() => {
+            if (!cancelled) fetchBlocks(false);
+          }, REFRESH_INTERVAL_MS);
+        },
+      });
 
-        try {
-          const { sortedBlocks, latestHeight } = await fetchBlocksOnce();
-          if (cancelled) return;
-
-          setBlocks(sortedBlocks);
-          setLastHeight(latestHeight);
-          setError(null);
-          if (!isRefresh) {
-            setLoading(false);
-            setIsInitialLoad(false);
-          }
-          return;
-        } catch (_err) {
-          if (cancelled) return;
-
-          if (attempt < MAX_RETRIES) {
-            await sleep(RETRY_BASE_MS * Math.pow(2, attempt));
-            continue;
-          }
-
-          if (!isRefresh) {
-            retryTimeoutId = setTimeout(() => {
-              if (!cancelled) fetchBlocks(false);
-            }, REFRESH_INTERVAL_MS);
-          }
+      if (cancelled || result.aborted) return;
+      if (!result.ok) {
+        if (!isRefresh) {
+          setLoading(false);
+          setIsInitialLoad(false);
+          setError('Failed to load blocks');
         }
+        return;
+      }
+
+      setBlocks(result.value.sortedBlocks);
+      setLastHeight(result.value.latestHeight);
+      setError(null);
+      if (!isRefresh) {
+        setLoading(false);
+        setIsInitialLoad(false);
       }
     }
 
@@ -94,6 +80,7 @@ function useBlocks(page) {
 
     return () => {
       cancelled = true;
+      ac.abort();
       clearInterval(intervalId);
       if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };

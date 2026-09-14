@@ -5,7 +5,7 @@ import ExplorerFooter from './ExplorerFooter';
 import { SunIcon, MoonIcon } from './ThemeIcons';
 import AppRoutes from '../AppRoutes';
 import useChainId from '../hooks/useChainId';
-import { RPC_URL } from '../config';
+import { rpcGet, isAbortError } from '../api';
 import { BACKGROUND_COLOR, LIGHT_TEXT_COLOR } from '../utils/constants';
 
 function ExplorerAppShell() {
@@ -27,35 +27,26 @@ function ExplorerAppShell() {
   };
 
   useEffect(() => {
-    let isMounted = true;
+    const ac = new AbortController();
 
     const loadNodeVersion = async () => {
       try {
-        const response = await fetch(`${RPC_URL}/abci_info`);
-        if (!response.ok) {
-          throw new Error(`Failed to load node version: ${response.status}`);
-        }
-
-        const payload = await response.json();
+        const payload = await rpcGet('/abci_info', { signal: ac.signal });
         const responseData = payload?.result?.response?.data;
         const parsedData = responseData ? JSON.parse(responseData) : null;
         const resolvedVersion =
           parsedData?.eld_app_version || payload?.result?.response?.version || '--';
-
-        if (isMounted) {
-          setNodeVersion(resolvedVersion);
-        }
-      } catch (_error) {
-        if (isMounted) {
-          setNodeVersion('--');
-        }
+        setNodeVersion(resolvedVersion);
+      } catch (err) {
+        if (isAbortError(err)) return;
+        setNodeVersion('--');
       }
     };
 
     loadNodeVersion();
 
     return () => {
-      isMounted = false;
+      ac.abort();
     };
   }, []);
 

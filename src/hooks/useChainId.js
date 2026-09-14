@@ -1,27 +1,29 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcGet, isAbortError, debugLog } from '../api';
 
 function useChainId() {
   const [chainId, setChainId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const ac = new AbortController();
+
     async function fetchChainId() {
       try {
-        const response = await fetch(`${RPC_URL}/status`);
-        const data = await response.json();
-
+        const data = await rpcGet('/status', { signal: ac.signal });
         if (data.result?.node_info?.network) {
           setChainId(data.result.node_info.network);
         }
       } catch (err) {
-        console.error('Error fetching chain ID:', err);
+        if (isAbortError(err)) return;
+        debugLog('Error fetching chain ID:', err);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchChainId();
+    return () => ac.abort();
   }, []);
 
   return { chainId, loading };

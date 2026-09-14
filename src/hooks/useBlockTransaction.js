@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAbortError } from '../api';
 import { fetchBlockTransactionAtIndex } from '../utils/blockTransactions';
 
 function useBlockTransaction(blockHeight, blockIndex) {
@@ -7,7 +8,7 @@ function useBlockTransaction(blockHeight, blockIndex) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const ac = new AbortController();
 
     async function load() {
       if (blockHeight == null || blockIndex == null || Number.isNaN(Number(blockIndex))) {
@@ -19,28 +20,27 @@ function useBlockTransaction(blockHeight, blockIndex) {
       setLoading(true);
       setError(null);
       try {
-        const tx = await fetchBlockTransactionAtIndex(blockHeight, blockIndex);
-        if (cancelled) return;
+        const tx = await fetchBlockTransactionAtIndex(blockHeight, blockIndex, {
+          signal: ac.signal,
+        });
+        if (ac.signal.aborted) return;
         if (tx) {
           setTransaction(tx);
         } else {
           setError('Transaction not found in block');
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(`Failed to fetch transaction: ${err.message}`);
-        }
+        if (isAbortError(err) || ac.signal.aborted) return;
+        setError(`Failed to fetch transaction: ${err.message}`);
       } finally {
-        if (!cancelled) {
+        if (!ac.signal.aborted) {
           setLoading(false);
         }
       }
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [blockHeight, blockIndex]);
 
   return { transaction, loading, error };

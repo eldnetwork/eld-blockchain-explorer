@@ -1,33 +1,37 @@
 import { useEffect, useState } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 const DEFAULT_PAGE_SIZE = 20;
 
-async function pinboardPostsPageHasItems(pageIndex, pageSize, order) {
+async function pinboardPostsPageHasItems(pageIndex, pageSize, order, { signal } = {}) {
   const params = new URLSearchParams({
     order,
     page: String(pageIndex),
     page_size: String(pageSize),
   });
-  const response = await fetch(`${API_URL}/v1/pinboard/posts?${params.toString()}`);
-  if (!response.ok) {
+  try {
+    const data = await indexerGet(`/v1/pinboard/posts?${params.toString()}`, { signal });
+    const items = Array.isArray(data?.items) ? data.items : [];
+    return items.length > 0;
+  } catch (err) {
+    if (isAbortError(err)) throw err;
     return false;
   }
-  const data = await response.json();
-  const items = Array.isArray(data?.items) ? data.items : [];
-  return items.length > 0;
 }
 
 /**
  * Largest 0-based page index with at least one post (exponential probe + binary search).
+ * @param {number} pageSize
+ * @param {string} order
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function findLastPinboardPostsPageIndex(pageSize, order) {
-  if (!(await pinboardPostsPageHasItems(0, pageSize, order))) {
+export async function findLastPinboardPostsPageIndex(pageSize, order, { signal } = {}) {
+  if (!(await pinboardPostsPageHasItems(0, pageSize, order, { signal }))) {
     return 0;
   }
   let lo = 0;
   let hi = 1;
-  while (await pinboardPostsPageHasItems(hi, pageSize, order)) {
+  while (await pinboardPostsPageHasItems(hi, pageSize, order, { signal })) {
     lo = hi;
     hi *= 2;
     if (hi > 1_000_000) {
@@ -36,7 +40,7 @@ export async function findLastPinboardPostsPageIndex(pageSize, order) {
   }
   while (lo + 1 < hi) {
     const mid = Math.floor((lo + hi) / 2);
-    if (await pinboardPostsPageHasItems(mid, pageSize, order)) {
+    if (await pinboardPostsPageHasItems(mid, pageSize, order, { signal })) {
       lo = mid;
     } else {
       hi = mid;
@@ -57,6 +61,8 @@ function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc'
   });
 
   useEffect(() => {
+    const ac = new AbortController();
+
     async function fetchPosts() {
       setLoading(true);
       setError(null);
@@ -66,13 +72,9 @@ function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc'
           page: String(page),
           page_size: String(pageSize),
         });
-        const response = await fetch(`${API_URL}/v1/pinboard/posts?${params.toString()}`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const data = await indexerGet(`/v1/pinboard/posts?${params.toString()}`, {
+          signal: ac.signal,
+        });
         const nextItems = Array.isArray(data?.items) ? data.items : [];
         const nextPagination = data?.pagination || {};
 
@@ -85,15 +87,17 @@ function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc'
           next_cursor: nextPagination.next_cursor ?? null,
         });
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(`Failed to fetch pinboard posts: ${err.message}`);
         setItems([]);
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchPosts();
+    return () => ac.abort();
   }, [order, page, pageSize]);
 
   return {

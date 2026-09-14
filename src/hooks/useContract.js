@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError, debugLog } from '../api';
 
 function useContract(contractId) {
   const [contract, setContract] = useState(null);
@@ -7,38 +7,33 @@ function useContract(contractId) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchContract() {
-      if (!contractId) {
-        setLoading(false);
-        return;
-      }
+    if (!contractId) {
+      setLoading(false);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchContract() {
       setLoading(true);
       setError(null);
       try {
-        // Remove 0x prefix if present for the API call
         const id = contractId.startsWith('0x') ? contractId.slice(2) : contractId;
-        const url = `${API_URL}/contract?id=${encodeURIComponent(id)}`;
-        console.log('Fetching contract from:', url);
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Contract data received:', data);
-
+        const data = await indexerGet(`/contract?id=${encodeURIComponent(id)}`, {
+          signal: ac.signal,
+        });
         setContract(data);
       } catch (err) {
-        console.error('Error fetching contract:', err);
+        if (isAbortError(err)) return;
+        debugLog('Error fetching contract:', err);
         setError('Failed to fetch contract: ' + err.message);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchContract();
+    return () => ac.abort();
   }, [contractId]);
 
   return { contract, loading, error };

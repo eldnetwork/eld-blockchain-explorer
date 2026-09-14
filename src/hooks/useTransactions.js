@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -14,13 +14,9 @@ function transactionsQueryParams(limit, continuation) {
   return params;
 }
 
-async function fetchTransactionsPage(limit, continuation) {
+async function fetchTransactionsPage(limit, continuation, { signal } = {}) {
   const params = transactionsQueryParams(limit, continuation);
-  const response = await fetch(`${API_URL}/transactions?${params}`);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  }
-  const data = await response.json();
+  const data = await indexerGet(`/transactions?${params}`, { signal });
 
   if (!data.transactions || !Array.isArray(data.transactions)) {
     throw new Error('Invalid response format');
@@ -68,22 +64,32 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
   const pageSizeRef = useRef(pageSize);
   pageSizeRef.current = pageSize;
 
+  const abortRef = useRef(/** @type {AbortController | null} */ (null));
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
+    abortRef.current = new AbortController();
     return () => {
       mountedRef.current = false;
+      abortRef.current?.abort();
     };
   }, []);
 
-  const loadPage = useCallback(async (continuation, isRefresh = false) => {
+  const loadPage = useCallback(async (continuation, isRefresh = false, signal) => {
     if (!isRefresh) {
       setLoading(true);
       setError(null);
     }
     try {
       const lim = pageSizeRef.current;
-      const { transactions: txs, pagination: pag } = await fetchTransactionsPage(lim, continuation);
+      const { transactions: txs, pagination: pag } = await fetchTransactionsPage(
+        lim,
+        continuation,
+        {
+          signal,
+        },
+      );
+      if (signal?.aborted) return;
       setTransactions(txs);
       setPagination({
         limit: pag.limit ?? lim,
@@ -91,10 +97,11 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
         total: pag.total == null ? null : Number(pag.total),
       });
     } catch (err) {
+      if (isAbortError(err) || signal?.aborted) return;
       setError(err instanceof Error ? err.message : String(err));
       setTransactions([]);
     } finally {
-      if (!isRefresh) {
+      if (!isRefresh && !signal?.aborted) {
         setLoading(false);
         setIsInitialLoad(false);
       }
@@ -104,17 +111,23 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
   const continuation = boundaries[activePage] ?? null;
 
   useEffect(() => {
-    loadPage(continuation);
+    const ac = new AbortController();
+    loadPage(continuation, false, ac.signal);
+    return () => ac.abort();
   }, [activePage, continuation, loadPage]);
 
   useEffect(() => {
     if (pagerJumping) {
       return undefined;
     }
+    const ac = new AbortController();
     const id = setInterval(() => {
-      loadPage(continuation, true);
+      loadPage(continuation, true, ac.signal);
     }, 5000);
-    return () => clearInterval(id);
+    return () => {
+      ac.abort();
+      clearInterval(id);
+    };
   }, [continuation, loadPage, pagerJumping]);
 
   const goOlder = useCallback(() => {
@@ -143,13 +156,16 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
     setError(null);
     try {
       const lim = pageSizeRef.current;
+      const signal = abortRef.current?.signal;
       const nextBoundaries = [null];
       let cont = null;
       for (;;) {
-        if (!mountedRef.current) {
+        if (!mountedRef.current || signal?.aborted) {
           return;
         }
-        const { transactions: txs, pagination: pag } = await fetchTransactionsPage(lim, cont);
+        const { transactions: txs, pagination: pag } = await fetchTransactionsPage(lim, cont, {
+          signal,
+        });
         if (!txs.length) {
           break;
         }
@@ -164,13 +180,14 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
         nextBoundaries.push(nextB);
         cont = nextB;
       }
-      if (!mountedRef.current) {
+      if (!mountedRef.current || signal?.aborted) {
         return;
       }
       const lastIdx = Math.max(0, nextBoundaries.length - 1);
       setBoundaries(nextBoundaries);
       setActivePage(lastIdx);
     } catch (err) {
+      if (isAbortError(err)) return;
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : String(err));
       }

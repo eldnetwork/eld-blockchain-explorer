@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { RPC_URL, API_URL } from '../config';
+import { rpcGet, indexerGet } from '../api';
 import {
   executionStatusFromBlockResult,
   resolveTransactionExecutionStatus,
@@ -30,20 +30,20 @@ export function decodeEldTxFromBlockBase64(txBase64) {
 
 /**
  * @param {number} blockHeight
+ * @param {{ signal?: AbortSignal }} [options]
  * @returns {Promise<Array<{ code: number, log: string, events?: Array }>|null>}
  */
-export async function fetchBlockTxResults(blockHeight) {
-  const res = await fetch(`${RPC_URL}/block_results?height=${blockHeight}`);
-  const data = await res.json();
+export async function fetchBlockTxResults(blockHeight, { signal } = {}) {
+  const data = await rpcGet(`/block_results?height=${blockHeight}`, { signal });
   const results = data?.result?.txs_results;
   return Array.isArray(results) ? results : null;
 }
 
 /**
  * @param {number} blockHeight
- * @param {string} [apiUrl]
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function fetchIndexedTransactionsForBlock(blockHeight, apiUrl = API_URL) {
+export async function fetchIndexedTransactionsForBlock(blockHeight, { signal } = {}) {
   const blockIndexed = [];
   let continuation = null;
   const PAGE = 80;
@@ -57,8 +57,7 @@ export async function fetchIndexedTransactionsForBlock(blockHeight, apiUrl = API
       params.set('after_height', String(continuation.after_height));
       params.set('after_index', String(continuation.after_index));
     }
-    const response = await fetch(`${apiUrl}/transactions?${params}`);
-    const data = await response.json();
+    const data = await indexerGet(`/transactions?${params}`, { signal });
     const batch = Array.isArray(data?.transactions) ? data.transactions : [];
     blockIndexed.push(...batch);
 
@@ -146,22 +145,23 @@ export function mergeIndexedWithRpcView(indexed, rpcView) {
  * Load one transaction at block index from Tendermint RPC (optionally enriched from indexer).
  * @param {number|string} blockHeight
  * @param {number|string} blockIndex
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function fetchBlockTransactionAtIndex(blockHeight, blockIndex) {
+export async function fetchBlockTransactionAtIndex(blockHeight, blockIndex, { signal } = {}) {
   const height = parseInt(blockHeight, 10);
   const index = parseInt(blockIndex, 10);
   if (Number.isNaN(height) || Number.isNaN(index)) {
     return null;
   }
 
-  const [blockRes, resultsRes, indexedList] = await Promise.all([
-    fetch(`${RPC_URL}/block?height=${height}`),
-    fetch(`${RPC_URL}/block_results?height=${height}`),
-    fetchIndexedTransactionsForBlock(height),
+  const [blockData, resultsData, indexedList] = await Promise.all([
+    rpcGet(`/block?height=${height}`, { signal }),
+    rpcGet(`/block_results?height=${height}`, { signal }),
+    fetchIndexedTransactionsForBlock(height, { signal }),
   ]);
 
-  const block = (await blockRes.json())?.result?.block;
-  const blockResults = (await resultsRes.json())?.result?.txs_results;
+  const block = blockData?.result?.block;
+  const blockResults = resultsData?.result?.txs_results;
   const txs = block?.data?.txs;
   if (!Array.isArray(txs) || index < 0 || index >= txs.length) {
     return null;
@@ -234,8 +234,9 @@ export function buildBlockTransactionRows(
 
 /**
  * @param {{ header: { height: string | number }, data?: { txs?: string[] } }} block
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function loadBlockTransactions(block) {
+export async function loadBlockTransactions(block, { signal } = {}) {
   const blockHeight = parseInt(block.header.height, 10);
   const parsedTxs = (block.data?.txs || [])
     .map((txBase64, index) => {
@@ -245,8 +246,8 @@ export async function loadBlockTransactions(block) {
     .filter(Boolean);
 
   const [indexed, blockResults] = await Promise.all([
-    fetchIndexedTransactionsForBlock(blockHeight),
-    fetchBlockTxResults(blockHeight),
+    fetchIndexedTransactionsForBlock(blockHeight, { signal }),
+    fetchBlockTxResults(blockHeight, { signal }),
   ]);
 
   return buildBlockTransactionRows(parsedTxs, indexed, blockResults, blockHeight);

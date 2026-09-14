@@ -28,9 +28,10 @@ This repository is the **explorer frontend only** — not the Eld protocol, cons
 ```text
 Browser (React SPA)
   └─ App → ExplorerAppShell → AppRoutes → pages/
-       ├─ hooks/          data fetching (blocks, txs, epochs, pinboard, …)
+       ├─ api/            shared RPC + indexer HTTP (timeout, abort)
+       ├─ hooks/          data hooks built on api/
        ├─ components/     shared UI (lists, shell, footer, …)
-       ├─ utils/          formatting and helpers
+       ├─ utils/          search resolver, formatting, helpers
        └─ config/         RPC_URL, API_URL, feature flags
               │
               ├─ REACT_APP_RPC_URL  → Tendermint / node RPC
@@ -41,9 +42,10 @@ Browser (React SPA)
 | ------------------------------------ | ----------------------------------------------------------------- |
 | `src/App.js`                         | `BrowserRouter` entry                                             |
 | `src/components/ExplorerAppShell.js` | chrome (header, theme, footer)                                    |
-| `src/AppRoutes.js`                   | client-side routes                                                |
+| `src/AppRoutes.js`                   | client-side routes (+ error boundary, 404)                        |
 | `src/pages/`                         | route screens (home, block, tx, account, validators, pinboard, …) |
-| `src/hooks/`                         | `fetch` wrappers against `RPC_URL` / `API_URL`                    |
+| `src/api/`                           | typed HTTP helpers for RPC and indexer                            |
+| `src/hooks/`                         | data hooks (retry + AbortController) using `src/api/`             |
 | `src/config/`                        | env-backed endpoints and optional validator admin status maps     |
 
 Static output is a CRA `build/` folder; deploy that behind any static host / CDN.

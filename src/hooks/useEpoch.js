@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 function useEpoch(epochRef = 'current') {
   const [epoch, setEpoch] = useState(null);
@@ -7,27 +7,29 @@ function useEpoch(epochRef = 'current') {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchEpoch() {
-      if (!epochRef) return;
+    if (!epochRef) return undefined;
 
+    const ac = new AbortController();
+
+    async function fetchEpoch() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/epoch/${encodeURIComponent(epochRef)}`);
-        if (!response.ok) {
-          throw new Error(`Epoch not found (${response.status})`);
-        }
-        const data = await response.json();
+        const data = await indexerGet(`/epoch/${encodeURIComponent(epochRef)}`, {
+          signal: ac.signal,
+        });
         setEpoch(data);
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(err.message || 'Failed to fetch epoch');
         setEpoch(null);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchEpoch();
+    return () => ac.abort();
   }, [epochRef]);
 
   return { epoch, loading, error };

@@ -1,35 +1,36 @@
 import { useState, useEffect } from 'react';
-import { RPC_URL } from '../config';
+import { rpcGet, isAbortError, debugLog } from '../api';
 
 function useTestnetAvailability() {
   const [isTestnetAvailable, setIsTestnetAvailable] = useState(true);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    const ac = new AbortController();
+
     const checkTestnetAvailability = async () => {
       try {
-        const response = await fetch(`${RPC_URL}/status`);
-        if (!response.ok) {
-          throw new Error('Status endpoint not available');
-        }
-        const data = await response.json();
+        const data = await rpcGet('/status', { signal: ac.signal });
         if (data.result?.sync_info?.latest_block_height) {
           setIsTestnetAvailable(true);
         } else {
           setIsTestnetAvailable(false);
         }
       } catch (err) {
-        console.error('Error checking testnet availability:', err);
+        if (isAbortError(err)) return;
+        debugLog('Error checking testnet availability:', err);
         setIsTestnetAvailable(false);
       } finally {
-        setIsChecking(false);
+        if (!ac.signal.aborted) setIsChecking(false);
       }
     };
 
     checkTestnetAvailability();
-    // Refresh check every 30 seconds
     const interval = setInterval(checkTestnetAvailability, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      ac.abort();
+      clearInterval(interval);
+    };
   }, []);
 
   return { isTestnetAvailable, isChecking };

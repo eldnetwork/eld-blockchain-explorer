@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError } from '../api';
 
 const PAGE_LIMIT = 50;
 /** Safety cap ~10k txs for one account fetch. */
 const MAX_PAGES = 200;
 
-async function fetchSenderPage(senderAddress, continuation) {
+async function fetchSenderPage(senderAddress, continuation, { signal } = {}) {
   const params = new URLSearchParams({
     limit: String(PAGE_LIMIT),
   });
@@ -14,11 +14,7 @@ async function fetchSenderPage(senderAddress, continuation) {
     params.set('after_height', String(continuation.after_height));
     params.set('after_index', String(continuation.after_index));
   }
-  const response = await fetch(`${API_URL}/transactions?${params}`);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return response.json();
+  return indexerGet(`/transactions?${params}`, { signal });
 }
 
 function useTransactionsBySender(senderAddress) {
@@ -27,12 +23,14 @@ function useTransactionsBySender(senderAddress) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchAll() {
-      if (!senderAddress) {
-        setLoading(false);
-        return;
-      }
+    if (!senderAddress) {
+      setLoading(false);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchAll() {
       setLoading(true);
       setError(null);
       try {
@@ -41,7 +39,8 @@ function useTransactionsBySender(senderAddress) {
         let pages = 0;
 
         while (pages < MAX_PAGES) {
-          const data = await fetchSenderPage(senderAddress, continuation);
+          const data = await fetchSenderPage(senderAddress, continuation, { signal: ac.signal });
+          if (ac.signal.aborted) return;
           pages += 1;
 
           const batch = Array.isArray(data.transactions)
@@ -77,15 +76,17 @@ function useTransactionsBySender(senderAddress) {
 
         setTransactions(aggregated);
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(
           'Failed to fetch transactions: ' + (err instanceof Error ? err.message : String(err)),
         );
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchAll();
+    return () => ac.abort();
   }, [senderAddress]);
 
   return { transactions, loading, error };

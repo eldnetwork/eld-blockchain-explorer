@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RPC_URL } from '../config';
+import { rpcPost, isAbortError } from '../api';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -9,7 +9,7 @@ function bytesToHex(bytes) {
   return hex;
 }
 
-async function pinboardFeedQuery({ order, page, pageSize }) {
+async function pinboardFeedQuery({ order, page, pageSize, signal }) {
   const payload = JSON.stringify({
     order,
     page,
@@ -19,11 +19,8 @@ async function pinboardFeedQuery({ order, page, pageSize }) {
   const bytes = new TextEncoder().encode(payload);
   const hexData = bytesToHex(bytes);
 
-  const response = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
+  return rpcPost(
+    {
       id: -1,
       method: 'abci_query',
       params: {
@@ -31,10 +28,9 @@ async function pinboardFeedQuery({ order, page, pageSize }) {
         data: hexData,
         prove: false,
       },
-    }),
-  });
-
-  return response.json();
+    },
+    { signal },
+  );
 }
 
 function usePinboardFeed(order = 'desc', page = 0, pageSize = DEFAULT_PAGE_SIZE) {
@@ -47,12 +43,14 @@ function usePinboardFeed(order = 'desc', page = 0, pageSize = DEFAULT_PAGE_SIZE)
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const ac = new AbortController();
+
     async function fetchFeed() {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await pinboardFeedQuery({ order, page, pageSize });
+        const data = await pinboardFeedQuery({ order, page, pageSize, signal: ac.signal });
 
         const code = data?.result?.response?.code;
         if (code !== 0) {
@@ -80,15 +78,17 @@ function usePinboardFeed(order = 'desc', page = 0, pageSize = DEFAULT_PAGE_SIZE)
         setEffectiveOrder(typeof payload.order === 'string' ? payload.order : order);
         setHasMore(Boolean(payload.has_more));
       } catch (err) {
+        if (isAbortError(err)) return;
         setError(`Failed to fetch pinboard feed: ${err.message}`);
         setItems([]);
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchFeed();
+    return () => ac.abort();
   }, [order, page, pageSize]);
 
   return {

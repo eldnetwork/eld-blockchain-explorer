@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet } from '../api';
 import { fetchWithRetry } from '../utils/retryFetch';
 
 const SUM_PATH = '/v1/capacity/verified-proof-rewards/sum';
@@ -14,14 +14,7 @@ function pickTotalRewards(payload) {
 }
 
 async function fetchSumOnce(signal) {
-  const res = await fetch(`${API_URL}${SUM_PATH}`, {
-    signal,
-    credentials: 'omit',
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
-  }
-  const data = await res.json();
+  const data = await indexerGet(SUM_PATH, { signal });
   return pickTotalRewards(data);
 }
 
@@ -47,6 +40,7 @@ function useVerifiedProofRewardsSum() {
       }
 
       const result = await fetchWithRetry(() => fetchSumOnce(ac.signal), {
+        signal: ac.signal,
         cancelled: () => cancelled,
         isRefresh,
         onExhausted: () => {
@@ -56,7 +50,7 @@ function useVerifiedProofRewardsSum() {
         },
       });
 
-      if (!result.ok || cancelled) return;
+      if (cancelled || result.aborted || !result.ok) return;
 
       setTotalRewards(result.value);
       setError(null);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import { indexerGet, isAbortError, debugLog } from '../api';
 
 function useEvents(txid) {
   const [events, setEvents] = useState([]);
@@ -7,25 +7,21 @@ function useEvents(txid) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchEvents() {
-      if (!txid) {
-        setLoading(false);
-        return;
-      }
+    if (!txid) {
+      setLoading(false);
+      return undefined;
+    }
 
+    const ac = new AbortController();
+
+    async function fetchEvents() {
       setLoading(true);
       setError(null);
       try {
-        const url = `${API_URL}/events?txid=${encodeURIComponent(txid)}`;
-        const response = await fetch(url);
+        const data = await indexerGet(`/events?txid=${encodeURIComponent(txid)}`, {
+          signal: ac.signal,
+        });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Handle different response formats
         if (Array.isArray(data)) {
           setEvents(data);
         } else if (data.events && Array.isArray(data.events)) {
@@ -36,15 +32,17 @@ function useEvents(txid) {
           setEvents([]);
         }
       } catch (err) {
-        console.error('Error fetching events:', err);
+        if (isAbortError(err)) return;
+        debugLog('Error fetching events:', err);
         setError('Failed to fetch events: ' + err.message);
         setEvents([]);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       }
     }
 
     fetchEvents();
+    return () => ac.abort();
   }, [txid]);
 
   return { events, loading, error };

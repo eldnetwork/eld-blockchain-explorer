@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL, RPC_URL } from '../config';
+import { rpcGet, indexerGet, isAbortError } from '../api';
 
 /**
  * @typedef {Object} VerifiedProofRewardsResponse
@@ -24,7 +24,7 @@ function useVerifiedProofRewards(normalizedAddress) {
       setData(null);
       setLoading(false);
       setError(null);
-      return;
+      return undefined;
     }
 
     const ac = new AbortController();
@@ -34,14 +34,7 @@ function useVerifiedProofRewards(normalizedAddress) {
 
     (async () => {
       try {
-        const statusRes = await fetch(`${RPC_URL}/status`, {
-          signal: ac.signal,
-          credentials: 'omit',
-        });
-        if (!statusRes.ok) {
-          throw new Error(`RPC status HTTP ${statusRes.status}`);
-        }
-        const statusJson = await statusRes.json();
+        const statusJson = await rpcGet('/status', { signal: ac.signal });
         const latestRaw = statusJson.result?.sync_info?.latest_block_height;
         const toHeight = parseInt(String(latestRaw), 10);
         if (!Number.isFinite(toHeight) || toHeight < 0) {
@@ -49,19 +42,14 @@ function useVerifiedProofRewards(normalizedAddress) {
         }
 
         const params = new URLSearchParams({ from_height: '0', to_height: String(toHeight) });
-        const rewardsUrl = `${API_URL}/v1/capacity/verified-proof-rewards/${encodeURIComponent(
-          normalizedAddress,
-        )}?${params.toString()}`;
-
-        const rewardsRes = await fetch(rewardsUrl, { signal: ac.signal, credentials: 'omit' });
-        if (!rewardsRes.ok) {
-          throw new Error(`Rewards HTTP ${rewardsRes.status}`);
-        }
-        const rewardsJson = await rewardsRes.json();
+        const rewardsJson = await indexerGet(
+          `/v1/capacity/verified-proof-rewards/${encodeURIComponent(normalizedAddress)}?${params.toString()}`,
+          { signal: ac.signal },
+        );
         setData(rewardsJson);
         setError(null);
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if (isAbortError(err)) return;
         setData(null);
         setError(err instanceof Error ? err.message : String(err));
       } finally {
