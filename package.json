@@ -1,6 +1,6 @@
 {
   "name": "eld-blockchain-explorer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "Eld Blockchain Explorer — UI for the Eld decentralized ephemeral storage protocol",
