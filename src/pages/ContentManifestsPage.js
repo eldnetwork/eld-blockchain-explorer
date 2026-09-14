@@ -143,7 +143,7 @@ function ContentManifestList({ manifests, loading }) {
                   </Text>
                 )}
                 {manifestData._note && (
-                  <Text fontSize="xs" color="orange.500" fontStyle="italic">
+                  <Text fontSize="xs" color="orange.500">
                     {manifestData._note}
                   </Text>
                 )}
@@ -168,7 +168,7 @@ function ContentManifestList({ manifests, loading }) {
                   !manifestData.content_id &&
                   !manifestData.total_size &&
                   !manifestData._note && (
-                    <Text fontSize="xs" color="gray.400" fontStyle="italic">
+                    <Text fontSize="xs" color="gray.400">
                       CADO data available (deserialization may be required for full details)
                     </Text>
                   )}
