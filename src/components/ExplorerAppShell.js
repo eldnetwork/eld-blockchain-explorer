@@ -86,9 +86,7 @@ function ExplorerAppShell() {
           >
             <Box className="explorer-home-shell__brand-mark">E</Box>
             <HStack className="explorer-home-shell__brand-text" spacing={2} align="center">
-              <Text>ELD</Text>
-              <Text>{'//'}</Text>
-              <Text>BLOCKCHAIN EXPLORER</Text>
+              <Text>ELD BLOCKCHAIN EXPLORER</Text>
             </HStack>
           </Link>
 

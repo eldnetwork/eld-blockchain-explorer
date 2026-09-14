@@ -8,9 +8,11 @@
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fexplorer.eld.network)](https://explorer.eld.network)
 [![Stars](https://img.shields.io/github/stars/eldnetwork/eld-blockchain-explorer)](https://github.com/eldnetwork/eld-blockchain-explorer/stargazers)
 
-Block explorer UI for the [Eld](https://www.eld.network) decentralized ephemeral storage protocol, built with [Create React App](https://create-react-app.dev/) and React.
+Eld Blockchain Explorer is the public block explorer UI for the [Eld](https://www.eld.network) decentralized ephemeral storage protocol, built with [Create React App](https://create-react-app.dev/) and React.
 
-This repository is the public explorer frontend only — not the Eld protocol, node software, or SDKs. For protocol docs and the marketing site, see [Documentation](https://docs.eld.network) and [eld.network](https://www.eld.network).
+This repository is the explorer frontend only — not the Eld protocol, node software, or SDKs. For protocol docs and the marketing site, see [Documentation](https://docs.eld.network) and [eld.network](https://www.eld.network).
+
+In the UI and docs, **capacity provider** is the canonical term (legacy `/storage-providers` and `/storage-validator/:address` routes redirect to the capacity-provider pages).
 
 **Live site:** [https://explorer.eld.network](https://explorer.eld.network)
 
