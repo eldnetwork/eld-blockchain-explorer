@@ -87,6 +87,28 @@ export function fetchRpcStatus() {
 }
 
 /**
+ * Current summary header (`SH:`). Params are ignored.
+ * Resolves to `null` when the store has no summary header.
+ * @param {{ signal?: AbortSignal, timeoutMs?: number }} [options]
+ * @returns {Promise<Record<string, unknown> | null>}
+ */
+export function fetchRpcSummary(options = {}) {
+  return rpcPost({ method: 'summary', params: {} }, options).then((data) => {
+    if (data?.error) {
+      if (data.error.data === 'summary not found') return null;
+      const err = new Error(data.error.message || 'RPC error');
+      err.code = data.error.code;
+      err.data = data.error.data;
+      throw err;
+    }
+    if (!data?.result || typeof data.result !== 'object') {
+      throw new Error('No summary in response');
+    }
+    return data.result;
+  });
+}
+
+/**
  * Tendermint JSON-RPC POST (e.g. abci_query via POST body).
  * @param {{ method: string, params?: unknown, id?: number|string }} payload
  * @param {{ signal?: AbortSignal, timeoutMs?: number }} [options]

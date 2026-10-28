@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { RPC_URL } from '../config';
-import { rpcAbciQuery, rpcGet, rpcPathToPost } from './rpc';
+import { fetchRpcSummary, rpcAbciQuery, rpcGet, rpcPathToPost } from './rpc';
 
 function jsonResponse(body) {
   return {
@@ -44,7 +44,7 @@ describe('rpcPathToPost', () => {
   });
 });
 
-describe('rpcGet', () => {
+describe('rpc requests', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: {} })));
   });
@@ -63,6 +63,40 @@ describe('rpcGet', () => {
       }),
     );
     expect(postedBody()).toEqual({ jsonrpc: '2.0', id: 1, method: 'status' });
+  });
+
+  test('posts summary and returns the header', async () => {
+    const header = { end_height: '5160', summary_hash: 'AA' };
+    fetch.mockResolvedValueOnce(jsonResponse({ jsonrpc: '2.0', id: 1, result: header }));
+    await expect(fetchRpcSummary()).resolves.toEqual(header);
+    expect(postedBody()).toEqual({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'summary',
+      params: {},
+    });
+  });
+
+  test('returns null when the store has no summary header', async () => {
+    fetch.mockResolvedValueOnce(
+      jsonResponse({
+        jsonrpc: '2.0',
+        id: 1,
+        error: { code: -32603, message: 'Internal error', data: 'summary not found' },
+      }),
+    );
+    await expect(fetchRpcSummary()).resolves.toBeNull();
+  });
+
+  test('throws other summary RPC errors', async () => {
+    fetch.mockResolvedValueOnce(
+      jsonResponse({
+        jsonrpc: '2.0',
+        id: 1,
+        error: { code: -32603, message: 'Internal error', data: 'boom' },
+      }),
+    );
+    await expect(fetchRpcSummary()).rejects.toThrow('Internal error');
   });
 
   test('posts abci_query with an empty data hex string', async () => {

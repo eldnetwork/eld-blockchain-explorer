@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Flex, Heading, Input, Button, VStack, HStack, Text } from '@chakra-ui/react';
 import BlocksList from '../components/BlocksList';
 import EpochDashboard from '../components/EpochDashboard';
+import SummaryWidget from '../components/SummaryWidget';
 import ValidatorStats from '../components/ValidatorStats';
 import TransactionsList from '../components/TransactionsList';
 import EpochsList from '../components/EpochsList';
@@ -146,6 +147,7 @@ function HomePage() {
         </Flex>
         <EpochDashboard />
         <ValidatorStats />
+        <SummaryWidget />
         <Flex
           className="explorer-home__lists"
           direction={{ base: 'column', lg: 'row' }}
