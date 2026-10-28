@@ -1,13 +1,11 @@
 import { rpcGet } from '../api';
+import { cachedFetch } from '../api/queryCache';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
-const REFRESH_INTERVAL_MS = 2000;
-
-async function fetchEpochInfoOnce(signal) {
+async function fetchEpochInfoOnce() {
   // height=0 is part of the original query; use full path rather than rpcAbciQuery.
-  const data = await rpcGet('/abci_query?path="epoch_info"&data=""&height=0&prove=false', {
-    signal,
-  });
+  const data = await rpcGet('/abci_query?path="epoch_info"&data=""&height=0&prove=false');
   if (!data.result?.response?.info) {
     throw new Error('No epoch info in response');
   }
@@ -15,14 +13,17 @@ async function fetchEpochInfoOnce(signal) {
 }
 
 function useEpochInfo() {
+  const latestHeight = useLatestHeight();
   const {
     data: epochInfo,
     loading,
     isInitialLoad,
   } = useAsyncResource({
-    fetcher: fetchEpochInfoOnce,
+    enabled: latestHeight > 0,
+    fetcher: () =>
+      cachedFetch(`epoch_info:${latestHeight}`, () => fetchEpochInfoOnce(), { ttlMs: 2000 }),
     deps: [],
-    intervalMs: REFRESH_INTERVAL_MS,
+    refreshKey: latestHeight,
     retry: true,
     errorMessage: 'Failed to load epoch info',
   });

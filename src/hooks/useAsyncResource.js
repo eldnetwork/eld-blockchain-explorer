@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { isAbortError } from '../api';
 import { fetchWithRetry } from '../utils/retryFetch';
+import { nextDelay, startJitteredPoll } from '../utils/pollSchedule';
+import usePageVisible from './usePageVisible';
 
 function defaultErrorMessage(err) {
   if (err instanceof Error && err.message) return err.message;
@@ -20,12 +22,16 @@ function depsKey(enabled, deps) {
  * Shared abortable fetcher with optional polling and fetchWithRetry.
  * Loading is derived from the request key so effects never call setState synchronously.
  *
+ * Polling uses a recursive timeout with ±20% jitter and pauses while the tab is hidden.
+ * `refreshKey` triggers a silent refresh (`load(true)`) without changing the request key.
+ *
  * @template T
  * @param {object} options
  * @param {(signal: AbortSignal) => Promise<T>} options.fetcher
  * @param {readonly unknown[]} [options.deps]
  * @param {boolean} [options.enabled]
  * @param {number | null} [options.intervalMs]
+ * @param {unknown} [options.refreshKey]
  * @param {boolean} [options.retry]
  * @param {string | ((err?: unknown) => string)} [options.errorMessage]
  * @param {T} [options.initialData]
@@ -38,6 +44,7 @@ function useAsyncResource({
   deps = [],
   enabled = true,
   intervalMs = null,
+  refreshKey,
   retry = false,
   errorMessage = defaultErrorMessage,
   initialData = null,
@@ -45,7 +52,9 @@ function useAsyncResource({
   clearOnDisabled = false,
   onError,
 }) {
-  const requestKey = depsKey(enabled, deps);
+  const visible = usePageVisible();
+  const active = enabled && visible;
+  const requestKey = depsKey(active, deps);
 
   const fetcherRef = useRef(fetcher);
   fetcherRef.current = fetcher;
@@ -58,16 +67,19 @@ function useAsyncResource({
   const resetDataOnErrorRef = useRef(resetDataOnError);
   resetDataOnErrorRef.current = resetDataOnError;
 
+  const loadRef = useRef(/** @type {null | ((isRefresh: boolean) => Promise<void>)} */ (null));
+  const processedRefreshKeyRef = useRef(refreshKey);
+
   const [snapshot, setSnapshot] = useState({
     key: requestKey,
     data: initialData,
     error: null,
-    completed: !enabled,
+    completed: !active,
     isInitialLoad: true,
   });
 
-  const pending = enabled && snapshot.key !== requestKey;
-  const loading = enabled && (pending || !snapshot.completed);
+  const pending = active && snapshot.key !== requestKey;
+  const loading = active && (pending || !snapshot.completed);
   const data = !enabled && clearOnDisabled ? initialDataRef.current : snapshot.data;
   const error = !enabled
     ? clearOnDisabled
@@ -78,13 +90,15 @@ function useAsyncResource({
       : null;
 
   useEffect(() => {
-    if (!enabled) {
+    if (!active) {
       return undefined;
     }
 
     const ac = new AbortController();
     let cancelled = false;
     let retryTimeoutId = null;
+    /** @type {null | (() => void)} */
+    let cancelPoll = null;
 
     async function load(isRefresh) {
       if (cancelled || ac.signal.aborted) return;
@@ -120,7 +134,7 @@ function useAsyncResource({
             ? () => {
                 retryTimeoutId = setTimeout(() => {
                   if (!cancelled) load(false);
-                }, intervalMs);
+                }, nextDelay(intervalMs));
               }
             : undefined,
         });
@@ -143,21 +157,44 @@ function useAsyncResource({
       }
     }
 
-    load(false);
+    loadRef.current = load;
+    processedRefreshKeyRef.current = refreshKey;
 
-    const intervalId = intervalMs
-      ? setInterval(() => {
-          load(true);
-        }, intervalMs)
-      : null;
+    void load(false).finally(() => {
+      if (!intervalMs || cancelled) return;
+      cancelPoll = startJitteredPoll({
+        intervalMs,
+        isCancelled: () => cancelled,
+        isPaused: () => typeof document !== 'undefined' && document.visibilityState !== 'visible',
+        onTick: () => load(true),
+      });
+    });
 
     return () => {
       cancelled = true;
       ac.abort();
-      if (intervalId) clearInterval(intervalId);
+      cancelPoll?.();
       if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };
-  }, [requestKey, enabled, intervalMs, retry]);
+    // refreshKey is synced onto processedRefreshKeyRef when this effect starts so a
+    // concurrent refreshKey change does not double-fetch with load(false).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- requestKey captures enabled/deps/visibility
+  }, [requestKey, active, intervalMs, retry]);
+
+  useEffect(() => {
+    if (!active) {
+      return undefined;
+    }
+    if (refreshKey === undefined) {
+      return undefined;
+    }
+    if (Object.is(processedRefreshKeyRef.current, refreshKey)) {
+      return undefined;
+    }
+    processedRefreshKeyRef.current = refreshKey;
+    void loadRef.current?.(true);
+    return undefined;
+  }, [refreshKey, active]);
 
   return {
     data,

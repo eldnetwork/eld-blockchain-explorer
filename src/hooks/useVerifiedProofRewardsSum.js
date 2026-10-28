@@ -1,8 +1,11 @@
 import { indexerGet } from '../api';
+import { cachedFetch } from '../api/queryCache';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
 const SUM_PATH = '/v1/capacity/verified-proof-rewards/sum';
-const REFRESH_INTERVAL_MS = 10000;
+const SLOW_POLL_MS = 30_000;
+const HEIGHT_JUMP = 20;
 
 function pickTotalRewards(payload) {
   if (payload == null || typeof payload !== 'object') return null;
@@ -12,8 +15,8 @@ function pickTotalRewards(payload) {
   return String(raw);
 }
 
-async function fetchSumOnce(signal) {
-  const data = await indexerGet(SUM_PATH, { signal });
+async function fetchSumOnce() {
+  const data = await indexerGet(SUM_PATH);
   return pickTotalRewards(data);
 }
 
@@ -22,15 +25,17 @@ async function fetchSumOnce(signal) {
  * @returns {{ totalRewards: string | null, loading: boolean, error: string | null, isInitialLoad: boolean }}
  */
 function useVerifiedProofRewardsSum() {
+  const latestHeight = useLatestHeight();
   const {
     data: totalRewards,
     loading,
     error,
     isInitialLoad,
   } = useAsyncResource({
-    fetcher: fetchSumOnce,
+    fetcher: () => cachedFetch('verified-proof-rewards-sum', () => fetchSumOnce(), { ttlMs: 4000 }),
     deps: [],
-    intervalMs: REFRESH_INTERVAL_MS,
+    intervalMs: SLOW_POLL_MS,
+    refreshKey: Math.floor(latestHeight / HEIGHT_JUMP),
     retry: true,
     errorMessage: 'Failed to load verified proof rewards',
   });

@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useLatestHeight from './useLatestHeight';
+import useOnHeightChange from './useOnHeightChange';
+import usePageVisible from './usePageVisible';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -50,6 +53,8 @@ function afterEpochKey(afterEpoch) {
 }
 
 function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
+  const latestHeight = useLatestHeight();
+  const pageVisible = usePageVisible();
   const [epochs, setEpochs] = useState([]);
   const [pagination, setPagination] = useState({
     limit: pageSize,
@@ -119,19 +124,11 @@ function useEpochs(pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
     return () => ac.abort();
   }, [activePage, afterEpoch, loadPage]);
 
-  useEffect(() => {
-    if (pagerJumping) {
-      return undefined;
-    }
+  useOnHeightChange(latestHeight, pageVisible && !pagerJumping && activePage === 0, () => {
     const ac = new AbortController();
-    const id = setInterval(() => {
-      loadPage(afterEpoch, true, ac.signal);
-    }, 10000);
-    return () => {
-      ac.abort();
-      clearInterval(id);
-    };
-  }, [afterEpoch, loadPage, pagerJumping]);
+    loadPage(afterEpoch, true, ac.signal);
+    return () => ac.abort();
+  });
 
   const goOlder = useCallback(() => {
     if (!epochs.length || !pagination.has_next) return;

@@ -1,5 +1,6 @@
 import { indexerGet, isAbortError } from '../api';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -50,6 +51,7 @@ export async function findLastPinboardPostsPageIndex(pageSize, order, { signal }
 }
 
 function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc') {
+  const latestHeight = useLatestHeight();
   const { data, loading, error } = useAsyncResource({
     fetcher: async (signal) => {
       try {
@@ -75,6 +77,7 @@ function usePinboardPosts(page = 0, pageSize = DEFAULT_PAGE_SIZE, order = 'desc'
       }
     },
     deps: [order, page, pageSize],
+    refreshKey: page === 0 ? latestHeight : undefined,
     initialData: {
       items: [],
       hasMore: false,

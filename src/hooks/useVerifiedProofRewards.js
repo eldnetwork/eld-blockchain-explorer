@@ -1,4 +1,4 @@
-import { rpcGet, indexerGet } from '../api';
+import { fetchRpcStatus, indexerGet } from '../api';
 import useAsyncResource from './useAsyncResource';
 
 /**
@@ -17,7 +17,7 @@ import useAsyncResource from './useAsyncResource';
 function useVerifiedProofRewards(normalizedAddress) {
   const { data, loading, error } = useAsyncResource({
     fetcher: async (signal) => {
-      const statusJson = await rpcGet('/status', { signal });
+      const statusJson = await fetchRpcStatus();
       const latestRaw = statusJson.result?.sync_info?.latest_block_height;
       const toHeight = parseInt(String(latestRaw), 10);
       if (!Number.isFinite(toHeight) || toHeight < 0) {

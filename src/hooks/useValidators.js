@@ -1,10 +1,13 @@
 import { rpcAbciQuery } from '../api';
+import { cachedFetch } from '../api/queryCache';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
-const REFRESH_INTERVAL_MS = 10000;
+const SLOW_POLL_MS = 30_000;
+const HEIGHT_JUMP = 20;
 
-async function fetchValidatorsOnce(signal) {
-  const data = await rpcAbciQuery('active_validators', '', { signal });
+async function fetchValidatorsOnce() {
+  const data = await rpcAbciQuery('active_validators', '');
   const queryResponse = data.result?.response;
   if (queryResponse?.code && queryResponse.code !== 0) {
     throw new Error(queryResponse.log || 'ABCI query returned error');
@@ -16,10 +19,12 @@ async function fetchValidatorsOnce(signal) {
 }
 
 function useValidators() {
+  const latestHeight = useLatestHeight();
   const { data, loading, error, isInitialLoad } = useAsyncResource({
-    fetcher: fetchValidatorsOnce,
+    fetcher: () => cachedFetch('active_validators', () => fetchValidatorsOnce(), { ttlMs: 4000 }),
     deps: [],
-    intervalMs: REFRESH_INTERVAL_MS,
+    intervalMs: SLOW_POLL_MS,
+    refreshKey: Math.floor(latestHeight / HEIGHT_JUMP),
     retry: true,
     errorMessage: 'Failed to load validators',
   });

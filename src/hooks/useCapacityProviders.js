@@ -1,10 +1,13 @@
 import { rpcAbciQuery } from '../api';
+import { cachedFetch } from '../api/queryCache';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
-const REFRESH_INTERVAL_MS = 10000;
+const SLOW_POLL_MS = 30_000;
+const HEIGHT_JUMP = 20;
 
-async function fetchProvidersOnce(signal) {
-  const data = await rpcAbciQuery('capacity_validators', '', { signal });
+async function fetchProvidersOnce() {
+  const data = await rpcAbciQuery('capacity_validators', '');
   const queryResponse = data.result?.response;
   if (queryResponse?.code && queryResponse.code !== 0) {
     throw new Error(queryResponse.log || 'ABCI query returned error');
@@ -16,24 +19,31 @@ async function fetchProvidersOnce(signal) {
 }
 
 function useCapacityProviders() {
+  const latestHeight = useLatestHeight();
   const { data, loading, error, isInitialLoad } = useAsyncResource({
-    fetcher: async (signal) => {
-      const parsed = await fetchProvidersOnce(signal);
-      const providers =
-        parsed.capacity_validators || parsed.all_providers || parsed.active_providers || [];
-      const totalStake =
-        parsed.total_stake || parsed.all_total_stake || parsed.active_total_stake || 0;
-      const totalCapacity =
-        parsed.total_capacity || parsed.all_total_capacity || parsed.active_total_capacity || 0;
-      return {
-        providers,
-        totalStake,
-        totalCapacity,
-        currentEpoch: parsed.current_epoch || 0,
-      };
-    },
+    fetcher: () =>
+      cachedFetch(
+        'capacity_validators',
+        async () => {
+          const parsed = await fetchProvidersOnce();
+          const providers =
+            parsed.capacity_validators || parsed.all_providers || parsed.active_providers || [];
+          const totalStake =
+            parsed.total_stake || parsed.all_total_stake || parsed.active_total_stake || 0;
+          const totalCapacity =
+            parsed.total_capacity || parsed.all_total_capacity || parsed.active_total_capacity || 0;
+          return {
+            providers,
+            totalStake,
+            totalCapacity,
+            currentEpoch: parsed.current_epoch || 0,
+          };
+        },
+        { ttlMs: 4000 },
+      ),
     deps: [],
-    intervalMs: REFRESH_INTERVAL_MS,
+    intervalMs: SLOW_POLL_MS,
+    refreshKey: Math.floor(latestHeight / HEIGHT_JUMP),
     retry: true,
     errorMessage: 'Failed to load capacity providers',
   });

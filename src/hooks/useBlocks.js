@@ -1,18 +1,15 @@
 import { rpcGet } from '../api';
+import { cachedFetch } from '../api/queryCache';
 import useAsyncResource from './useAsyncResource';
+import useLatestHeight from './useLatestHeight';
 
 const BLOCKS_PER_PAGE = 20;
-const REFRESH_INTERVAL_MS = 10000;
 
-async function fetchBlocksOnce(page, signal) {
-  const statusData = await rpcGet('/status', { signal });
-  const latestHeight = parseInt(statusData.result.sync_info.latest_block_height, 10);
+async function fetchBlocksOnce(page, latestHeight) {
   const maxHeight = latestHeight - (page - 1) * BLOCKS_PER_PAGE;
   const minHeight = Math.max(0, maxHeight - BLOCKS_PER_PAGE + 1);
 
-  const data = await rpcGet(`/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`, {
-    signal,
-  });
+  const data = await rpcGet(`/blockchain?minHeight=${minHeight}&maxHeight=${maxHeight}`);
   if (!data.result?.block_metas) {
     throw new Error('No blocks found');
   }
@@ -24,17 +21,22 @@ async function fetchBlocksOnce(page, signal) {
 }
 
 function useBlocks(page) {
+  const latestHeight = useLatestHeight();
   const { data, loading, error, isInitialLoad } = useAsyncResource({
-    fetcher: (signal) => fetchBlocksOnce(page, signal),
+    enabled: latestHeight > 0,
+    fetcher: () =>
+      cachedFetch(`blocks:${page}:${latestHeight}`, () => fetchBlocksOnce(page, latestHeight), {
+        ttlMs: 4000,
+      }),
     deps: [page],
-    intervalMs: REFRESH_INTERVAL_MS,
+    refreshKey: latestHeight,
     retry: true,
     errorMessage: 'Failed to load blocks',
   });
 
   return {
     blocks: data?.sortedBlocks ?? [],
-    lastHeight: data?.latestHeight ?? 0,
+    lastHeight: latestHeight || data?.latestHeight || 0,
     loading,
     error,
     isInitialLoad,

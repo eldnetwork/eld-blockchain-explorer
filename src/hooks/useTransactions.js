@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { indexerGet, isAbortError } from '../api';
+import useLatestHeight from './useLatestHeight';
+import useOnHeightChange from './useOnHeightChange';
+import usePageVisible from './usePageVisible';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -51,6 +54,8 @@ function continuationKey(continuation) {
 }
 
 function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
+  const latestHeight = useLatestHeight();
+  const pageVisible = usePageVisible();
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({
     limit: pageSize,
@@ -121,19 +126,11 @@ function useTransactions(pageSize = DEFAULT_PAGE_SIZE) {
     return () => ac.abort();
   }, [activePage, continuation, loadPage]);
 
-  useEffect(() => {
-    if (pagerJumping) {
-      return undefined;
-    }
+  useOnHeightChange(latestHeight, pageVisible && !pagerJumping && activePage === 0, () => {
     const ac = new AbortController();
-    const id = setInterval(() => {
-      loadPage(continuation, true, ac.signal);
-    }, 5000);
-    return () => {
-      ac.abort();
-      clearInterval(id);
-    };
-  }, [continuation, loadPage, pagerJumping]);
+    loadPage(continuation, true, ac.signal);
+    return () => ac.abort();
+  });
 
   const goOlder = useCallback(() => {
     if (!transactions.length || !pagination.has_next) return;

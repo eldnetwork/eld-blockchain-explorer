@@ -28,8 +28,8 @@ This repository is the **explorer frontend only** — not the Eld protocol, cons
 ```text
 Browser (React SPA)
   └─ App → ExplorerAppShell → AppRoutes → pages/
-       ├─ api/            shared RPC + indexer HTTP (timeout, abort)
-       ├─ hooks/          data hooks built on api/
+       ├─ api/            shared RPC + indexer HTTP (timeout, abort, cache)
+       ├─ hooks/          data hooks built on api/ (poll + chain head)
        ├─ components/     shared UI (lists, shell, footer, …)
        ├─ utils/          search resolver, formatting, helpers
        └─ config/         RPC_URL, API_URL, feature flags
@@ -38,17 +38,38 @@ Browser (React SPA)
               └─ VITE_API_URL  → explorer / indexer API
 ```
 
-| Layer                                | Role                                                              |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| `src/App.js`                         | `BrowserRouter` entry                                             |
-| `src/components/ExplorerAppShell.js` | chrome (header, theme, footer)                                    |
-| `src/AppRoutes.js`                   | client-side routes (+ error boundary, 404)                        |
-| `src/pages/`                         | route screens (home, block, tx, account, validators, pinboard, …) |
-| `src/api/`                           | typed HTTP helpers for RPC and indexer                            |
-| `src/hooks/`                         | data hooks (retry + AbortController) using `src/api/`             |
-| `src/config/`                        | env-backed endpoints and optional validator admin status maps     |
+| Layer                                | Role                                                                          |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `src/App.js`                         | `BrowserRouter` entry                                                         |
+| `src/components/ExplorerAppShell.js` | chrome (header, theme, footer)                                                |
+| `src/AppRoutes.js`                   | client-side routes (+ error boundary, 404)                                    |
+| `src/pages/`                         | route screens (home, block, tx, account, validators, pinboard, …)             |
+| `src/api/`                           | typed HTTP helpers for RPC and indexer; `queryCache.js` shares inflight + TTL |
+| `src/hooks/`                         | data hooks on `src/api/` (`useAsyncResource`, `useLatestHeight`)              |
+| `src/config/`                        | env-backed endpoints and optional validator admin status maps                 |
 
 Static output is a Vite `build/` folder; deploy that behind any static host / CDN.
+
+## Polling
+
+The explorer is a public SPA. Many open tabs would otherwise hammer Tendermint RPC and the indexer on a lockstep 10s (or faster) beat. Polling is built on `useAsyncResource`, not TanStack Query.
+
+1. **Pause when hidden + jitter.** Pollers use a recursive timeout, skip ticks while `document.hidden`, and add ±20% jitter so many tabs do not synchronize. Background tabs stop polling (`enabled` is ANDed with page visibility). Helpers: `src/hooks/usePageVisible.js`, `src/utils/pollSchedule.js`.
+2. **Share in-flight requests.** `src/api/queryCache.js` `cachedFetch(key, fetcher, { ttlMs })` dedupes concurrent callers and serves a short TTL (for example `/status` ~3s, validators ~4s). Cached fetchers ignore subscriber abort; unmount only stops listening. TTL and tab visibility bound the work.
+3. **Poll the chain head once.** `useLatestHeight` owns `/status` (~8s jittered, one timer per tab). Block, tx, epoch, namespace, and pinboard lists refetch when height changes (`refreshKey`), not on their own 10s loops. Validators, capacity providers, and the rewards sum use a slower ~30s poll plus a refresh when height jumps by 20.
+
+One focused home tab: one status poll plus list fetch on new height. The same tab backgrounded: ~0 RPC. Two components that need `active_validators`: one HTTP call via `cachedFetch`.
+
+Do not add TanStack Query for this. Do not “fix” load by only raising intervals to 60s (home feels dead; hidden tabs still poll). Do not put a service worker in front of Tendermint RPC (stale chain data is worse than extra requests).
+
+Key files:
+
+- `src/hooks/useAsyncResource.js` — abortable fetch, visibility, jittered poll, `refreshKey`
+- `src/hooks/useLatestHeight.js` — singleton `/status` → latest height
+- `src/hooks/usePageVisible.js` / `src/utils/pollSchedule.js`
+- `src/api/queryCache.js` — inflight Map + TTL Map
+- Height-driven lists: `useBlocks`, `useTransactions`, `useEpochs`, `useNamespaces`, `useEpochInfo`, `usePinboardPosts`
+- Slower poll: `useValidators`, `useCapacityProviders`, `useVerifiedProofRewardsSum`
 
 ## Prerequisites
 

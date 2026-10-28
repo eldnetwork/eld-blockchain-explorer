@@ -1,5 +1,8 @@
 import { RPC_URL } from '../config';
 import { requestJson } from './http';
+import { cachedFetch } from './queryCache';
+
+const STATUS_TTL_MS = 3000;
 
 function joinUrl(base, path) {
   const b = String(base || '').replace(/\/$/, '');
@@ -14,6 +17,14 @@ function joinUrl(base, path) {
  */
 export function rpcGet(path, options = {}) {
   return requestJson(joinUrl(RPC_URL, path), options);
+}
+
+/**
+ * Shared `/status` fetch. Ignores subscriber abort; TTL is 3s.
+ * @returns {Promise<unknown>}
+ */
+export function fetchRpcStatus() {
+  return cachedFetch('rpc:status', () => rpcGet('/status'), { ttlMs: STATUS_TTL_MS });
 }
 
 /**

@@ -1,11 +1,11 @@
-import { rpcGet, isAbortError, debugLog } from '../api';
+import { fetchRpcStatus, isAbortError, debugLog } from '../api';
 import useAsyncResource from './useAsyncResource';
 
 function useTestnetAvailability() {
   const { data: isTestnetAvailable, loading: isChecking } = useAsyncResource({
-    fetcher: async (signal) => {
+    fetcher: async () => {
       try {
-        const data = await rpcGet('/status', { signal });
+        const data = await fetchRpcStatus();
         return Boolean(data.result?.sync_info?.latest_block_height);
       } catch (err) {
         if (isAbortError(err)) throw err;
