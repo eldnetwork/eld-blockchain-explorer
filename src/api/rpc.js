@@ -4,23 +4,82 @@ import { cachedFetch } from './queryCache';
 
 const STATUS_TTL_MS = 3000;
 
-function joinUrl(base, path) {
-  const b = String(base || '').replace(/\/$/, '');
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return `${b}${p}`;
+const BOOL_PARAMS = new Set(['prove']);
+const INT_PARAMS = new Set(['height', 'minHeight', 'maxHeight']);
+const BYTE_PARAMS = new Set(['data']);
+
+function unquoteRpcValue(value) {
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed === 'string') return parsed;
+    } catch {
+      return value.slice(1, -1);
+    }
+  }
+  return value;
+}
+
+function utf8ToHex(text) {
+  const bytes = new TextEncoder().encode(String(text));
+  let hex = '';
+  for (const byte of bytes) {
+    hex += byte.toString(16).padStart(2, '0');
+  }
+  return hex;
 }
 
 /**
- * Tendermint / node RPC GET (e.g. `/status`, `/block?height=1`).
+ * Turn a Tendermint URI (`/status`, `/block?height=1`) into JSON-RPC params.
+ * eld-tendermint-rs only accepts `POST /`. Quoted query values match the old GET form.
+ * @param {string} path
+ * @returns {{ method: string, params: Record<string, unknown> }}
+ */
+export function rpcPathToPost(path) {
+  const queryAt = path.indexOf('?');
+  const pathname = queryAt === -1 ? path : path.slice(0, queryAt);
+  const search = queryAt === -1 ? '' : path.slice(queryAt + 1);
+  /** @type {Record<string, unknown>} */
+  const params = {};
+
+  if (search) {
+    for (const part of search.split('&')) {
+      if (!part) continue;
+      const eq = part.indexOf('=');
+      const key = eq === -1 ? part : part.slice(0, eq);
+      const raw = eq === -1 ? '' : part.slice(eq + 1);
+      const value = unquoteRpcValue(raw);
+      if (BYTE_PARAMS.has(key)) {
+        params[key] = utf8ToHex(value);
+      } else if (BOOL_PARAMS.has(key)) {
+        params[key] = value === true || value === 'true';
+      } else if (INT_PARAMS.has(key) && /^-?\d+$/.test(String(value))) {
+        params[key] = Number(value);
+      } else {
+        params[key] = value;
+      }
+    }
+  }
+
+  return { method: pathname.replace(/^\//, ''), params };
+}
+
+/**
+ * Tendermint RPC. Callers still pass URI paths (`/status`, `/block?height=1`).
+ * The request is JSON-RPC `POST /`, which both Go Tendermint and eld-tendermint-rs accept.
  * @param {string} path
  * @param {{ signal?: AbortSignal, timeoutMs?: number }} [options]
  */
 export function rpcGet(path, options = {}) {
-  return requestJson(joinUrl(RPC_URL, path), options);
+  const { method, params } = rpcPathToPost(path);
+  /** @type {{ method: string, params?: Record<string, unknown> }} */
+  const payload = { method };
+  if (Object.keys(params).length > 0) payload.params = params;
+  return rpcPost(payload, options);
 }
 
 /**
- * Shared `/status` fetch. Ignores subscriber abort; TTL is 3s.
+ * Shared `status` fetch. Ignores subscriber abort; TTL is 3s.
  * @returns {Promise<unknown>}
  */
 export function fetchRpcStatus() {
@@ -42,7 +101,8 @@ export function rpcPost(payload, options = {}) {
 }
 
 /**
- * Convenience GET abci_query with Tendermint-style query params.
+ * ABCI query as JSON-RPC `POST /`.
+ * `data` is a quoted string, matching the old URI form (`""` or `JSON.stringify`).
  * @param {string} path query path value (without quotes)
  * @param {string} [data]
  * @param {{ signal?: AbortSignal, timeoutMs?: number }} [options]

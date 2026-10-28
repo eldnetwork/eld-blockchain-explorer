@@ -30,12 +30,12 @@ export default defineConfig({
       '/rpc': {
         target: 'http://localhost:26657',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/rpc/, ''),
+        rewrite: (path) => path.replace(/^\/rpc/, '') || '/',
       },
       '/api': {
         target: 'http://localhost:9001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, '') || '/',
       },
     },
   },
