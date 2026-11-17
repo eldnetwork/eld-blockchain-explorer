@@ -106,14 +106,12 @@ function AnalyticsPage() {
             <p>Could not reach the analytics API.</p>
             <p>{state.message}</p>
             <p className="muted">
-              Check <code>VITE_ANALYTICS_API_URL</code> / the Vite{' '}
-              <code>/analytics-api</code> proxy (<code>ANALYTICS_API_URL</code>).
+              Check <code>VITE_ANALYTICS_API_URL</code> / the Vite <code>/analytics-api</code> proxy
+              (<code>ANALYTICS_API_URL</code>).
             </p>
           </div>
         )}
-        {state.status === 'ready' && (
-          <DiskWidget latest={state.latest} history={state.history} />
-        )}
+        {state.status === 'ready' && <DiskWidget latest={state.latest} history={state.history} />}
       </main>
     </div>
   );
