@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import TransactionPage from './pages/TransactionPage';
 import AccountPage from './pages/AccountPage';
@@ -16,6 +17,8 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
+
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 
 function LegacyCapacityProviderRedirect() {
   const { address } = useParams();
@@ -46,6 +49,14 @@ function AppRoutes() {
         <Route path="/epoch/:epochId" element={<SingleEpochPage />} />
         <Route path="/namespaces/:namespaceSlug" element={<NamespacePage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route
+          path="/analytics"
+          element={
+            <Suspense fallback={null}>
+              <AnalyticsPage />
+            </Suspense>
+          }
+        />
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

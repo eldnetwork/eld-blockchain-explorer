@@ -7,6 +7,7 @@ import AppRoutes from '../AppRoutes';
 import useChainId from '../hooks/useChainId';
 import { rpcGet, isAbortError } from '../api';
 import { BACKGROUND_COLOR, LIGHT_TEXT_COLOR } from '../utils/constants';
+import '../pages/ExplorerHomePage.css';
 
 function ExplorerAppShell() {
   const { chainId } = useChainId();
