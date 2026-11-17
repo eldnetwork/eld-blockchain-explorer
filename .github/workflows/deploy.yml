@@ -30,6 +30,7 @@ jobs:
         env:
           VITE_RPC_URL: ${{ vars.VITE_RPC_URL }}
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_ANALYTICS_API_URL: ${{ vars.VITE_ANALYTICS_API_URL }}
           VITE_ENABLE_VALIDATOR_ADMIN_STATUS: ${{ vars.VITE_ENABLE_VALIDATOR_ADMIN_STATUS }}
 
       - name: Configure AWS credentials
